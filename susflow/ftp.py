@@ -4,6 +4,8 @@ susflow/ftp.py
 Camada de transporte: toda comunicação com o FTP do DATASUS fica aqui.
 """
 
+import time
+
 from ftplib import FTP, all_errors
 from pathlib import Path
 
@@ -17,10 +19,8 @@ _BACKOFF    = 2    # segundos entre tentativas
 class FTPError(Exception):
     """Erro de comunicação com o FTP do DATASUS."""
 
-
 class ArquivoNaoEncontradoError(FTPError):
     """Arquivo não existe no FTP."""
-
 
 def _conectar() -> FTP:
     """Abre uma conexão FTP limpa. Reconectar por operação evita o bug '200 Type set to A'."""
@@ -33,15 +33,16 @@ def _conectar() -> FTP:
 
 def _tentar(fn, *args, **kwargs):
     """Executa fn com retentativas e backoff."""
-    import time
     ultimo_erro = None
     for tentativa in range(_TENTATIVAS):
         try:
             return fn(*args, **kwargs)
+        
         except all_errors as e:
             ultimo_erro = e
             if tentativa < _TENTATIVAS - 1:
                 time.sleep(_BACKOFF)
+
     raise FTPError(f"Falha após {_TENTATIVAS} tentativas: {ultimo_erro}") from ultimo_erro
 
 
@@ -52,6 +53,7 @@ def listar(caminho: str) -> list[str]:
     """
     def _listar():
         ftp = _conectar()
+
         try:
             itens: list[str] = []
             ftp.retrlines("LIST", itens.append)  # LIST no cwd após cwd()
@@ -63,9 +65,12 @@ def listar(caminho: str) -> list[str]:
             for linha in itens:
                 if "<DIR>" in linha:
                     continue
+
                 nome = linha.split()[-1]
                 arquivos.append(nome)
+            
             return arquivos
+        
         finally:
             ftp.quit()
 
@@ -83,19 +88,24 @@ def baixar(caminho_ftp: str, destino: Path) -> Path:
 
     def _baixar():
         ftp = _conectar()
+        
         try:
             with open(destino, "wb") as f:
                 ftp.retrbinary(f"RETR {caminho_ftp}", f.write)
+
         except all_errors as e:
             if destino.exists():
                 destino.unlink()
+
             if "550" in str(e):
                 raise ArquivoNaoEncontradoError(
                     f"Arquivo não encontrado no FTP: {caminho_ftp}"
                 ) from e
             raise
+
         finally:
             ftp.quit()
+
         return destino
 
     return _tentar(_baixar)

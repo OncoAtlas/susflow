@@ -1,24 +1,20 @@
 """
 susflow/config.py
 =================
-Mapa completo dos sistemas do DATASUS levantado por exploração direta do FTP.
-Cada entrada define tudo que a biblioteca precisa para listar e baixar arquivos.
+Metadados de todos os sistemas do DATASUS.
 
-Legenda dos campos:
-  ftp_dir       — caminho absoluto no FTP onde ficam os arquivos
-  pattern       — padrão do nome de arquivo (use {PREFIX}, {UF}, {YEAR}, {MONTH})
-  granularity   — "year" | "month"  (arquivo por ano ou por mês)
-  year_digits   — 2 ou 4 dígitos no nome do arquivo
-  format        — "dbc" | "dbf" | "zip"  (formato do arquivo no FTP)
-  scope         — "uf" | "national"  (arquivo por UF ou dado nacional agregado)
-  description   — descrição do sistema
+Campos de cada sistema:
+  ftp_dir       — caminho absoluto no FTP
+  pattern       — padrão do nome ({UF}, {YYYY}, {YY}, {PREFIX}, {DISEASE}, {TYPE})
+  granularity   — "year" | "month"
+  year_digits   — 2 ou 4
+  format        — "dbc" | "dbf" | "zip"
+  scope         — "uf" | "national"
+  year_range    — (ano_inicio, ano_fim) inclusive
 """
 
 FTP_HOST = "ftp.datasus.gov.br"
 
-# ---------------------------------------------------------------------------
-# UFs disponíveis
-# ---------------------------------------------------------------------------
 UFS = [
     "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO",
     "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR",
@@ -26,64 +22,77 @@ UFS = [
 ]
 
 # ---------------------------------------------------------------------------
-# SIM — Sistema de Informações sobre Mortalidade
-# ---------------------------------------------------------------------------
-#
-# Estrutura real confirmada em /dissemin/publicos/SIM/CID10/:
-#
-#   DOFET/   → categorias especiais (fetal, infantil, materno, causas externas)
-#              padrão: DO{TYPE}{YY}.dbc   ex: DOEXT24.dbc, DOINF24.dbc
-#              escopo: NACIONAL, granularidade: ANUAL, ano 2 dígitos
-#              tipos: EXT (causas externas), FET (fetal), INF (infantil), MAT (materno)
-#
-#   DBASE/   → NÃO EXISTE (caminho legado documentado incorretamente)
-#              Os arquivos por UF estão diretamente em CID10/ ou em subpasta ainda
-#              a confirmar. Rodar explorar_sim.py para mapear.
-#
-# AÇÃO NECESSÁRIA: explorar /dissemin/publicos/SIM/CID10/ para encontrar
-# os arquivos DO{UF}{YYYY}.dbc (ex: DOSP2023.dbc).
+# SIM — /dissemin/publicos/SIM/CID10/
+#   DORES/  → DO{UF}{YYYY}.dbc      por UF, anual, 4 dígitos
+#   DOFET/  → DO{TYPE}{YY}.dbc      nacional, anual, 2 dígitos
+#             tipos: EXT, FET, INF, MAT
 # ---------------------------------------------------------------------------
 SIM = {
     "description": "Sistema de Informações sobre Mortalidade",
-    "ftp_base": "/dissemin/publicos/SIM/CID10",
+    "ftp_base":    "/dissemin/publicos/SIM/CID10",
 
-    # Subcategorias especiais — dados nacionais por ano
-    "special": {
-        "ftp_dir": "/dissemin/publicos/SIM/CID10/DOFET",
-        "types": {
-            "EXT": "Óbitos por causas externas",
-            "FET": "Óbitos fetais",
-            "INF": "Óbitos infantis",
-            "MAT": "Óbitos maternos",
+    # Documentação técnica e layouts de campos
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/DOCS",
+        "arquivos": {
+            "Docs_Tabs_CID10.zip":       "Layouts, tabelas e dicionário de variáveis",
+            "Estrutura_do_SIM_2025.pdf": "Estrutura atual dos arquivos (referência principal)",
+            "Estrutura_SIM_Anterior.pdf": "Estrutura anterior — necessária para bases legadas",
         },
-        # Padrão: DO{TYPE}{YY}.dbc  ex: DOEXT24.dbc
-        "pattern":     "DO{TYPE}{YY}.dbc",
-        "granularity": "year",
-        "year_digits": 2,
-        "format":      "dbc",
-        "scope":       "national",
-        "year_range":  (1996, 2024),
     },
 
-    # Dados por UF — confirmado em /dissemin/publicos/SIM/CID10/DORES/
+    # Dados agregados tabulados
+    "tab": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/TAB",
+        "arquivos": {
+            "OBITOS_CID10_TAB.zip": "Óbitos agregados por CID-10 (série histórica tabulada)",
+        },
+    },
+
+    # Tabelas de apoio (CID-10, municípios, ocupações, países, UFs)
+    "tabelas": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/TABELAS",
+        "arquivos": {
+            "CID10.DBF":      "Classificação Internacional de Doenças — CID-10",
+            "CIDCAP10.DBF":   "Capítulos do CID-10",
+            "CADMUN.DBF":     "Cadastro de municípios",
+            "CADMUN.xls":     "Cadastro de municípios (formato Excel)",
+            "TABOCUP.DBF":    "Tabela de ocupações (CBO)",
+            "TABPAIS.DBF":    "Tabela de países",
+            "TABUF.DBF":      "Tabela de unidades federativas",
+        },
+    },
+
     "uf": {
         "ftp_dir":     "/dissemin/publicos/SIM/CID10/DORES",
-        "pattern":     "DO{UF}{YYYY}.dbc",   # ex: DOSP2023.dbc
+        "pattern":     "DO{UF}{YYYY}.dbc",
         "granularity": "year",
         "year_digits": 4,
         "format":      "dbc",
         "scope":       "uf",
         "year_range":  (1996, 2024),
     },
+
+    "special": {
+        "ftp_dir":     "/dissemin/publicos/SIM/CID10/DOFET",
+        "pattern":     "DO{TYPE}{YY}.dbc",
+        "granularity": "year",
+        "year_digits": 2,
+        "format":      "dbc",
+        "scope":       "national",
+        "year_range":  (1996, 2024),
+        "types": {
+            "EXT": "Óbitos por causas externas",
+            "FET": "Óbitos fetais",
+            "INF": "Óbitos infantis",
+            "MAT": "Óbitos maternos",
+        },
+    },
 }
 
 # ---------------------------------------------------------------------------
-# SINASC — Sistema de Informações sobre Nascidos Vivos
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/SINASC/NOV/DNRES/
-# Padrão:     DN{UF}{YYYY}.dbc     ex: DNSP2022.dbc
-# Cobertura:  1996 → 2022, todas as UFs
+# SINASC — /dissemin/publicos/SINASC/NOV/DNRES/
+#   DN{UF}{YYYY}.dbc    por UF, anual, 4 dígitos
 # ---------------------------------------------------------------------------
 SINASC = {
     "description": "Sistema de Informações sobre Nascidos Vivos",
@@ -97,24 +106,19 @@ SINASC = {
 }
 
 # ---------------------------------------------------------------------------
-# SINAN — Sistema de Informações de Agravos de Notificação
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/SINAN/DADOS/FINAIS/
-# Padrão:     {DISEASE}BR{YY}.dbc   ex: DENGBR23.dbc
-# Escopo: NACIONAL (BR), granularidade ANUAL, ano 2 dígitos
+# SINAN — /dissemin/publicos/SINAN/DADOS/
+#   FINAIS/{DISEASE}BR{YY}.dbc    dados consolidados
+#   PRELIM/{DISEASE}BR{YY}.dbc    dados preliminares
 # ---------------------------------------------------------------------------
 SINAN = {
-    "description": "Sistema de Informações de Agravos de Notificação",
-    "ftp_dir":     "/dissemin/publicos/SINAN/DADOS/FINAIS",
+    "description":    "Sistema de Informações de Agravos de Notificação",
+    "ftp_dir":        "/dissemin/publicos/SINAN/DADOS/FINAIS",
     "ftp_dir_prelim": "/dissemin/publicos/SINAN/DADOS/PRELIM",
-    "pattern":     "{DISEASE}BR{YY}.dbc",
-    "granularity": "year",
-    "year_digits": 2,
-    "format":      "dbc",
-    "scope":       "national",
-
-    # Dicionário completo das doenças — código: descrição
+    "pattern":        "{DISEASE}BR{YY}.dbc",
+    "granularity":    "year",
+    "year_digits":    2,
+    "format":         "dbc",
+    "scope":          "national",
     "diseases": {
         "ACBI": "Acidente por animal peçonhento",
         "ACGR": "Acidente de trabalho grave",
@@ -140,7 +144,7 @@ SINAN = {
         "LEIV": "Leishmaniose visceral",
         "LEPT": "Leptospirose",
         "LERD": "LER/DORT",
-        "LTAN": "Leishmaniose tegumentar americana",
+        "LTA":  "Leishmaniose tegumentar americana",
         "MALA": "Malária",
         "MENI": "Meningite",
         "MENT": "Transtorno mental relacionado ao trabalho",
@@ -164,20 +168,9 @@ SINAN = {
 }
 
 # ---------------------------------------------------------------------------
-# SIHSUS — Sistema de Informações Hospitalares
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/SIHSUS/200801_/Dados/
-# Padrão:     {PREFIX}{UF}{YY}{MM}.dbc   ex: RDSP2301.dbc
-# Granularidade: MENSAL, ano 2 dígitos
-#
-# Prefixos identificados:
-#   RD = AIH Reduzida (principal — registro de internação)
-#   SP = Serviços Profissionais
-#   RJ = AIH Rejeitada
-#   ER = AIH com Erro
-#   CM = Comunicação de Internação
-#   CH = Dados nacionais (BR) — escopo diferente
+# SIHSUS — /dissemin/publicos/SIHSUS/200801_/Dados/
+#   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Prefixo principal: RD (AIH Reduzida — registro de internação)
 # ---------------------------------------------------------------------------
 SIHSUS = {
     "description": "Sistema de Informações Hospitalares do SUS",
@@ -189,7 +182,6 @@ SIHSUS = {
     "format":      "dbc",
     "scope":       "uf",
     "year_range":  (2008, 2025),
-
     "prefixes": {
         "RD": "AIH reduzida (internações — dado principal)",
         "SP": "Serviços profissionais",
@@ -201,14 +193,9 @@ SIHSUS = {
 }
 
 # ---------------------------------------------------------------------------
-# SIASUS — Sistema de Informações Ambulatoriais
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/SIASUS/200801_/Dados/
-# Padrão:     {PREFIX}{UF}{YY}{MM}.dbc   ex: ABAC2501.dbc
-# Granularidade: MENSAL, ano 2 dígitos
-#
-# Prefixos: AB = Produção ambulatorial (BPA — Boletim de Produção Ambulatorial)
+# SIASUS — /dissemin/publicos/SIASUS/200801_/Dados/
+#   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Prefixo principal: AB (BPA — Boletim de Produção Ambulatorial)
 # ---------------------------------------------------------------------------
 SIASUS = {
     "description": "Sistema de Informações Ambulatoriais do SUS",
@@ -220,42 +207,35 @@ SIASUS = {
     "format":      "dbc",
     "scope":       "uf",
     "year_range":  (2008, 2025),
-
     "prefixes": {
-        "AB": "BPA — Boletim de Produção Ambulatorial (dado principal)",
-        "AM": "APAC de Medicamentos",
-        "AN": "APAC de Nefrologia",
-        "AQ": "APAC de Quimioterapia",
-        "AR": "APAC de Radioterapia",
-        "BI": "BPA individualizado",
-        "PA": "Produção ambulatorial (formato antigo)",
-        "PS": "RAAS Psicossocial",
+        "AB":  "BPA — Boletim de Produção Ambulatorial (dado principal)",
+        "AM":  "APAC de Medicamentos",
+        "AN":  "APAC de Nefrologia",
+        "AQ":  "APAC de Quimioterapia",
+        "AR":  "APAC de Radioterapia",
+        "BI":  "BPA individualizado",
+        "PA":  "Produção ambulatorial (formato antigo)",
+        "PS":  "RAAS Psicossocial",
         "SAD": "RAAS Atenção Domiciliar",
     },
 }
 
 # ---------------------------------------------------------------------------
-# CNES — Cadastro Nacional de Estabelecimentos de Saúde
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/CNES/200508_/Dados/
-# Estrutura: um subdiretório por tipo de arquivo (ST, DC, EE, etc.)
-# Padrão provável: {TYPE}/{TYPE}{UF}{YY}{MM}.dbc   ex: ST/STSP2501.dbc
-# Granularidade: MENSAL
-# AÇÃO: os arquivos ficam 2 níveis dentro de Dados/ — explorar um subdir.
+# CNES — /dissemin/publicos/CNES/200508_/Dados/
+#   {TYPE}/{TYPE}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Subtype principal: ST (Estabelecimentos)
 # ---------------------------------------------------------------------------
 CNES = {
     "description": "Cadastro Nacional de Estabelecimentos de Saúde",
     "ftp_base":    "/dissemin/publicos/CNES/200508_/Dados",
+    "pattern":     "{TYPE}/{TYPE}{UF}{YY}{MM}.dbc",
     "granularity": "month",
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
     "year_range":  (2005, 2025),
-
-    # Subdirs identificados — cada um é um tipo de dado cadastral
     "subtypes": {
-        "ST": "Estabelecimentos (dado principal — identificação e localização)",
+        "ST": "Estabelecimentos (dado principal)",
         "DC": "Dados complementares",
         "EE": "Equipamentos",
         "EF": "Centros cirúrgicos / obstétricos",
@@ -272,14 +252,9 @@ CNES = {
 }
 
 # ---------------------------------------------------------------------------
-# PNI — Programa Nacional de Imunizações
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/PNI/DADOS/
-# Padrão:     DPNI{UF}{YY}.DBF   ex: DPNISP00.DBF
-# Formato: DBF (não DBC — já é DBF puro, sem compressão blast)
-# Granularidade: ANUAL, ano 2 dígitos
-# Cobertura: 1994 → 2019
+# PNI — /dissemin/publicos/PNI/DADOS/
+#   DPNI{UF}{YY}.DBF    por UF, anual, 2 dígitos
+#   Formato DBF puro (sem compressão blast) — usar dbfread, não pyreaddbc
 # ---------------------------------------------------------------------------
 PNI = {
     "description": "Programa Nacional de Imunizações",
@@ -287,22 +262,17 @@ PNI = {
     "pattern":     "DPNI{UF}{YY}.DBF",
     "granularity": "year",
     "year_digits": 2,
-    "format":      "dbf",   # ATENÇÃO: DBF puro, não DBC — leitura diferente
+    "format":      "dbf",
     "scope":       "uf",
     "year_range":  (1994, 2019),
 }
 
 # ---------------------------------------------------------------------------
-# IBGE/POP — Estimativas populacionais (denominadores para taxas)
-# ---------------------------------------------------------------------------
-#
-# Confirmado: /dissemin/publicos/IBGE/POP/
-# Padrão:     POPBR{YY}.zip   ex: POPBR10.zip
-# Formato: ZIP (descomprime para DBF/CSV)
-# Cobertura: 1980 → 2012
+# IBGE/POP — /dissemin/publicos/IBGE/POP/
+#   POPBR{YY}.zip    nacional, anual, 2 dígitos
 # ---------------------------------------------------------------------------
 IBGE_POP = {
-    "description": "Estimativas populacionais IBGE (para cálculo de taxas)",
+    "description": "Estimativas populacionais IBGE",
     "ftp_dir":     "/dissemin/publicos/IBGE/POP",
     "pattern":     "POPBR{YY}.zip",
     "granularity": "year",
@@ -312,9 +282,6 @@ IBGE_POP = {
     "year_range":  (1980, 2012),
 }
 
-# ---------------------------------------------------------------------------
-# Índice geral — facilita iterar sobre todos os sistemas
-# ---------------------------------------------------------------------------
 ALL_SYSTEMS = {
     "SIM":      SIM,
     "SINASC":   SINASC,
