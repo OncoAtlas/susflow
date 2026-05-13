@@ -254,7 +254,7 @@ SIHSUS = {
 # ---------------------------------------------------------------------------
 # SIASUS — /dissemin/publicos/SIASUS/200801_/Dados/
 #   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
-#   Prefixo principal: AB (BPA — Boletim de Produção Ambulatorial)
+#   Prefixo principal: PA (Produção Ambulatorial)
 # ---------------------------------------------------------------------------
 SIASUS = {
     "description": "Sistema de Informações Ambulatoriais do SUS",
@@ -265,23 +265,29 @@ SIASUS = {
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2008, 2025),
+    "year_range":  (2008, 2026),
     "prefixes": {
-        "AB":  "BPA — Boletim de Produção Ambulatorial (dado principal)",
-        "AM":  "APAC de Medicamentos",
-        "AN":  "APAC de Nefrologia",
-        "AQ":  "APAC de Quimioterapia",
-        "AR":  "APAC de Radioterapia",
-        "BI":  "BPA individualizado",
-        "PA":  "Produção ambulatorial (formato antigo)",
-        "PS":  "RAAS Psicossocial",
-        "SAD": "RAAS Atenção Domiciliar",
+        "PA":  ("Produção Ambulatorial (BPA)",                          2008, 2026),
+        "BI":  ("BPA Individualizado",                                  2008, 2026),
+        "AD":  ("APAC de Laudos Diversos",                              2008, 2026),
+        "AM":  ("APAC de Medicamentos",                                 2008, 2026),
+        "AMP": ("APAC de Medicamentos Padronizados",                    2020, 2026),
+        "AQ":  ("APAC de Quimioterapia",                                2008, 2026),
+        "AR":  ("APAC de Radioterapia",                                 2008, 2026),
+        "ACF": ("APAC Confecção de Fístula Arteriovenosa",              2014, 2026),
+        "ATD": ("APAC Tratamento Dialítico",                            2014, 2026),
+        "PS":  ("RAAS Psicossocial",                                    2013, 2026),
+        "AB":  ("APAC Acompanhamento Pós Cirurgia Bariátrica (novo)",   2025, 2026),
+        "ABO": ("APAC Acompanhamento Pós Cirurgia Bariátrica (legado)", 2015, 2018),
+        "AN":  ("APAC de Nefrologia (encerrado, substituído por ATD)",  2008, 2014),
+        "SAD": ("RAAS Atenção Domiciliar (encerrado)",                  2013, 2015),
     },
 }
 
 # ---------------------------------------------------------------------------
 # CNES — /dissemin/publicos/CNES/200508_/Dados/
 #   {TYPE}/{TYPE}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Arquivo fica 2 níveis dentro de Dados/: ex. ST/STSP2501.dbc
 #   Subtype principal: ST (Estabelecimentos)
 # ---------------------------------------------------------------------------
 CNES = {
@@ -292,21 +298,20 @@ CNES = {
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2005, 2025),
     "subtypes": {
-        "ST": "Estabelecimentos (dado principal)",
-        "DC": "Dados complementares",
-        "EE": "Equipamentos",
-        "EF": "Centros cirúrgicos / obstétricos",
-        "EP": "Equipes de saúde",
-        "EQ": "Equipamentos e produções",
-        "GM": "Gestão e metas",
-        "HB": "Habilitações",
-        "IN": "Incentivos",
-        "LT": "Leitos",
-        "PF": "Profissionais",
-        "RC": "Regras contratuais",
-        "SR": "Serviços especializados",
+        "ST": ("Estabelecimentos (dado principal)",          2005, 2026),
+        "PF": ("Profissionais de saúde",                    2005, 2026),
+        "DC": ("Dados complementares",                      2005, 2026),
+        "EQ": ("Equipamentos",                              2005, 2026),
+        "SR": ("Serviços especializados",                   2005, 2026),
+        "LT": ("Leitos",                                    2005, 2026),
+        "HB": ("Habilitações",                             2007, 2026),
+        "EF": ("Centros cirúrgicos e obstétricos",          2007, 2026),
+        "EP": ("Equipes de saúde",                          2007, 2026),
+        "RC": ("Regras contratuais",                        2007, 2026),
+        "IN": ("Incentivos",                                2007, 2026),
+        "GM": ("Gestão e metas",                            2014, 2026),
+        "EE": ("Equipamentos e produções (encerrado)",      2007, 2019),
     },
 }
 
