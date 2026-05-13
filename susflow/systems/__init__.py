@@ -1,3 +1,3 @@
-from . import sinasc
+from . import sim, sinasc
 
-__all__ = ["sinasc"]
+__all__ = ["sim", "sinasc"]
