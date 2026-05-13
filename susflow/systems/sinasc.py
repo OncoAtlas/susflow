@@ -40,6 +40,7 @@ _ANO_MIN_NAC, _ANO_MAX_NAC = _CFG_NAC["year_range"]
 def _validar_uf(uf: str, ano: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"UF inválida: '{uf}'. Valores aceitos: {UFS}")
+    
     if not (_ANO_MIN_UF <= ano <= _ANO_MAX_UF):
         raise ValueError(f"Ano fora do intervalo: {ano} (disponível: {_ANO_MIN_UF}–{_ANO_MAX_UF})")
 
