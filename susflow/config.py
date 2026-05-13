@@ -226,6 +226,7 @@ SINAN = {
 # SIHSUS — /dissemin/publicos/SIHSUS/200801_/Dados/
 #   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
 #   Prefixo principal: RD (AIH Reduzida — registro de internação)
+#   Exceção: CH e CM usam BR fixo (escopo nacional), não {UF}
 # ---------------------------------------------------------------------------
 SIHSUS = {
     "description": "Sistema de Informações Hospitalares do SUS",
@@ -236,14 +237,17 @@ SIHSUS = {
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2008, 2025),
+    "year_range":  (2008, 2026),
     "prefixes": {
         "RD": "AIH reduzida (internações — dado principal)",
         "SP": "Serviços profissionais",
         "RJ": "AIH rejeitada",
         "ER": "AIH com erro",
+    },
+    # CH e CM usam BR fixo — padrão: {PREFIX}BR{YY}{MM}.dbc
+    "prefixes_nacionais": {
+        "CH": "Cabeçalho nacional (dados agregados)",
         "CM": "Comunicação de movimento",
-        "CH": "Dados nacionais agregados",
     },
 }
 
