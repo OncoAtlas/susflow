@@ -7,11 +7,16 @@ import pandas as pd
 from pyreaddbc import dbc2dbf
 
 def to_parquet(input_path: Path, output_path: Path) -> Path:
-    """Converte DBC/DBF para Parquet via DuckDB tratando codificação Latin-1."""
+    """
+    Converte DBC/DBF para Parquet via DuckDB, limpa duplicatas 
+    e trata codificação Latin-1.
+    """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     with tempfile.TemporaryDirectory() as tmp_dir:
         dbf_path = Path(tmp_dir) / "temp.dbf"
+        # Usamos um caminho temporário para o primeiro dump do DuckDB
+        raw_parquet = Path(tmp_dir) / "raw.parquet"
         
         if input_path.suffix.lower() == ".dbc":
             dbc2dbf(str(input_path), str(dbf_path))
@@ -19,26 +24,40 @@ def to_parquet(input_path: Path, output_path: Path) -> Path:
             dbf_path = input_path
 
         conn = duckdb.connect()
-        
         conn.execute("INSTALL spatial;")
         conn.execute("LOAD spatial;")
         
         try:
-            # O DuckDB agora exige que o encoding seja passado via open_options para arquivos DBF/SHP
+            # 1. Extração via DuckDB (Tratando Encoding)
             query = f"""
                 COPY (
                     SELECT * FROM st_read(
                         '{str(dbf_path)}', 
                         open_options=['ENCODING=ISO-8859-1']
                     )
-                ) TO '{str(output_path)}' (FORMAT PARQUET)
+                ) TO '{str(raw_parquet)}' (FORMAT PARQUET)
             """
             conn.execute(query)
-        except Exception as e:
             conn.close()
-            raise Exception(f"Falha na conversão DuckDB: {e}")
+
+            # 2. Refinamento via Polars (Remoção de Duplicatas)
+            df = pl.read_parquet(raw_parquet)
+            initial_rows = df.height
             
-        conn.close()
+            # Remove linhas 100% idênticas
+            df = df.unique()
+            
+            final_rows = df.height
+            if initial_rows > final_rows:
+                print(f"🧹 {input_path.name}: {initial_rows - final_rows} duplicatas removidas.")
+
+            # 3. Escrita final otimizada
+            df.write_parquet(output_path, compression="zstd")
+
+        except Exception as e:
+            if 'conn' in locals(): conn.close()
+            raise Exception(f"Falha na conversão/limpeza: {e}")
+            
     return output_path
 
 def load_as_df(parquet_path: Path, use_polars: bool = True):
