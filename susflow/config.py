@@ -65,14 +65,15 @@ SIM = {
         "year_range":  (1996, 2024),
     },
 
-    # Dados por UF — caminho a confirmar com explorar_sim.py
+    # Dados por UF — confirmado em /dissemin/publicos/SIM/CID10/DORES/
     "uf": {
-        "ftp_dir":     "PENDENTE — rodar explorar_sim.py",
+        "ftp_dir":     "/dissemin/publicos/SIM/CID10/DORES",
         "pattern":     "DO{UF}{YYYY}.dbc",   # ex: DOSP2023.dbc
         "granularity": "year",
         "year_digits": 4,
         "format":      "dbc",
         "scope":       "uf",
+        "year_range":  (1996, 2024),
     },
 }
 
