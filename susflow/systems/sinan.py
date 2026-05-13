@@ -16,6 +16,7 @@ import pandas as pd
 from .. import ftp as _ftp
 from .. import cache as _cache
 from ..config import SINAN as _CFG
+from ..reader import ler as _ler
 
 _DIR_FINAL  = _CFG["ftp_dir"]
 _DIR_PRELIM = _CFG["ftp_dir_prelim"]
@@ -23,25 +24,24 @@ _DOENCAS    = {k.upper(): v for k, v in _CFG["diseases"].items()}
 _ANO_MIN    = 2001   # menor ano observado nos arquivos do FTP
 _ANO_MAX    = 2024
 
-
 def _validar(doenca: str, ano: int) -> str:
     doenca = doenca.upper()
     if doenca not in _DOENCAS:
         disponiveis = ", ".join(sorted(_DOENCAS))
         raise ValueError(f"Doença inválida: '{doenca}'.\nDisponíveis: {disponiveis}")
+    
     if not (_ANO_MIN <= ano <= _ANO_MAX):
         raise ValueError(f"Ano fora do intervalo: {ano} (disponível: {_ANO_MIN}–{_ANO_MAX})")
+    
     return doenca
 
 
 def _nome_arquivo(doenca: str, ano: int) -> str:
     return f"{doenca}BR{str(ano)[-2:]}.dbc"
 
-
 def doencas() -> dict[str, str]:
     """Retorna o dicionário {código: descrição} de todas as doenças disponíveis."""
     return dict(_DOENCAS)
-
 
 def listar(doenca: str | None = None, preliminar: bool = False) -> list[str]:
     """
@@ -51,9 +51,11 @@ def listar(doenca: str | None = None, preliminar: bool = False) -> list[str]:
     """
     diretorio = _DIR_PRELIM if preliminar else _DIR_FINAL
     arquivos  = _ftp.listar(diretorio)
+    
     if doenca:
         prefixo = doenca.upper()
         arquivos = [a for a in arquivos if a.upper().startswith(prefixo)]
+
     return arquivos
 
 
@@ -79,5 +81,4 @@ def ler(doenca: str, ano: int, destino: Path | None = None,
     """
     Baixa (se necessário) e retorna os dados como DataFrame.
     """
-    from ..reader import ler as _ler
     return _ler(baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar))

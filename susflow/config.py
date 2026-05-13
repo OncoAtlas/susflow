@@ -91,18 +91,55 @@ SIM = {
 }
 
 # ---------------------------------------------------------------------------
-# SINASC — /dissemin/publicos/SINASC/NOV/DNRES/
-#   DN{UF}{YYYY}.dbc    por UF, anual, 4 dígitos
+# SINASC — /dissemin/publicos/SINASC/NOV/
+#   DNRES/  → DN{UF}{YYYY}.dbc      por UF, anual, 4 dígitos
+#   DNRES/  → DNBR{YYYY}.dbc        agregado nacional (2014–2017 apenas)
+#   DNRES/  → DNEX{YYYY}.dbc        exceções/suplementar (pontual, ex: 2021)
+#   DOCS/   → documentação técnica  (caminho a confirmar — não mapeado ainda)
 # ---------------------------------------------------------------------------
 SINASC = {
     "description": "Sistema de Informações sobre Nascidos Vivos",
-    "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
-    "pattern":     "DN{UF}{YYYY}.dbc",
-    "granularity": "year",
-    "year_digits": 4,
-    "format":      "dbc",
-    "scope":       "uf",
-    "year_range":  (1996, 2022),
+
+    "uf": {
+        "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern":     "DN{UF}{YYYY}.dbc",
+        "granularity": "year",
+        "year_digits": 4,
+        "format":      "dbc",
+        "scope":       "uf",
+        "year_range":  (1996, 2022),
+    },
+
+    # Agregado nacional — série incompleta (apenas 2014–2017 confirmados no FTP)
+    "nacional": {
+        "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern":     "DNBR{YYYY}.dbc",
+        "granularity": "year",
+        "year_digits": 4,
+        "format":      "dbc",
+        "scope":       "national",
+        "year_range":  (2014, 2017),
+    },
+
+    # Arquivo de exceção/suplementar — pontual, não é uma série regular
+    "excecoes": {
+        "ftp_dir": "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern": "DNEX{YYYY}.dbc",
+        "format":  "dbc",
+        "nota":    "Arquivos pontuais com registros suplementares. Confirmado: DNEX2021.dbc.",
+    },
+
+    # Documentação técnica — caminho exato a confirmar (não mapeado ainda)
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SINASC/NOV/DOCS",
+        "arquivos": {
+            "Estrutura_SINASC_para_CD.pdf": "Estrutura dos arquivos (formato legado de CD-ROM)",
+            "Legislacao_PDF.pdf":           "Legislação relacionada ao SINASC",
+            "NASC98.HLP":                   "Arquivo de ajuda do sistema legado (1998)",
+            "Portaria.pdf":                 "Portaria regulamentadora",
+        },
+        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
+    },
 }
 
 # ---------------------------------------------------------------------------
