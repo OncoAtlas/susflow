@@ -71,6 +71,27 @@ def listar(caminho: str) -> list[str]:
 
     return _tentar(_listar)
 
+def existe(caminho_ftp: str) -> bool:
+    """
+    Verifica se um arquivo existe no FTP usando o comando SIZE.
+    É muito mais rápido que tentar o download ou listar o diretório.
+    """
+    def _checar():
+        ftp = _conectar()
+        try:
+            # O comando SIZE retorna o tamanho do arquivo se ele existir
+            # Se não existir, o servidor retorna erro 550
+            ftp.voidcmd(f"SIZE {caminho_ftp}")
+            return True
+        except all_errors as e:
+            if "550" in str(e):
+                return False
+            raise
+        finally:
+            ftp.quit()
+
+    return _tentar(_checar)
+
 
 def baixar(caminho_ftp: str, destino: Path) -> Path:
     """
