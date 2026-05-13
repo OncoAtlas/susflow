@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Cache local da biblioteca
+.susflow/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Mapas FTP gerados
+tools/mapas/mapa_ftp_*.txt
