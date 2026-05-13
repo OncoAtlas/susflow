@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "susflow"
+version = "0.1.0"
+description = "Acesso e download dos dados abertos do DATASUS"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas",
+    "pyreaddbc",
+    "dbfread",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["susflow*"]
