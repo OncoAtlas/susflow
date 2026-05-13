@@ -146,6 +146,7 @@ SINASC = {
 # SINAN — /dissemin/publicos/SINAN/DADOS/
 #   FINAIS/{DISEASE}BR{YY}.dbc    dados consolidados
 #   PRELIM/{DISEASE}BR{YY}.dbc    dados preliminares
+#   DOCS/                         documentação técnica (caminho a confirmar)
 # ---------------------------------------------------------------------------
 SINAN = {
     "description":    "Sistema de Informações de Agravos de Notificação",
@@ -201,6 +202,23 @@ SINAN = {
         "TUBE": "Tuberculose",
         "VIOL": "Violência doméstica / sexual / autoprovocada",
         "ZIKA": "Zika vírus",
+    },
+
+    # Documentação técnica — caminho FTP a confirmar (não mapeado ainda)
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SINAN/DOCS",
+        "arquivos": {
+            "Docs_TAB_SINAN.zip":                              "Layouts, tabelas e dicionário de variáveis de todos os agravos",
+            "POP_I_Acesso_a_Microdados_5.pdf":                 "Guia de acesso aos microdados do SINAN",
+            "POP_II_Descompactacao_expansao_conversao_3.pdf":  "Guia de descompactação e conversão dos arquivos .dbc",
+            "POP_III_Instalacao_do_tabulador_TabWin_3.pdf":    "Guia de instalação do TabWin (tabulador oficial)",
+            "Nota_Tecnica_Doenca_de_Creutzfeldt-Jakob(DCJ).pdf": "Nota técnica — Doença de Creutzfeldt-Jakob",
+            "Nota_Tecnica_Intoxicacao_Exogena.pdf":            "Nota técnica — Intoxicação Exógena",
+            "Nota_Tecnica_Rotavirus.pdf":                      "Nota técnica — Rotavírus",
+            "Nota_Tecnica_Surtos_de_DTA.pdf":                  "Nota técnica — Surtos de Doença Transmitida por Alimento",
+            "Nota_Tecnica_Toxoplasmose.pdf":                   "Nota técnica — Toxoplasmose",
+        },
+        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
     },
 }
 

@@ -3,10 +3,14 @@ susflow/systems/sinan.py
 ========================
 SINAN — Sistema de Informações de Agravos de Notificação.
 
-Padrão de arquivo: {DOENÇA}BR{YY}.dbc   ex: DENGBR23.dbc
-Granularidade:     anual / nacional (BR)
-Dados finais:      /dissemin/publicos/SINAN/DADOS/FINAIS/
-Dados preliminares:/dissemin/publicos/SINAN/DADOS/PRELIM/
+Dados de agravos:
+
+  finais      → {DOENÇA}BR{YY}.dbc  em DADOS/FINAIS/   ex: DENGBR23.dbc
+  preliminares→ {DOENÇA}BR{YY}.dbc  em DADOS/PRELIM/   (flag preliminar=True)
+
+Arquivos auxiliares (apenas download, sem leitura como DataFrame):
+
+  docs        → layouts, dicionário de variáveis e notas técnicas por agravo
 """
 
 from pathlib import Path
@@ -20,8 +24,9 @@ from ..reader import ler as _ler
 
 _DIR_FINAL  = _CFG["ftp_dir"]
 _DIR_PRELIM = _CFG["ftp_dir_prelim"]
+_CFG_DOC    = _CFG["docs"]
 _DOENCAS    = {k.upper(): v for k, v in _CFG["diseases"].items()}
-_ANO_MIN    = 2001   # menor ano observado nos arquivos do FTP
+_ANO_MIN    = 2000   # menor ano observado nos arquivos do FTP
 _ANO_MAX    = 2024
 
 def _validar(doenca: str, ano: int) -> str:
@@ -38,6 +43,15 @@ def _validar(doenca: str, ano: int) -> str:
 
 def _nome_arquivo(doenca: str, ano: int) -> str:
     return f"{doenca}BR{str(ano)[-2:]}.dbc"
+
+
+def _baixar_arquivo(ftp_dir: str, nome: str, destino: Path | None, forcar: bool) -> Path:
+    caminho = f"{ftp_dir}/{nome}"
+    local   = _cache.caminho_local(caminho, destino)
+    if local.exists() and not forcar:
+        return local
+    return _ftp.baixar(caminho, local)
+
 
 def doencas() -> dict[str, str]:
     """Retorna o dicionário {código: descrição} de todas as doenças disponíveis."""
@@ -82,3 +96,37 @@ def ler(doenca: str, ano: int, destino: Path | None = None,
     Baixa (se necessário) e retorna os dados como DataFrame.
     """
     return _ler(baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar))
+
+
+# ---------------------------------------------------------------------------
+# Documentação técnica — apenas download
+# ---------------------------------------------------------------------------
+
+def listar_docs() -> dict[str, str]:
+    """Retorna os documentos técnicos disponíveis para download: {nome: descrição}."""
+    return dict(_CFG_DOC["arquivos"])
+
+
+def baixar_docs(
+    arquivo: str | None = None,
+    destino: Path | None = None,
+    forcar: bool = False,
+) -> "Path | list[Path]":
+    """
+    Baixa documentos técnicos do SINAN (layouts, dicionário de variáveis, notas técnicas).
+
+    Atenção: o caminho FTP deste diretório ainda não foi confirmado.
+    Se o download falhar, use mapear_ftp.py para localizar o diretório correto.
+
+    - Se `arquivo` for informado, baixa apenas aquele arquivo.
+    - Se omitido, baixa todos os disponíveis.
+    """
+    disponiveis = _CFG_DOC["arquivos"]
+    ftp_dir     = _CFG_DOC["ftp_dir"]
+
+    if arquivo:
+        if arquivo not in disponiveis:
+            raise ValueError(f"Documento não disponível: '{arquivo}'.\nDisponíveis: {list(disponiveis)}")
+        return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
+
+    return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]
