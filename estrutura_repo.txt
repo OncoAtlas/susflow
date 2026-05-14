@@ -1,0 +1,35 @@
+.
+├── CONTEXT.md               # Contexto estratégico e filosófico da lib
+├── CONTRIBUTING.md          # Guia para novos desenvolvedores (como adicionar sistemas)
+├── README.md                # Página principal (Instalação e Quick Start)
+├── docs/                    # Documentação técnica profunda e histórico de mudanças
+│   ├── CHANGELOG_REFACTOR.MD
+│   └── MIGRATION_RATIONALE.md
+├── pyproject.toml           # Configurações de build e dependências (DuckDB, Polars)
+├── setup.py                 # Script de instalação legado/compatibilidade
+├── susflow/                 # Código-fonte principal
+│   ├── __init__.py
+│   ├── cache.py             # Gestão de caminhos locais para arquivos baixados
+│   ├── config.py            # O "Cérebro": Mapas de FTP, colunas e UFs
+│   ├── core/                # Lógica de processamento e inteligência
+│   │   ├── cleaner.py       # Tradução de colunas e limpeza de tipos de dados
+│   │   ├── specialties.py   # Filtros clínicos especializados (ex: Oncologia)
+│   │   ├── synchronization.py # Motor de busca por dados mais recentes (Backtracking)
+│   │   └── validator.py     # Validador de anos, meses e UFs permitidas
+│   ├── ftp.py               # Camada de rede: Downloads resilientes do DATASUS
+│   ├── parsers/             # Transformação de formatos
+│   │   └── converter.py     # Motor de conversão DBC -> Parquet via DuckDB
+│   ├── reader.py            # Suporte para leitura de arquivos locais (.zip, .dbf)
+│   ├── resources/           # Dados de referência
+│   │   ├── territory.py     # Gestão do dicionário de municípios (API IBGE)
+│   │   └── municipios_br.parquet # Cache local de geolocalização
+│   ├── storage/             # Infraestrutura de persistência
+│   │   └── local_lake.py    # Implementação do Data Lake (Hive Partitioning)
+│   └── systems/             # Interface do Usuário (Sistemas do DATASUS)
+│       ├── base.py          # Carregador genérico (Engine de Bulk Load)
+│       ├── cnes.py          # Sistema de estabelecimentos
+│       ├── sih.py           # Sistema hospitalar (AIH)
+│       ├── sim.py           # Sistema de mortalidade
+│       ├── sinan.py         # Doenças de notificação
+│       └── sinasc.py        # Nascimentos
+└── tests/                   # Suite de testes (Unitários e Integração)

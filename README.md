@@ -1,213 +1,242 @@
 # susflow
 
-Biblioteca Python para acesso e download dos dados abertos do DATASUS. Abstrai o protocolo FTP, a descompressão dos arquivos `.dbc` e a leitura dos dados, entregando um DataFrame pronto para análise.
+> High-performance Python library to extract, convert, and standardize data from DATASUS — the Brazilian Ministry of Health's public data platform.
+
+**🇧🇷 [Leia em Português](README-ptbr.md)**
 
 ---
 
-## Instalação
+## Overview
+
+`susflow` automates the entire DATASUS pipeline: discovering files on legacy FTP servers, converting proprietary `.dbc` formats, deduplicating, and delivering clean, analysis-ready data in Parquet format — all with a single function call.
+
+### Why susflow?
+
+| Challenge | susflow Solution |
+|-----------|-----------------|
+| `.dbc` files don't open on Mac/Linux | Transparent DBC → Parquet conversion via `pyreaddbc` + DuckDB |
+| Cryptic column names (`CAUSABAS`, `DTINTERNA`) | Auto-renamed to readable names (`causa_basica_obito`, `data_internacao`) |
+| ISO-8859-1 encoding / Mojibake | Corrected to UTF-8 on every read |
+| Duplicate rows in legacy files | Removed automatically during conversion |
+| Repeated downloads waste time | Hive-partitioned local cache — re-runs are instant |
+| Different FTP structures per system | Unified `load()` API across all systems |
+
+---
+
+## Repository Structure
+
+```
+.
+├── README.md                        # This file (English)
+├── README-ptbr.md                   # Portuguese translation
+├── CONTRIBUTING.md                  # How to add systems and run tests
+├── CONTEXT.md                       # Strategic and philosophical context
+├── pyproject.toml                   # Build config and dependencies
+├── setup.py                         # Legacy install compatibility
+│
+├── docs/
+│   ├── CHANGELOG_REFACTOR.md        # Refactoring history
+│   └── MIGRATION_RATIONALE.md       # Architectural decisions
+│
+├── susflow/
+│   ├── __init__.py
+│   ├── config.py                    # The "brain": FTP maps, column mappings, UF lists
+│   ├── ftp.py                       # Network layer: resilient FTP downloads with retry/backoff
+│   ├── cache.py                     # Local path management for downloaded files
+│   ├── reader.py                    # Local file support (.zip, .dbf)
+│   │
+│   ├── core/
+│   │   ├── cleaner.py               # Column renaming, municipality enrichment, CID descriptions, date parsing
+│   │   ├── specialties.py           # Clinical domain filters (e.g. Oncology ICD C00–D48)
+│   │   ├── synchronization.py       # BacktrackingEngine: finds the most recent consistent FTP month
+│   │   └── validator.py             # Validates UF, year range, and granularity against config rules
+│   │
+│   ├── parsers/
+│   │   └── converter.py             # DBC/DBF → Parquet via DuckDB + Polars (dedup + ZSTD)
+│   │
+│   ├── resources/
+│   │   ├── territory.py             # IBGE municipality map (7-digit → 6-digit code, cached)
+│   │   └── municipios_br.parquet    # Local geolocation cache
+│   │
+│   ├── storage/
+│   │   └── local_lake.py            # Hive-partitioned path builder for the local data lake
+│   │
+│   └── systems/                     # User-facing entry points — one file per DATASUS system
+│       ├── base.py                  # generic_load() and generic_bulk_load() — the universal engine
+│       ├── sim.py                   # SIM: Mortality Information System
+│       ├── sinasc.py                # SINASC: Live Births
+│       ├── sinan.py                 # SINAN: Notifiable Diseases
+│       ├── sih.py                   # SIHSUS: Hospital Information System (AIH)
+│       ├── cnes.py                  # CNES: Health Establishment Registry
+│       └── sia.py                   # SIASUS: Outpatient Information System
+│
+└── tests/                           # Unit and integration test suite
+```
+
+**Local Data Lake layout** (created automatically on first use):
+
+```
+data_lake/
+├── SIM/DO/year=2022/uf=PB/data.parquet
+├── SIHSUS/RD/year=2023/month=03/uf=SP/data.parquet
+├── CNES/ST/year=2024/month=01/uf=RJ/data.parquet
+└── _temp/                           # Temporary download workspace (auto-cleaned)
+```
+
+---
+
+## Installation
 
 ```bash
-git clone https://github.com/seu-usuario/susflow.git
-cd susflow
-pip install -e .
+pip install susflow
 ```
 
-Dependências: `pandas`, `pyreaddbc`, `dbfread`
+**Requirements:** Python 3.10+, DuckDB, Polars, pyreaddbc
 
 ---
 
-## Como usar
+## Get Started
 
-### SINASC — Nascidos Vivos
-
-```python
-from susflow.systems import sinasc
-
-# listar arquivos disponíveis no FTP
-sinasc.listar()           # todos
-sinasc.listar(uf="SP")    # filtrado por UF
-
-# baixar para o cache (~/.susflow/cache/)
-path = sinasc.baixar(uf="SP", ano=2022)
-
-# baixar para pasta específica
-path = sinasc.baixar(uf="SP", ano=2022, destino="/meus/dados")
-
-# ler direto como DataFrame (baixa se necessário)
-df = sinasc.ler(uf="SP", ano=2022)
-
-# forçar novo download mesmo com cache
-df = sinasc.ler(uf="SP", ano=2022, forcar=True)
-```
-
-### SIM — Mortalidade
+### Mortality data (SIM)
 
 ```python
 from susflow.systems import sim
 
-# dados por UF
-df = sim.ler(uf="SP", ano=2023)
-
-# dados nacionais por categoria (DOFET)
-# tipos disponíveis: EXT (causas externas), FET (fetal), INF (infantil), MAT (materno)
-df = sim.ler_especial(tipo="EXT", ano=2024)
-df = sim.ler_especial(tipo="MAT", ano=2022)
-
-# listar
-sim.listar(uf="RJ")
-sim.listar_especial(tipo="INF")
+# Load deaths for Paraíba in 2022
+df = sim.load(uf="PB", year=2022)
+print(df.head())
+# Columns: causa_basica_obito, data_obito, municipio_residencia, sexo_paciente ...
 ```
 
-### SINAN — Agravos de Notificação
+### Hospitalizations (SIHSUS)
+
+```python
+from susflow.systems import sih
+
+# Single month
+df = sih.load(uf="SP", year=2023, month=3, table="RD")
+
+# Full year in parallel (12 months, up to 5 concurrent downloads)
+df_year = sih.load_year(uf="SP", year=2023)
+```
+
+### Notifiable diseases (SINAN)
 
 ```python
 from susflow.systems import sinan
 
-# ver todas as doenças disponíveis
-sinan.doencas()   # retorna dict {código: descrição}
+df_dengue = sinan.load(agravo="DENG", uf="CE", year=2023)
+df_tb     = sinan.load(agravo="TUBE", uf="AM", year=2022)
+```
 
-# baixar e ler
-df = sinan.ler(doenca="DENG", ano=2023)   # Dengue
-df = sinan.ler(doenca="TUBE", ano=2022)   # Tuberculose
-df = sinan.ler(doenca="CHIK", ano=2023)   # Chikungunya
+### Live births (SINASC)
 
-# dados preliminares do ano corrente
-df = sinan.ler(doenca="DENG", ano=2024, preliminar=True)
+```python
+from susflow.systems import sinasc
 
-# listar arquivos disponíveis
-sinan.listar(doenca="DENG")
-sinan.listar(preliminar=True)
+df = sinasc.load(uf="RJ", year=2021)
+```
+
+### CNES — always get the latest available month
+
+```python
+from susflow.systems import cnes
+
+# BacktrackingEngine scans the FTP backwards to find the most recent
+# month where the requested table is already published
+df_estab = cnes.load_latest(table="ST", uf="MG")
+```
+
+### Bulk load — multiple states in parallel
+
+```python
+from susflow.systems import sim
+
+nordeste = ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"]
+df_nordeste = sim.load_bulk(ufs=nordeste, year=2022)
+```
+
+### Oncology filter (ICD C00–D48)
+
+```python
+from susflow.systems import sim
+from susflow.core import specialties
+
+df = sim.load(uf="SP", year=2022)
+df_cancer = specialties.filter_oncology(df, cid_column="causa_basica_obito")
+```
+
+### Lazy scan of the entire local lake (zero RAM until `.collect()`)
+
+```python
+from susflow.systems.base import scan_system
+import polars as pl
+
+lazy = scan_system("SIM", "DO")
+result = lazy.filter(pl.col("year") == 2022).collect()
+```
+
+### Load an entire region
+
+```python
+from susflow.systems.base import load_region
+
+df_sul = load_region("SIM", "DO", region_name="SUL", year=2022)
+# region_name options: "NORTE", "NORDESTE", "CENTRO-OESTE", "SUDESTE", "SUL"
 ```
 
 ---
 
-## Cache
-
-Por padrão os arquivos são salvos em `~/.susflow/cache/`, espelhando a estrutura do FTP:
+## Architecture at a Glance
 
 ```
-~/.susflow/cache/
-└── dissemin/publicos/
-    ├── SINASC/NOV/DNRES/DNSP2022.dbc
-    ├── SIM/CID10/DORES/DOSP2023.dbc
-    └── SINAN/DADOS/FINAIS/DENGBR23.dbc
+User calls sim.load(uf, year)
+        │
+        ▼
+validator.validate_params()       ← checks UF list, year range, granularity (config.py)
+        │
+        ▼
+local_lake.get_path()             ← builds Hive-partitioned cache path
+        │
+   ┌────┴────┐
+   │ cached? │
+   └────┬────┘
+    Yes │                    No
+        ▼                    ▼
+  converter.load_as_df()   ftp.baixar()              ← resilient download with retry/backoff
+        │                  converter.to_parquet()    ← DBC → DBF → DuckDB → Polars (dedup + ZSTD)
+        │                         │
+        └──────────┬───────────────┘
+                   ▼
+        cleaner.apply_standard_clean()    ← rename + municipalities + CID descriptions + dates
+                   │
+                   ▼
+             pl.DataFrame  ✓
 ```
-
-Um arquivo já baixado nunca é baixado novamente, a menos que `forcar=True` seja passado.
 
 ---
 
-## Escopo
+## Configuration Reference
 
-### v1 — implementado
+All system rules live in `config.py`. Key constants:
 
-| Sistema | Granularidade | Formato | Status |
-|---------|--------------|---------|--------|
-| SINASC | anual / por UF | `.dbc` | ✅ |
-| SIM (por UF) | anual / por UF | `.dbc` | ✅ |
-| SIM (especial) | anual / nacional | `.dbc` | ✅ |
-| SINAN | anual / nacional | `.dbc` | ✅ |
-| SIHSUS | mensal / por UF | `.dbc` | 🔄 próximo |
-| SIASUS | mensal / por UF | `.dbc` | 🔄 próximo |
-| CNES | mensal / por UF | `.dbc` | 🔄 próximo |
-| PNI | anual / por UF | `.dbf` | 🔄 próximo |
-
-### v1 — features possíveis com os dados já disponíveis
-
-| Feature | Sistemas envolvidos |
-|---------|-------------------|
-| Taxa de mortalidade infantil por UF/ano | SIM + SINASC + IBGE/POP |
-| Série histórica de nascimentos por UF | SINASC |
-| Mapa de doenças notificadas por ano | SINAN |
-| Evolução de internações hospitalares | SIHSUS |
-| Cobertura vacinal por UF | PNI |
-| Distribuição de estabelecimentos de saúde | CNES |
-| Comparativo de produção ambulatorial | SIASUS |
-| Mortalidade por causas externas (nacional) | SIM especial (EXT) |
-| Óbitos maternos por ano | SIM especial (MAT) |
-
-### v2 — sistemas especializados (planejado)
-
-| Sistema | O que é | Observação |
-|---------|---------|------------|
-| CIH / CIHA | Comunicação Hospitalar | CIH encerrou em 2010, CIHA substituiu |
-| e-SUS Notifica | Notificações de COVID-19 | Escopo específico da pandemia |
-| PCE | Controle de Esquistossomose | Subconjunto do SINAN |
-| Painel Oncologia | Registros de câncer | Desde 2013 |
-| RESP | Síndrome Congênita do Zika | Surto 2015-2016 |
-| SISCOLO / SISMAMA | Cânceres de colo e mama | Dentro do SISCAN |
-| SISPRENATAL | Pré-natal | Monitoramento da gestação |
+| Constant | Purpose |
+|----------|---------|
+| `UFS` | All 27 valid Brazilian state codes |
+| `REGIOES` | State groupings by region (Norte, Nordeste, etc.) |
+| `UF_PARA_REGIAO` | Reverse lookup: UF → region name |
+| `COLUMN_MAPPINGS` | Cryptic DATASUS columns → readable snake_case names |
+| `MAX_WORKERS` | Parallel download concurrency (default: 5) |
+| `ALL_SYSTEMS` | Registry of all supported DATASUS systems and their FTP rules |
 
 ---
 
-## Fontes FTP
+## Contributing
 
-Os dados são obtidos via FTP do DATASUS (`ftp.datasus.gov.br`). A estrutura principal fica em `/dissemin/publicos/`:
-
-```
-/dissemin/publicos/
-├── SIM/
-│   ├── CID10/DORES/      ← óbitos por UF (DO{UF}{YYYY}.dbc)
-│   ├── CID10/DOFET/      ← óbitos especiais nacionais (DO{TIPO}{YY}.dbc)
-│   └── PRELIM/
-├── SINASC/
-│   └── NOV/DNRES/        ← nascidos vivos (DN{UF}{YYYY}.dbc)
-├── SINAN/
-│   ├── DADOS/FINAIS/     ← agravos finais ({DOENÇA}BR{YY}.dbc)
-│   └── DADOS/PRELIM/     ← agravos preliminares
-├── SIHSUS/200801_/Dados/ ← internações ({PREFIX}{UF}{YY}{MM}.dbc)
-├── SIASUS/200801_/Dados/ ← ambulatório ({PREFIX}{UF}{YY}{MM}.dbc)
-├── CNES/200508_/Dados/   ← estabelecimentos ({TIPO}/{TIPO}{UF}{YY}{MM}.dbc)
-└── PNI/DADOS/            ← vacinação (DPNI{UF}{YY}.DBF)
-```
-
-### Padrão de arquivos por sistema
-
-| Sistema | Padrão de arquivo | Granularidade | Formato |
-|---------|-------------------|---------------|---------|
-| SINASC | `DN{UF}{YYYY}.dbc` | anual / por UF | `.dbc` |
-| SIM UF | `DO{UF}{YYYY}.dbc` | anual / por UF | `.dbc` |
-| SIM especial | `DO{TIPO}{YY}.dbc` | anual / nacional | `.dbc` |
-| SINAN | `{DOENÇA}BR{YY}.dbc` | anual / nacional | `.dbc` |
-| SIHSUS | `{PREFIX}{UF}{YY}{MM}.dbc` | mensal / por UF | `.dbc` |
-| SIASUS | `{PREFIX}{UF}{YY}{MM}.dbc` | mensal / por UF | `.dbc` |
-| PNI | `DPNI{UF}{YY}.DBF` | anual / por UF | `.dbf` |
+See [CONTRIBUTING.md](CONTRIBUTING.md) for a step-by-step guide on adding new systems and running the test suite.
 
 ---
 
-## Fluxo dos dados
+## License
 
-```
-FTP DATASUS (.dbc)
-      │
-      ▼
-Descomprimir blast → .dbf
-      │
-      ▼
-Ler colunas → DataFrame
-      │
-      ▼
-Usuário trabalha com os dados
-```
-
-O único passo não trivial é `.dbc → .dbf`, que usa um algoritmo de compressão proprietário chamado **blast** (variante do PKWARE). A lib [`pyreaddbc`](https://github.com/AlertaDengue/PySUS) resolve isso em Python puro.
-
----
-
-## Ferramentas de mapeamento FTP
-
-O diretório `tools/` contém scripts para explorar e mapear a estrutura do FTP do DATASUS:
-
-```bash
-# mapear sistemas da v1 (padrão)
-python tools/mapear_ftp.py
-
-# salvar resultado em tools/mapas/
-python tools/mapear_ftp.py --salvar --quiet
-
-# explorar caminho específico
-python tools/mapear_ftp.py --alvo /dissemin/publicos/SINAN/DADOS
-
-# descer mais um nível de subdiretórios
-python tools/mapear_ftp.py --profundo --salvar
-```
+MIT
