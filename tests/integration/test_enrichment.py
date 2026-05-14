@@ -3,17 +3,17 @@ import polars as pl
 from susflow.systems import sim
 
 def test_sim_load_has_enrichment():
-    """Valida se o carregamento do SIM traz as colunas traduzidas dinamicamente."""
+    """Validates that SIM loading brings the dynamically translated columns."""
     df = sim.load(uf="PB", year=2023)
     
-    # No SIM, esperamos encontrar CAUSABAS e DTOBITO
-    # O cleaner deve ter criado CAUSABAS_DESC e DTOBITO_DT
+    # In SIM, we expect CAUSABAS and DTOBITO
+    # The cleaner should have created CAUSABAS_DESC and DTOBITO_DT
     assert "causa_basica_obito_desc" in df.columns
     assert "data_obito_dt" in df.columns
     
-    # Verifica se a tipagem da data convertida está correta
+    # Checks that the converted date type is correct
     assert df["data_obito_dt"].dtype == pl.Date
     
-    # Verifica integridade: o número de linhas não pode ter mudado com o join
-    # (O erro do SIM anterior tinha 28.773 linhas)
+    # Checks integrity: the number of rows must not change after the join
+    # (The previous SIM issue had 28,773 rows)
     assert df.height == 28773

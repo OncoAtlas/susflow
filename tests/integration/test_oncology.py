@@ -3,11 +3,11 @@ import polars as pl
 from susflow.systems import sim, cnes
 
 def test_cross_system_integrity():
-    """Valida se os dados do SIM e CNES podem ser relacionados."""
+    """Validates whether SIM and CNES data can be linked."""
     df_sim = sim.load(uf="PB", year=2023)
     
-    # Se CODESTAB não está no config.py, ele mantém o nome original.
-    # Mas CNES vira codigo_cnes.
+    # If CODESTAB is not in config.py, it keeps the original name.
+    # But CNES becomes codigo_cnes.
     col_estabelecimento_sim = "CODESTAB" 
     
     lista_cnes_sim = (
@@ -19,7 +19,7 @@ def test_cross_system_integrity():
     
     df_cnes = cnes.load(table="ST", uf="PB", year=2023, month=6)
     
-    # ATENÇÃO: Aqui mudamos de "CNES" para "codigo_cnes"
+    # WARNING: Here we switch from "CNES" to "codigo_cnes"
     lista_cnes_oficial = (
         df_cnes.select(pl.col("codigo_cnes").cast(pl.Utf8))
         .unique()["codigo_cnes"]

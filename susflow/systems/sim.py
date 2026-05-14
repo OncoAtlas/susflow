@@ -2,6 +2,8 @@
 from .. import config as _cfg
 from .base import generic_load, generic_bulk_load
 
+"""Loads SIM data (mortality)."""
+
 def load(uf: str, year: int, **kwargs):
     conf = _cfg.SIM["uf"] # Pega as regras do SIM no config
     return generic_load(

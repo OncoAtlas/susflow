@@ -2,13 +2,13 @@
 """
 susflow/config.py
 =================
-Mapa completo dos sistemas do DATASUS e configurações de motor da biblioteca.
+Complete map of DATASUS systems and library engine settings.
 """
 
 FTP_HOST = "ftp.datasus.gov.br"
 
 # ---------------------------------------------------------------------------
-# UFs disponíveis
+# Available state codes
 # ---------------------------------------------------------------------------
 UFS = [
     "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO",
@@ -17,7 +17,7 @@ UFS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Agrupamentos Regionais (Para filtros de performance e análise)
+# Regional groupings (for performance and analysis filters)
 # ---------------------------------------------------------------------------
 REGIOES = {
     "NORTE": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
@@ -27,27 +27,27 @@ REGIOES = {
     "SUL": ["PR", "RS", "SC"],
 }
 
-# Inverso: permite descobrir a região a partir da UF rapidamente
+# Reverse lookup: allows quickly finding the region from the UF
 UF_PARA_REGIAO = {uf: reg for reg, ufs in REGIOES.items() for uf in ufs}
 
 # ---------------------------------------------------------------------------
-# CONFIGURAÇÕES DE MOTOR (ENGINE)
+# ENGINE SETTINGS
 # ---------------------------------------------------------------------------
-MAX_WORKERS = 5          # Downloads simultâneos no Bulk Load
+MAX_WORKERS = 5          # Concurrent downloads in bulk load
 DEFAULT_ENCODING = "iso-8859-1"
 
 # ---------------------------------------------------------------------------
-# DICIONÁRIO DE LEGIBILIDADE (Para o Atlas da Oncologia)
-# Mapeia siglas crípticas do DATASUS para nomes claros em português.
+# READABILITY DICTIONARY (for the Oncology Atlas)
+# Maps cryptic DATASUS acronyms to clear names in Portuguese.
 # ---------------------------------------------------------------------------
 COLUMN_MAPPINGS = {
-    # Identificação e Localização
+    # Identification and location
     "MUNIC_RES": "municipio_residencia",
     "CODMUNRES": "municipio_residencia",
     "MUNIC_MOV": "municipio_movimentacao",
     "CNES":      "codigo_cnes",
     
-    # Datas e Paciente
+    # Dates and patient
     "IDADE":     "idade_paciente",
     "SEXO":      "sexo_paciente",
     "DTINTERNA": "data_internacao",
@@ -55,20 +55,20 @@ COLUMN_MAPPINGS = {
     "DTNASC":    "data_nascimento",
     "DTRECEBIM": "data_recebimento",
     
-    # Diagnósticos (CID) e Procedimentos
+    # Diagnoses (ICD) and procedures
     "CAUSABAS":   "causa_basica_obito",
     "DIAG_PRINC": "diagnostico_principal",
     "DIAG_SEC":   "diagnostico_secundario",
     "PROC_REA":   "procedimento_realizado",
     
-    # Valores e Gestão
+    # Values and management
     "VAL_TOT":    "valor_total_pago",
     "DIAS_PERM":  "dias_permanencia",
     "CODUFMUN":   "codigo_municipio_ibge",
 }
 
 # ---------------------------------------------------------------------------
-# MAPEAMENTO DE SISTEMAS (PROVENIÊNCIA E REGRAS DE FTP)
+# SYSTEM MAPPING (PROVENANCE AND FTP RULES)
 # ---------------------------------------------------------------------------
 
 SIM = {
@@ -118,7 +118,7 @@ SINAN = {
     "diseases": {
         "DENG": "Dengue", "CHIK": "Chikungunya", "TUBE": "Tuberculose",
         "HANS": "Hanseníase", "CANC": "Câncer relacionado ao trabalho",
-        # ... (suas outras doenças mapeadas continuam aqui)
+        # ... (your other mapped diseases continue here)
     }
 }
 
@@ -183,7 +183,7 @@ IBGE_POP = {
 }
 
 # ---------------------------------------------------------------------------
-# ÍNDICE GERAL
+# GLOBAL INDEX
 # ---------------------------------------------------------------------------
 ALL_SYSTEMS = {
     "SIM":      SIM,

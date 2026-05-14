@@ -2,27 +2,27 @@ import polars as pl
 import requests
 from pathlib import Path
 
-# Caminho onde o arquivo ficará guardado dentro da estrutura da lib
+# Path where the file will be stored inside the library structure
 RESOURCE_PATH = Path(__file__).parent / "municipios_br.parquet"
 
 def get_municipality_map() -> pl.DataFrame:
     """
-    Retorna o mapa de municípios. 
-    Se não estiver em disco, baixa e salva.
+    Returns the municipality map.
+    If it is not on disk, downloads and saves it.
     """
     if RESOURCE_PATH.exists():
         return pl.read_parquet(RESOURCE_PATH)
     
     df = _fetch_from_ibge()
     
-    # Salva para as próximas execuções (feat: offline-first)
+    # Save for future runs (offline-first)
     df.write_parquet(RESOURCE_PATH)
     print(f"Dicionário de municípios salvo em: {RESOURCE_PATH}")
     
     return df
 
 def _fetch_from_ibge() -> pl.DataFrame:
-    """Busca dados brutos da API do IBGE e formata para o padrão DATASUS."""
+    """Fetches raw data from the IBGE API and formats it to the DATASUS standard."""
     url = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios"
     print("🌐 Baixando dicionário de municípios via API do IBGE...")
     
@@ -33,7 +33,7 @@ def _fetch_from_ibge() -> pl.DataFrame:
         
         municipios = []
         for m in data:
-            # Pega a sigla da UF de forma segura
+            # Safely fetch the UF abbreviation
             microrregiao = m.get("microrregiao") or {}
             mesorregiao = microrregiao.get("mesorregiao") or {}
             uf_sigla = mesorregiao.get("UF", {}).get("sigla", "N/A")

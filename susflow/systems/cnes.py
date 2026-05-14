@@ -1,6 +1,8 @@
 from .base import generic_load
 from ..core.synchronization import BacktrackingEngine
 
+"""Loads CNES data (health establishments)."""
+
 def load(table: str, uf: str, year: int, month: int, use_polars: bool = True):
     return generic_load(
         system="CNES",

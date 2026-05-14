@@ -1,11 +1,11 @@
 from .base import generic_load
+"""
+Loads SINAN data.
+Examples of 'agravo': 'DENG' (Dengue), 'TUBE' (Tuberculosis), 'HANS' (Leprosy).
+"""
 
 def load(agravo: str, uf: str, year: int, use_polars: bool = True):
-    """
-    Carrega dados do SINAN. 
-    Exemplos de 'agravo': 'DENG' (Dengue), 'TUBE' (Tuberculose), 'HANS' (Hanseníase).
-    """
-    # O SINAN armazena os arquivos em subpastas com o nome do agravo
+    # SINAN stores files in subfolders named after the condition
     return generic_load(
         system="SINAN",
         sub_dir="2007_/Dados",

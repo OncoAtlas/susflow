@@ -4,8 +4,8 @@ from typing import List, Optional
 
 def load(uf: str, year: int, month: int, table: str = "RD", columns: Optional[List[str]] = None):
     """
-    Carrega dados do SIHSUS (Internações).
-    Padrão: Tabela 'RD' (Reduzido), que contém o diagnóstico e valor.
+    Loads SIHSUS data (hospitalizations).
+    Default: table 'RD' (Reduced), which contains diagnosis and value.
     """
     return generic_load(
         system="SIHSUS", 
@@ -17,10 +17,10 @@ def load(uf: str, year: int, month: int, table: str = "RD", columns: Optional[Li
         columns=columns
     )
 
-# Função adicional para carregar o ano inteiro em paralelo (12 meses)
-# arquivos do SIH são enormes, então isso acelera a carga anual significativamente
+# Additional function to load the whole year in parallel (12 months)
+# SIH files are huge, so this significantly speeds up annual loading
 def load_year(uf: str, year: int, table: str = "RD", **kwargs):
-    """Carrega os 12 meses de um ano em paralelo."""
+    """Loads the 12 months of a year in parallel."""
     months = list(range(1, 13))
     return generic_bulk_load(
         system="SIHSUS",

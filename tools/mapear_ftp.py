@@ -1,9 +1,9 @@
 """
 tools/mapear_ftp.py
 ===================
-Mapeia a estrutura de diretórios do FTP do DATASUS.
+Maps the directory structure of the DATASUS FTP.
 
-Uso:
+Usage:
     python mapear_ftp.py                   # imprime na tela
     python mapear_ftp.py --salvar          # salva em mapas/mapa_ftp_<timestamp>.txt
     python mapear_ftp.py --salvar --quiet  # salva sem imprimir
@@ -12,18 +12,18 @@ Uso:
 """
 
 # ---------------------------------------------------------------------------
-# Configuração
+# Configuration
 # ---------------------------------------------------------------------------
 
 FTP_HOST = "ftp.datasus.gov.br"
 
-# Pasta onde os arquivos .txt gerados serão salvos (relativa a este script)
+# Folder where generated .txt files will be saved (relative to this script)
 PASTA_SAIDA = "mapas"
 
-# Profundidade padrão de recursão nos subdiretórios
+# Default recursion depth in subdirectories
 MAX_PROF_PADRAO = 1
 
-# Caminhos explorados quando nenhum --alvo é passado (sistemas da v1)
+# Paths explored when no --alvo is provided (v1 systems)
 ALVOS_PADRAO = [
     "/dissemin/publicos/SIM/CID10",
     "/dissemin/publicos/SINASC/NOV/DNRES",
@@ -44,7 +44,7 @@ from pathlib import Path
 
 
 def nova_conexao() -> FTP:
-    """Abre uma conexão FTP limpa. Reconectar por alvo evita o bug '200 Type set to A'."""
+    """Opens a clean FTP connection. Reconnecting per target avoids the '200 Type set to A' bug."""
     ftp = FTP()
     ftp.connect(FTP_HOST, 21)
     ftp.login()
