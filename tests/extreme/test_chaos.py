@@ -8,8 +8,8 @@ def test_corrupted_dbc_file(tmp_path):
         corrupted_file = tmp_path / "DOPB2023.dbc"
         corrupted_file.write_text("CONTEUDO_CORROMPIDO")
         
-        # O truque está aqui: retornar o path absoluto como string
+        # The trick is here: return the absolute path as a string
         with patch('susflow.ftp.baixar', return_value=str(corrupted_file.absolute())):
             with pytest.raises(Exception):
-                # Chame o load que vai tentar processar esse lixo
+            # Call the load that will try to process this garbage
                 sim.load(uf="PB", year=2023)

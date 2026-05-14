@@ -1,7 +1,7 @@
 """
 susflow/reader.py
 =================
-Camada de leitura: converte arquivos locais (.dbc, .dbf, .zip) em DataFrame.
+Read layer: converts local files (.dbc, .dbf, .zip) into DataFrames.
 """
 
 import tempfile
@@ -12,14 +12,14 @@ import pandas as pd
 
 
 class LeituraError(Exception):
-    """Falha ao converter arquivo para DataFrame."""
+    """Failed to convert a file into a DataFrame."""
 
 
 def ler(arquivo: Path) -> pd.DataFrame:
     """
-    Lê um arquivo local e retorna um DataFrame.
-    Suporta .dbc, .dbf e .zip (que contenha .dbc ou .dbf).
-    Colunas sempre em maiúsculo, strings decodificadas em latin-1.
+    Reads a local file and returns a DataFrame.
+    Supports .dbc, .dbf, and .zip (containing .dbc or .dbf).
+    Columns are always uppercase, strings decoded in latin-1.
     """
     arquivo = Path(arquivo)
     sufixo  = arquivo.suffix.lower()
@@ -72,7 +72,7 @@ def _ler_zip(arquivo: Path) -> pd.DataFrame:
                     raise LeituraError(f"ZIP vazio: {arquivo}")
                 zf.extractall(tmp)
 
-            # lê o primeiro arquivo reconhecível dentro do zip
+            # read the first recognizable file inside the zip
             for nome in nomes:
                 extraido = Path(tmp) / nome
                 sufixo   = extraido.suffix.lower()

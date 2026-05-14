@@ -1,7 +1,7 @@
 from .base import generic_load
 
 def load(uf: str, year: int):
-    # PNI geralmente é anual ou por doses, ajustamos conforme a tabela
+    # PNI is usually annual or dose-based; we adjust according to the table
     return generic_load(
         system="PNI", 
         sub_dir="DADOS", 

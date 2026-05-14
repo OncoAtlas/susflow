@@ -1,12 +1,12 @@
 """
 tests/teste_download.py
 =======================
-Teste end-to-end: baixa um arquivo real de cada sistema implementado
-e valida que o DataFrame retornado tem dados.
+End-to-end test: downloads a real file from each implemented system
+and validates that the returned DataFrame has data.
 
-Requer conexão com a internet (acessa ftp.datasus.gov.br).
+Requires an internet connection (accesses ftp.datasus.gov.br).
 
-Uso:
+Usage:
     python tests/teste_download.py
     python tests/teste_download.py --sistema sinasc
     python tests/teste_download.py --sistema sim
@@ -40,14 +40,14 @@ def checar_df(df: pd.DataFrame, label: str) -> None:
     ok(f"{label} → {len(df):,} linhas × {len(df.columns)} colunas")
 
 
-# ── testes por sistema ──────────────────────────────────────────────────────
+# ── system tests ────────────────────────────────────────────────────────────
 
 def testar_sinasc() -> bool:
     cabecalho("SINASC — Nascidos Vivos")
     from susflow.systems import sinasc
     passou = True
 
-    # listar
+    # list
     try:
         arquivos = sinasc.listar(uf="SP")
         assert len(arquivos) > 0
@@ -55,21 +55,21 @@ def testar_sinasc() -> bool:
     except Exception as e:
         falhou("listar()", e); passou = False
 
-    # ler (ano pequeno = arquivo menor = download mais rápido)
+    # read (small year = smaller file = faster download)
     try:
         df = sinasc.ler(uf="AC", ano=1996)
         checar_df(df, "ler(uf='AC', ano=1996)")
     except Exception as e:
         falhou("ler()", e); passou = False
 
-    # cache: segunda chamada não deve bater no FTP
+    # cache: the second call should not hit the FTP
     try:
         df2 = sinasc.ler(uf="AC", ano=1996)
         checar_df(df2, "ler() — cache hit")
     except Exception as e:
         falhou("ler() cache", e); passou = False
 
-    # validação de parâmetros
+    # parameter validation
     try:
         sinasc.baixar(uf="XX", ano=2022)
         print("  ❌ deveria ter levantado ValueError para UF inválida")
@@ -92,7 +92,7 @@ def testar_sim() -> bool:
     from susflow.systems import sim
     passou = True
 
-    # por UF
+    # by UF
     try:
         arquivos = sim.listar(uf="AC")
         assert len(arquivos) > 0
@@ -106,7 +106,7 @@ def testar_sim() -> bool:
     except Exception as e:
         falhou("ler() por UF", e); passou = False
 
-    # especial (DOFET)
+    # special (DOFET)
     try:
         arquivos_esp = sim.listar_especial(tipo="MAT")
         assert len(arquivos_esp) > 0
@@ -120,7 +120,7 @@ def testar_sim() -> bool:
     except Exception as e:
         falhou("ler_especial()", e); passou = False
 
-    # validações
+    # validations
     try:
         sim.baixar_especial(tipo="ZZZ", ano=2020)
         print("  ❌ deveria ter levantado ValueError para tipo inválido")
@@ -136,7 +136,7 @@ def testar_sinan() -> bool:
     from susflow.systems import sinan
     passou = True
 
-    # dicionário de doenças
+    # disease dictionary
     try:
         d = sinan.doencas()
         assert len(d) > 0
@@ -144,7 +144,7 @@ def testar_sinan() -> bool:
     except Exception as e:
         falhou("doencas()", e); passou = False
 
-    # listar
+    # list
     try:
         arquivos = sinan.listar(doenca="DENG")
         assert len(arquivos) > 0
@@ -152,14 +152,14 @@ def testar_sinan() -> bool:
     except Exception as e:
         falhou("listar()", e); passou = False
 
-    # ler (tuberculose — arquivo menor)
+    # read (tuberculosis - smaller file)
     try:
         df = sinan.ler(doenca="TUBE", ano=2007)
         checar_df(df, "ler(doenca='TUBE', ano=2007)")
     except Exception as e:
         falhou("ler()", e); passou = False
 
-    # validações
+    # validations
     try:
         sinan.baixar(doenca="INVALIDA", ano=2020)
         print("  ❌ deveria ter levantado ValueError para doença inválida")

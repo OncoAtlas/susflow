@@ -1,5 +1,7 @@
 from .base import generic_load
 
+"""Loads SIASUS data (outpatient procedures)."""
+
 def load(table: str, uf: str, year: int, month: int):
     return generic_load(
         system="SIASUS", 

@@ -9,15 +9,15 @@ class BacktrackingEngine:
 
     def find_latest_consistent(self, tables: list, uf: str):
         """
-        Retorna (ano, mes) do período mais recente onde TODAS 
-        as tabelas da lista existem no FTP.
+        Returns the (year, month) of the most recent period where ALL
+        tables in the list exist on the FTP.
         """
         hoje = date.today()
         ano_atual = hoje.year
         mes_atual = hoje.month
 
         for i in range(self.max_months):
-            # Calcula o mês alvo retroativamente
+            # Calculates the target month backward
             m_idx = (mes_atual - i - 1) % 12 + 1
             y_idx = ano_atual - ((i + (12 - mes_atual)) // 12)
             
@@ -26,7 +26,7 @@ class BacktrackingEngine:
             
             consistente = True
             for table in tables:
-                # Monta o caminho genérico baseado no sistema
+                # Build the generic path based on the system
                 nome_arq = f"{table.upper()}{uf.upper()}{yy}{mm}.dbc"
                 path_ftp = f"/dissemin/publicos/{self.system}/200508_/Dados/{table.upper()}/{nome_arq}"
                 

@@ -1,8 +1,8 @@
 """
 susflow/cache.py
 ================
-Resolução de cache local. Compartilhado por todos os sistemas.
-Pasta padrão: ~/.susflow/cache/, espelhando a estrutura do FTP.
+Local cache resolution. Shared by all systems.
+Default folder: ~/.susflow/cache/, mirroring the FTP structure.
 """
 
 from pathlib import Path
@@ -12,12 +12,12 @@ _CACHE_PADRAO = Path.home() / ".susflow" / "cache"
 
 def caminho_local(caminho_ftp: str, raiz: Path | None = None) -> Path:
     """
-    Retorna o path local correspondente a um caminho FTP.
+    Returns the local path corresponding to an FTP path.
     Ex: /dissemin/publicos/SINASC/NOV/DNRES/DNSP2022.dbc
      →  ~/.susflow/cache/dissemin/publicos/SINASC/NOV/DNRES/DNSP2022.dbc
     """
     raiz = Path(raiz) if raiz else _CACHE_PADRAO
-    # remove a barra inicial para não criar path absoluto ao fazer /
+    # remove the leading slash to avoid creating an absolute path when joining
     relativo = caminho_ftp.lstrip("/")
     return raiz / relativo
 

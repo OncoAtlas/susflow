@@ -1,7 +1,7 @@
 """
 susflow/ftp.py
 ==============
-Camada de transporte: toda comunicação com o FTP do DATASUS fica aqui.
+Transport layer: all communication with the DATASUS FTP lives here.
 """
 
 from ftplib import FTP, all_errors
@@ -15,15 +15,15 @@ _BACKOFF    = 2    # segundos entre tentativas
 
 
 class FTPError(Exception):
-    """Erro de comunicação com o FTP do DATASUS."""
+    """DATASUS FTP communication error."""
 
 
 class ArquivoNaoEncontradoError(FTPError):
-    """Arquivo não existe no FTP."""
+    """File does not exist on the FTP."""
 
 
 def _conectar() -> FTP:
-    """Abre uma conexão FTP limpa. Reconectar por operação evita o bug '200 Type set to A'."""
+    """Opens a clean FTP connection. Reconnecting per operation avoids the '200 Type set to A' bug."""
     ftp = FTP()
     ftp.connect(FTP_HOST, 21, timeout=_TIMEOUT)
     ftp.login()
@@ -32,7 +32,7 @@ def _conectar() -> FTP:
 
 
 def _tentar(fn, *args, **kwargs):
-    """Executa fn com retentativas e backoff."""
+    """Executes fn with retries and backoff."""
     import time
     ultimo_erro = None
     for tentativa in range(_TENTATIVAS):
@@ -47,14 +47,14 @@ def _tentar(fn, *args, **kwargs):
 
 def listar(caminho: str) -> list[str]:
     """
-    Lista os nomes de arquivo em um diretório FTP.
-    Retorna apenas arquivos (não subdiretórios).
+    Lists file names in an FTP directory.
+    Returns files only, not subdirectories.
     """
     def _listar():
         ftp = _conectar()
         try:
             itens: list[str] = []
-            ftp.retrlines("LIST", itens.append)  # LIST no cwd após cwd()
+            ftp.retrlines("LIST", itens.append)  # LIST in cwd after cwd()
             ftp.cwd(caminho)
             itens.clear()
             ftp.retrlines("LIST", itens.append)
@@ -73,14 +73,14 @@ def listar(caminho: str) -> list[str]:
 
 def existe(caminho_ftp: str) -> bool:
     """
-    Verifica se um arquivo existe no FTP usando o comando SIZE.
-    É muito mais rápido que tentar o download ou listar o diretório.
+    Checks whether a file exists on the FTP using the SIZE command.
+    It is much faster than trying to download or list the directory.
     """
     def _checar():
         ftp = _conectar()
         try:
-            # O comando SIZE retorna o tamanho do arquivo se ele existir
-            # Se não existir, o servidor retorna erro 550
+            # SIZE returns the file size if it exists
+            # If it does not exist, the server returns error 550
             ftp.voidcmd(f"SIZE {caminho_ftp}")
             return True
         except all_errors as e:
@@ -95,9 +95,9 @@ def existe(caminho_ftp: str) -> bool:
 
 def baixar(caminho_ftp: str, destino: Path) -> Path:
     """
-    Baixa um arquivo do FTP para o caminho local `destino`.
-    Cria os diretórios necessários. Retorna o path do arquivo salvo.
-    Levanta ArquivoNaoEncontradoError se o arquivo não existir no FTP.
+    Downloads a file from the FTP to the local path `destino`.
+    Creates the necessary directories. Returns the saved file path.
+    Raises ArquivoNaoEncontradoError if the file does not exist on the FTP.
     """
     destino = Path(destino)
     destino.parent.mkdir(parents=True, exist_ok=True)
