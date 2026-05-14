@@ -36,3 +36,15 @@ Durante os testes de integração, o sistema **SINASC** apresentou erro `550 (Pa
 | `systems/sim.py` | Migrado para Polars/DuckDB via `generic_load`. |
 | `systems/sinasc.py` | Ajuste do `sub_dir` para `1994_/Dados` para maior compatibilidade. |
 | `ftp.py` | Implementação da função `existe()` para suporte ao Backtracking. |
+
+### Atualização: Estrutura de Dados e Performance (Hive Partitioning)
+**Objetivo**: Implementar o padrão "Hive Partitioning" para permitir o *Partition Pruning*, reduzindo drasticamente o uso de RAM e tempo de IO em análises regionais.
+
+#### Mudanças Estruturais:
+1. **Hierarquia de Pastas**: Migração do modelo flat para `SISTEMA/TABELA/year=YYYY/uf=XX/data.parquet`.
+2. **Inteligência Geográfica**: Integração do `config.REGIOES` para permitir cargas em lote por blocos federativos (ex: Norte, Nordeste).
+3. **Enriquecimento Territorial**: Implementação de cache local para municípios (IBGE) em `resources/`, permitindo tradução offline de códigos para nomes de cidades.
+
+#### Melhorias de Performance:
+- **Partition Pruning**: O Polars agora ignora diretórios físicos que não atendem aos filtros de `year` ou `uf`.
+- **Lazy Evaluation**: Introdução do `scan_system()` para processamento de múltiplos anos/estados sem saturação de memória.
