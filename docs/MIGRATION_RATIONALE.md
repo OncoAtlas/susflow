@@ -24,9 +24,11 @@ Precisamos de consistência dos dados, então:
 | `cache.py` | `storage/local_lake.py` | Gerencia a estrutura de diretórios do "Data Lake" local. |
 | `sim.py`, `cnes.py` | `systems/*.py` | Interfaces que expõem a função `load()` e perfis (ex: `load_oncology`). |
 
-## 5. Próximos Passos na Implementação
-1. Refatorar o `ftp.py` para suportar o motor de descoberta.
-2. Criar o `converter.py` integrando DuckDB para geração de Parquet.
-3. Implementar a lógica de `load()` no CNES com o backtracking de consistência.
+## 5. Particionamento Hive e Performance Regional
+A análise de dados do SUS frequentemente exige recortes temporais ou geográficos. A arquitetura anterior exigia que o usuário soubesse quais arquivos ler.
+
+- **O Problema**: Ler 10 anos de dados nacionais para analisar apenas a Paraíba era ineficiente.
+- **A Solução (Hive)**: Ao salvar dados em pastas `year=YYYY/uf=XX/`, o sistema de arquivos torna-se parte do índice do banco de dados. 
+- **Vantagem Técnica**: O Polars utiliza as subpastas como colunas "virtuais". Isso economiza espaço em disco (não precisamos salvar a coluna 'uf' dentro de cada linha do arquivo) e acelera a filtragem em nível de sistema de arquivos, antes mesmo do dado entrar na memória.
 
 ---

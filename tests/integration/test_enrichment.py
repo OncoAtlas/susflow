@@ -8,11 +8,11 @@ def test_sim_load_has_enrichment():
     
     # No SIM, esperamos encontrar CAUSABAS e DTOBITO
     # O cleaner deve ter criado CAUSABAS_DESC e DTOBITO_DT
-    assert "CAUSABAS_DESC" in df.columns
-    assert "DTOBITO_DT" in df.columns
+    assert "causa_basica_obito_desc" in df.columns
+    assert "data_obito_dt" in df.columns
     
     # Verifica se a tipagem da data convertida está correta
-    assert df["DTOBITO_DT"].dtype == pl.Date
+    assert df["data_obito_dt"].dtype == pl.Date
     
     # Verifica integridade: o número de linhas não pode ter mudado com o join
     # (O erro do SIM anterior tinha 28.773 linhas)
