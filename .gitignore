@@ -33,3 +33,5 @@ venv/
 .venv
 
 CONTEXT.md
+
+.DS_Store
