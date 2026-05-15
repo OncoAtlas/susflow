@@ -187,7 +187,7 @@ df_sul = load_region("SIM", "DO", region_name="SUL", year=2022)
 
 ---
 
-## Architecture at a Glance
+## Architecture
 
 ```
 User calls sim.load(uf, year)
