@@ -1,0 +1,13 @@
+from .base import generic_load
+
+"""Loads SIASUS data (outpatient procedures)."""
+
+def load(table: str, uf: str, year: int, month: int):
+    return generic_load(
+        system="SIASUS", 
+        sub_dir="200801_/Dados", 
+        table=table, 
+        uf=uf, 
+        year=year, 
+        month=month
+    )
