@@ -1,4 +1,4 @@
-# susflow
+# SUSFlow
 
 > High-performance Python library to extract, convert, and standardize data from DATASUS — the Brazilian Ministry of Health's public data platform.
 
