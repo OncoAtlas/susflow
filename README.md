@@ -8,11 +8,11 @@
 
 ## Overview
 
-`susflow` automates the entire DATASUS pipeline: discovering files on legacy FTP servers, converting proprietary `.dbc` formats, deduplicating, and delivering clean, analysis-ready data in Parquet format — all with a single function call.
+`SUSFlow` automates the entire DATASUS pipeline: discovering files on legacy FTP servers, converting proprietary `.dbc` formats, deduplicating, and delivering clean, analysis-ready data in Parquet format — all with a single function call.
 
-### Why susflow?
+### Why SUSFlow?
 
-| Challenge | susflow Solution |
+| Challenge | SUSFlow Solution |
 |-----------|-----------------|
 | `.dbc` files don't open on Mac/Linux | Transparent DBC → Parquet conversion via `pyreaddbc` + DuckDB |
 | Cryptic column names (`CAUSABAS`, `DTINTERNA`) | Auto-renamed to readable names (`causa_basica_obito`, `data_internacao`) |
