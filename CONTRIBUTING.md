@@ -1,4 +1,4 @@
-# Contributing to susflow
+# Contributing to SUSFlow
 
 Thank you for your interest in contributing! This guide covers the two most common contributions: **adding a new DATASUS system** and **running the test suite**.
 
