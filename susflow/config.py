@@ -1,15 +1,20 @@
-# susflow/config.py
 """
 susflow/config.py
 =================
-Complete map of DATASUS systems and library engine settings.
+Metadados de todos os sistemas do DATASUS.
+
+Campos de cada sistema:
+  ftp_dir       — caminho absoluto no FTP
+  pattern       — padrão do nome ({UF}, {YYYY}, {YY}, {PREFIX}, {DISEASE}, {TYPE})
+  granularity   — "year" | "month"
+  year_digits   — 2 ou 4
+  format        — "dbc" | "dbf" | "zip"
+  scope         — "uf" | "national"
+  year_range    — (ano_inicio, ano_fim) inclusive
 """
 
 FTP_HOST = "ftp.datasus.gov.br"
 
-# ---------------------------------------------------------------------------
-# Available state codes
-# ---------------------------------------------------------------------------
 UFS = [
     "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO",
     "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR",
@@ -17,149 +22,304 @@ UFS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Regional groupings (for performance and analysis filters)
+# SIM — /dissemin/publicos/SIM/CID10/
+#   DORES/  → DO{UF}{YYYY}.dbc      por UF, anual, 4 dígitos
+#   DOFET/  → DO{TYPE}{YY}.dbc      nacional, anual, 2 dígitos
+#             tipos: EXT, FET, INF, MAT
 # ---------------------------------------------------------------------------
-REGIOES = {
-    "NORTE": ["AC", "AM", "AP", "PA", "RO", "RR", "TO"],
-    "NORDESTE": ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
-    "CENTRO-OESTE": ["DF", "GO", "MS", "MT"],
-    "SUDESTE": ["ES", "MG", "RJ", "SP"],
-    "SUL": ["PR", "RS", "SC"],
-}
-
-# Reverse lookup: allows quickly finding the region from the UF
-UF_PARA_REGIAO = {uf: reg for reg, ufs in REGIOES.items() for uf in ufs}
-
-# ---------------------------------------------------------------------------
-# ENGINE SETTINGS
-# ---------------------------------------------------------------------------
-MAX_WORKERS = 5          # Concurrent downloads in bulk load
-DEFAULT_ENCODING = "iso-8859-1"
-
-# ---------------------------------------------------------------------------
-# READABILITY DICTIONARY (for the Oncology Atlas)
-# Maps cryptic DATASUS acronyms to clear names in Portuguese.
-# ---------------------------------------------------------------------------
-COLUMN_MAPPINGS = {
-    # Identification and location
-    "MUNIC_RES": "municipio_residencia",
-    "CODMUNRES": "municipio_residencia",
-    "MUNIC_MOV": "municipio_movimentacao",
-    "CNES":      "codigo_cnes",
-    
-    # Dates and patient
-    "IDADE":     "idade_paciente",
-    "SEXO":      "sexo_paciente",
-    "DTINTERNA": "data_internacao",
-    "DTOBITO":   "data_obito",
-    "DTNASC":    "data_nascimento",
-    "DTRECEBIM": "data_recebimento",
-    
-    # Diagnoses (ICD) and procedures
-    "CAUSABAS":   "causa_basica_obito",
-    "DIAG_PRINC": "diagnostico_principal",
-    "DIAG_SEC":   "diagnostico_secundario",
-    "PROC_REA":   "procedimento_realizado",
-    
-    # Values and management
-    "VAL_TOT":    "valor_total_pago",
-    "DIAS_PERM":  "dias_permanencia",
-    "CODUFMUN":   "codigo_municipio_ibge",
-}
-
-# ---------------------------------------------------------------------------
-# SYSTEM MAPPING (PROVENANCE AND FTP RULES)
-# ---------------------------------------------------------------------------
-
 SIM = {
     "description": "Sistema de Informações sobre Mortalidade",
-    "ftp_base": "/dissemin/publicos/SIM/CID10",
-    "special": {
-        "ftp_dir": "/dissemin/publicos/SIM/CID10/DOFET",
-        "types": {"EXT": "Externas", "FET": "Fetais", "INF": "Infantis", "MAT": "Maternos"},
-        "pattern": "DO{TYPE}{YY}.dbc",
-        "granularity": "year",
-        "year_digits": 2,
-        "format": "dbc",
-        "scope": "national",
-        "year_range": (1996, 2024),
+    "ftp_base":    "/dissemin/publicos/SIM/CID10",
+
+    # Documentação técnica e layouts de campos
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/DOCS",
+        "arquivos": {
+            "Docs_Tabs_CID10.zip":       "Layouts, tabelas e dicionário de variáveis",
+            "Estrutura_do_SIM_2025.pdf": "Estrutura atual dos arquivos (referência principal)",
+            "Estrutura_SIM_Anterior.pdf": "Estrutura anterior — necessária para bases legadas",
+        },
     },
+
+    # Dados agregados tabulados
+    "tab": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/TAB",
+        "arquivos": {
+            "OBITOS_CID10_TAB.zip": "Óbitos agregados por CID-10 (série histórica tabulada)",
+        },
+    },
+
+    # Tabelas de apoio (CID-10, municípios, ocupações, países, UFs)
+    "tabelas": {
+        "ftp_dir": "/dissemin/publicos/SIM/CID10/TABELAS",
+        "arquivos": {
+            "CID10.DBF":      "Classificação Internacional de Doenças — CID-10",
+            "CIDCAP10.DBF":   "Capítulos do CID-10",
+            "CADMUN.DBF":     "Cadastro de municípios",
+            "CADMUN.xls":     "Cadastro de municípios (formato Excel)",
+            "TABOCUP.DBF":    "Tabela de ocupações (CBO)",
+            "TABPAIS.DBF":    "Tabela de países",
+            "TABUF.DBF":      "Tabela de unidades federativas",
+        },
+    },
+
     "uf": {
-        "ftp_dir": "/dissemin/publicos/SIM/CID10/DORES",
-        "pattern": "DO{UF}{YYYY}.dbc",
+        "ftp_dir":     "/dissemin/publicos/SIM/CID10/DORES",
+        "pattern":     "DO{UF}{YYYY}.dbc",
         "granularity": "year",
         "year_digits": 4,
-        "format": "dbc",
-        "scope": "uf",
-        "year_range": (1996, 2024),
+        "format":      "dbc",
+        "scope":       "uf",
+        "year_range":  (1996, 2024),
+    },
+
+    "special": {
+        "ftp_dir":     "/dissemin/publicos/SIM/CID10/DOFET",
+        "pattern":     "DO{TYPE}{YY}.dbc",
+        "granularity": "year",
+        "year_digits": 2,
+        "format":      "dbc",
+        "scope":       "national",
+        "year_range":  (1996, 2024),
+        "types": {
+            "EXT": "Óbitos por causas externas",
+            "FET": "Óbitos fetais",
+            "INF": "Óbitos infantis",
+            "MAT": "Óbitos maternos",
+        },
     },
 }
 
+# ---------------------------------------------------------------------------
+# SINASC — /dissemin/publicos/SINASC/NOV/
+#   DNRES/  → DN{UF}{YYYY}.dbc      por UF, anual, 4 dígitos
+#   DNRES/  → DNBR{YYYY}.dbc        agregado nacional (2014–2017 apenas)
+#   DNRES/  → DNEX{YYYY}.dbc        exceções/suplementar (pontual, ex: 2021)
+#   DOCS/   → documentação técnica  (caminho a confirmar — não mapeado ainda)
+# ---------------------------------------------------------------------------
 SINASC = {
     "description": "Sistema de Informações sobre Nascidos Vivos",
-    "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
-    "pattern":     "DN{UF}{YYYY}.dbc",
-    "granularity": "year",
-    "year_digits": 4,
-    "format":      "dbc",
-    "scope":       "uf",
-    "year_range":  (1996, 2022),
+
+    "uf": {
+        "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern":     "DN{UF}{YYYY}.dbc",
+        "granularity": "year",
+        "year_digits": 4,
+        "format":      "dbc",
+        "scope":       "uf",
+        "year_range":  (1996, 2022),
+    },
+
+    # Agregado nacional — série incompleta (apenas 2014–2017 confirmados no FTP)
+    "nacional": {
+        "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern":     "DNBR{YYYY}.dbc",
+        "granularity": "year",
+        "year_digits": 4,
+        "format":      "dbc",
+        "scope":       "national",
+        "year_range":  (2014, 2017),
+    },
+
+    # Arquivo de exceção/suplementar — pontual, não é uma série regular
+    "excecoes": {
+        "ftp_dir": "/dissemin/publicos/SINASC/NOV/DNRES",
+        "pattern": "DNEX{YYYY}.dbc",
+        "format":  "dbc",
+        "nota":    "Arquivos pontuais com registros suplementares. Confirmado: DNEX2021.dbc.",
+    },
+
+    # Documentação técnica — caminho exato a confirmar (não mapeado ainda)
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SINASC/NOV/DOCS",
+        "arquivos": {
+            "Estrutura_SINASC_para_CD.pdf": "Estrutura dos arquivos (formato legado de CD-ROM)",
+            "Legislacao_PDF.pdf":           "Legislação relacionada ao SINASC",
+            "NASC98.HLP":                   "Arquivo de ajuda do sistema legado (1998)",
+            "Portaria.pdf":                 "Portaria regulamentadora",
+        },
+        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
+    },
 }
 
+# ---------------------------------------------------------------------------
+# SINAN — /dissemin/publicos/SINAN/DADOS/
+#   FINAIS/{DISEASE}BR{YY}.dbc    dados consolidados
+#   PRELIM/{DISEASE}BR{YY}.dbc    dados preliminares
+#   DOCS/                         documentação técnica (caminho a confirmar)
+# ---------------------------------------------------------------------------
 SINAN = {
-    "description": "Sistema de Informações de Agravos de Notificação",
-    "ftp_dir":     "/dissemin/publicos/SINAN/DADOS/FINAIS",
+    "description":    "Sistema de Informações de Agravos de Notificação",
+    "ftp_dir":        "/dissemin/publicos/SINAN/DADOS/FINAIS",
     "ftp_dir_prelim": "/dissemin/publicos/SINAN/DADOS/PRELIM",
-    "pattern":     "{DISEASE}BR{YY}.dbc",
-    "granularity": "year",
-    "year_digits": 2,
-    "format":      "dbc",
-    "scope":       "national",
+    "pattern":        "{DISEASE}BR{YY}.dbc",
+    "granularity":    "year",
+    "year_digits":    2,
+    "format":         "dbc",
+    "scope":          "national",
     "diseases": {
-        "DENG": "Dengue", "CHIK": "Chikungunya", "TUBE": "Tuberculose",
-        "HANS": "Hanseníase", "CANC": "Câncer relacionado ao trabalho",
-        # ... (your other mapped diseases continue here)
-    }
+        "ACBI": "Acidente por animal peçonhento",
+        "ACGR": "Acidente de trabalho grave",
+        "ANIM": "Acidente por animal (outros)",
+        "ANTR": "Antraz (Carbúnculo)",
+        "BOTU": "Botulismo",
+        "CANC": "Câncer relacionado ao trabalho",
+        "CHAG": "Doença de Chagas",
+        "CHIK": "Chikungunya",
+        "COLE": "Cólera",
+        "COQU": "Coqueluche",
+        "DCRJ": "Doença de Creutzfeldt-Jakob",
+        "DENG": "Dengue",
+        "DERM": "Dermatose ocupacional",
+        "DIFT": "Difteria",
+        "ESPO": "Esporotricose",
+        "ESQU": "Esquistossomose",
+        "FMAC": "Febre maculosa",
+        "FTIF": "Febre tifoide",
+        "HANS": "Hanseníase",
+        "HANT": "Hantavirose",
+        "IEXO": "Intoxicação exógena",
+        "LEIV": "Leishmaniose visceral",
+        "LEPT": "Leptospirose",
+        "LERD": "LER/DORT",
+        "LTA":  "Leishmaniose tegumentar americana",
+        "MALA": "Malária",
+        "MENI": "Meningite",
+        "MENT": "Transtorno mental relacionado ao trabalho",
+        "NTRA": "Noma (Cancrum oris)",
+        "PAIR": "Perda auditiva induzida por ruído",
+        "PEST": "Peste",
+        "PFAN": "Paralisia flácida aguda / Poliomielite",
+        "PNEU": "Pneumoconiose",
+        "RAIV": "Raiva humana",
+        "ROTA": "Rotavírus",
+        "SDTA": "Surto de doença transmitida por alimento",
+        "TETA": "Tétano acidental",
+        "TETN": "Tétano neonatal",
+        "TOXC": "Toxoplasmose congênita",
+        "TOXG": "Toxoplasmose gestacional",
+        "TRAC": "Tracoma",
+        "TUBE": "Tuberculose",
+        "VIOL": "Violência doméstica / sexual / autoprovocada",
+        "ZIKA": "Zika vírus",
+    },
+
+    # Documentação técnica — caminho FTP a confirmar (não mapeado ainda)
+    "docs": {
+        "ftp_dir": "/dissemin/publicos/SINAN/DOCS",
+        "arquivos": {
+            "Docs_TAB_SINAN.zip":                              "Layouts, tabelas e dicionário de variáveis de todos os agravos",
+            "POP_I_Acesso_a_Microdados_5.pdf":                 "Guia de acesso aos microdados do SINAN",
+            "POP_II_Descompactacao_expansao_conversao_3.pdf":  "Guia de descompactação e conversão dos arquivos .dbc",
+            "POP_III_Instalacao_do_tabulador_TabWin_3.pdf":    "Guia de instalação do TabWin (tabulador oficial)",
+            "Nota_Tecnica_Doenca_de_Creutzfeldt-Jakob(DCJ).pdf": "Nota técnica — Doença de Creutzfeldt-Jakob",
+            "Nota_Tecnica_Intoxicacao_Exogena.pdf":            "Nota técnica — Intoxicação Exógena",
+            "Nota_Tecnica_Rotavirus.pdf":                      "Nota técnica — Rotavírus",
+            "Nota_Tecnica_Surtos_de_DTA.pdf":                  "Nota técnica — Surtos de Doença Transmitida por Alimento",
+            "Nota_Tecnica_Toxoplasmose.pdf":                   "Nota técnica — Toxoplasmose",
+        },
+        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
+    },
 }
 
+# ---------------------------------------------------------------------------
+# SIHSUS — /dissemin/publicos/SIHSUS/200801_/Dados/
+#   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Prefixo principal: RD (AIH Reduzida — registro de internação)
+#   Exceção: CH e CM usam BR fixo (escopo nacional), não {UF}
+# ---------------------------------------------------------------------------
 SIHSUS = {
     "description": "Sistema de Informações Hospitalares do SUS",
     "ftp_dir":     "/dissemin/publicos/SIHSUS/200801_/Dados",
+    "ftp_dir_old": "/dissemin/publicos/SIHSUS/199201_200712",
     "pattern":     "{PREFIX}{UF}{YY}{MM}.dbc",
     "granularity": "month",
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2008, 2025),
+    "year_range":  (2008, 2026),
     "prefixes": {
-        "RD": "AIH reduzida", "SP": "Serviços profissionais",
+        "RD": "AIH reduzida (internações — dado principal)",
+        "SP": "Serviços profissionais",
+        "RJ": "AIH rejeitada",
+        "ER": "AIH com erro",
+    },
+    # CH e CM usam BR fixo — padrão: {PREFIX}BR{YY}{MM}.dbc
+    "prefixes_nacionais": {
+        "CH": "Cabeçalho nacional (dados agregados)",
+        "CM": "Comunicação de movimento",
     },
 }
 
+# ---------------------------------------------------------------------------
+# SIASUS — /dissemin/publicos/SIASUS/200801_/Dados/
+#   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Prefixo principal: PA (Produção Ambulatorial)
+# ---------------------------------------------------------------------------
 SIASUS = {
     "description": "Sistema de Informações Ambulatoriais do SUS",
     "ftp_dir":     "/dissemin/publicos/SIASUS/200801_/Dados",
+    "ftp_dir_old": "/dissemin/publicos/SIASUS/199407_200712",
     "pattern":     "{PREFIX}{UF}{YY}{MM}.dbc",
     "granularity": "month",
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2008, 2025),
+    "year_range":  (2008, 2026),
+    "prefixes": {
+        "PA":  ("Produção Ambulatorial (BPA)",                          2008, 2026),
+        "BI":  ("BPA Individualizado",                                  2008, 2026),
+        "AD":  ("APAC de Laudos Diversos",                              2008, 2026),
+        "AM":  ("APAC de Medicamentos",                                 2008, 2026),
+        "AMP": ("APAC de Medicamentos Padronizados",                    2020, 2026),
+        "AQ":  ("APAC de Quimioterapia",                                2008, 2026),
+        "AR":  ("APAC de Radioterapia",                                 2008, 2026),
+        "ACF": ("APAC Confecção de Fístula Arteriovenosa",              2014, 2026),
+        "ATD": ("APAC Tratamento Dialítico",                            2014, 2026),
+        "PS":  ("RAAS Psicossocial",                                    2013, 2026),
+        "AB":  ("APAC Acompanhamento Pós Cirurgia Bariátrica (novo)",   2025, 2026),
+        "ABO": ("APAC Acompanhamento Pós Cirurgia Bariátrica (legado)", 2015, 2018),
+        "AN":  ("APAC de Nefrologia (encerrado, substituído por ATD)",  2008, 2014),
+        "SAD": ("RAAS Atenção Domiciliar (encerrado)",                  2013, 2015),
+    },
 }
 
+# ---------------------------------------------------------------------------
+# CNES — /dissemin/publicos/CNES/200508_/Dados/
+#   {TYPE}/{TYPE}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
+#   Arquivo fica 2 níveis dentro de Dados/: ex. ST/STSP2501.dbc
+#   Subtype principal: ST (Estabelecimentos)
+# ---------------------------------------------------------------------------
 CNES = {
     "description": "Cadastro Nacional de Estabelecimentos de Saúde",
     "ftp_base":    "/dissemin/publicos/CNES/200508_/Dados",
+    "pattern":     "{TYPE}/{TYPE}{UF}{YY}{MM}.dbc",
     "granularity": "month",
     "year_digits": 2,
     "format":      "dbc",
     "scope":       "uf",
-    "year_range":  (2005, 2025),
     "subtypes": {
-        "ST": "Estabelecimentos", "LT": "Leitos", "PF": "Profissionais",
+        "ST": ("Estabelecimentos (dado principal)",          2005, 2026),
+        "PF": ("Profissionais de saúde",                    2005, 2026),
+        "DC": ("Dados complementares",                      2005, 2026),
+        "EQ": ("Equipamentos",                              2005, 2026),
+        "SR": ("Serviços especializados",                   2005, 2026),
+        "LT": ("Leitos",                                    2005, 2026),
+        "HB": ("Habilitações",                             2007, 2026),
+        "EF": ("Centros cirúrgicos e obstétricos",          2007, 2026),
+        "EP": ("Equipes de saúde",                          2007, 2026),
+        "RC": ("Regras contratuais",                        2007, 2026),
+        "IN": ("Incentivos",                                2007, 2026),
+        "GM": ("Gestão e metas",                            2014, 2026),
+        "EE": ("Equipamentos e produções (encerrado)",      2007, 2019),
     },
 }
 
+# ---------------------------------------------------------------------------
+# PNI — /dissemin/publicos/PNI/DADOS/
+#   DPNI{UF}{YY}.DBF    por UF, anual, 2 dígitos
+#   Formato DBF puro (sem compressão blast) — usar dbfread, não pyreaddbc
+# ---------------------------------------------------------------------------
 PNI = {
     "description": "Programa Nacional de Imunizações",
     "ftp_dir":     "/dissemin/publicos/PNI/DADOS",
@@ -171,6 +331,10 @@ PNI = {
     "year_range":  (1994, 2019),
 }
 
+# ---------------------------------------------------------------------------
+# IBGE/POP — /dissemin/publicos/IBGE/POP/
+#   POPBR{YY}.zip    nacional, anual, 2 dígitos
+# ---------------------------------------------------------------------------
 IBGE_POP = {
     "description": "Estimativas populacionais IBGE",
     "ftp_dir":     "/dissemin/publicos/IBGE/POP",
@@ -182,9 +346,6 @@ IBGE_POP = {
     "year_range":  (1980, 2012),
 }
 
-# ---------------------------------------------------------------------------
-# GLOBAL INDEX
-# ---------------------------------------------------------------------------
 ALL_SYSTEMS = {
     "SIM":      SIM,
     "SINASC":   SINASC,

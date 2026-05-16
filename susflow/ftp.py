@@ -1,8 +1,10 @@
 """
 susflow/ftp.py
 ==============
-Transport layer: all communication with the DATASUS FTP lives here.
+Camada de transporte: toda comunicação com o FTP do DATASUS fica aqui.
 """
+
+import time
 
 from ftplib import FTP, all_errors
 from pathlib import Path
@@ -15,15 +17,13 @@ _BACKOFF    = 2    # segundos entre tentativas
 
 
 class FTPError(Exception):
-    """DATASUS FTP communication error."""
-
+    """Erro de comunicação com o FTP do DATASUS."""
 
 class ArquivoNaoEncontradoError(FTPError):
-    """File does not exist on the FTP."""
-
+    """Arquivo não existe no FTP."""
 
 def _conectar() -> FTP:
-    """Opens a clean FTP connection. Reconnecting per operation avoids the '200 Type set to A' bug."""
+    """Abre uma conexão FTP limpa. Reconectar por operação evita o bug '200 Type set to A'."""
     ftp = FTP()
     ftp.connect(FTP_HOST, 21, timeout=_TIMEOUT)
     ftp.login()
@@ -32,29 +32,31 @@ def _conectar() -> FTP:
 
 
 def _tentar(fn, *args, **kwargs):
-    """Executes fn with retries and backoff."""
-    import time
+    """Executa fn com retentativas e backoff."""
     ultimo_erro = None
     for tentativa in range(_TENTATIVAS):
         try:
             return fn(*args, **kwargs)
+        
         except all_errors as e:
             ultimo_erro = e
             if tentativa < _TENTATIVAS - 1:
                 time.sleep(_BACKOFF)
+
     raise FTPError(f"Falha após {_TENTATIVAS} tentativas: {ultimo_erro}") from ultimo_erro
 
 
 def listar(caminho: str) -> list[str]:
     """
-    Lists file names in an FTP directory.
-    Returns files only, not subdirectories.
+    Lista os nomes de arquivo em um diretório FTP.
+    Retorna apenas arquivos (não subdiretórios).
     """
     def _listar():
         ftp = _conectar()
+
         try:
             itens: list[str] = []
-            ftp.retrlines("LIST", itens.append)  # LIST in cwd after cwd()
+            ftp.retrlines("LIST", itens.append)  # LIST no cwd após cwd()
             ftp.cwd(caminho)
             itens.clear()
             ftp.retrlines("LIST", itens.append)
@@ -63,60 +65,47 @@ def listar(caminho: str) -> list[str]:
             for linha in itens:
                 if "<DIR>" in linha:
                     continue
+
                 nome = linha.split()[-1]
                 arquivos.append(nome)
+            
             return arquivos
+        
         finally:
             ftp.quit()
 
     return _tentar(_listar)
 
-def existe(caminho_ftp: str) -> bool:
-    """
-    Checks whether a file exists on the FTP using the SIZE command.
-    It is much faster than trying to download or list the directory.
-    """
-    def _checar():
-        ftp = _conectar()
-        try:
-            # SIZE returns the file size if it exists
-            # If it does not exist, the server returns error 550
-            ftp.voidcmd(f"SIZE {caminho_ftp}")
-            return True
-        except all_errors as e:
-            if "550" in str(e):
-                return False
-            raise
-        finally:
-            ftp.quit()
-
-    return _tentar(_checar)
-
 
 def baixar(caminho_ftp: str, destino: Path) -> Path:
     """
-    Downloads a file from the FTP to the local path `destino`.
-    Creates the necessary directories. Returns the saved file path.
-    Raises ArquivoNaoEncontradoError if the file does not exist on the FTP.
+    Baixa um arquivo do FTP para o caminho local `destino`.
+    Cria os diretórios necessários. Retorna o path do arquivo salvo.
+    Levanta ArquivoNaoEncontradoError se o arquivo não existir no FTP.
     """
     destino = Path(destino)
     destino.parent.mkdir(parents=True, exist_ok=True)
 
     def _baixar():
         ftp = _conectar()
+        
         try:
             with open(destino, "wb") as f:
                 ftp.retrbinary(f"RETR {caminho_ftp}", f.write)
+
         except all_errors as e:
             if destino.exists():
                 destino.unlink()
+
             if "550" in str(e):
                 raise ArquivoNaoEncontradoError(
                     f"Arquivo não encontrado no FTP: {caminho_ftp}"
                 ) from e
             raise
+
         finally:
             ftp.quit()
+
         return destino
 
     return _tentar(_baixar)
