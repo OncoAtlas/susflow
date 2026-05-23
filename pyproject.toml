@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "susflow"
-version = "0.1.0"
+version = "0.1.1"
 description = "Acesso programático aos dados do DATASUS"
 readme = "README.md"
 license = { text = "MIT" }
@@ -16,5 +16,4 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = ""
-Issues   = ""
+"Homepage" = "https://github.com/OncoAtlas/susflow"
