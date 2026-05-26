@@ -1,31 +1,31 @@
 """
 susflow/systems/cnes.py
 =======================
-CNES — Cadastro Nacional de Estabelecimentos de Saúde.
+CNES — National Registry of Health Establishments.
 
-Padrão de arquivo: {TYPE}/{TYPE}{UF}{YY}{MM}.dbc
-Granularidade:     mensal / por UF
-Cobertura geral:   2005–2026
+File pattern: {TYPE}/{TYPE}{UF}{YY}{MM}.dbc
+Granularity: monthly / by state (UF)
+Overall coverage: 2005–2026
 
-O arquivo fica 2 níveis dentro de Dados/:
-  ex: /dissemin/publicos/CNES/200508_/Dados/ST/STSP2501.dbc
+Files are located two levels inside `Dados/`:
+    e.g. /dissemin/publicos/CNES/200508_/Dados/ST/STSP2501.dbc
 
-Subtipos ativos:
-  ST  — Estabelecimentos (dado principal)       2005–2026
-  PF  — Profissionais de saúde                  2005–2026
-  DC  — Dados complementares                    2005–2026
-  EQ  — Equipamentos                            2005–2026
-  SR  — Serviços especializados                 2005–2026
-  LT  — Leitos                                  2005–2026
-  HB  — Habilitações                            2007–2026
-  EF  — Centros cirúrgicos e obstétricos        2007–2026
-  EP  — Equipes de saúde                        2007–2026
-  RC  — Regras contratuais                      2007–2026
-  IN  — Incentivos                              2007–2026
-  GM  — Gestão e metas                          2014–2026
+Active subtypes:
+    ST  — Establishments (main data)               2005–2026
+    PF  — Health professionals                      2005–2026
+    DC  — Complementary data                        2005–2026
+    EQ  — Equipment                                 2005–2026
+    SR  — Specialized services                      2005–2026
+    LT  — Beds                                      2005–2026
+    HB  — Authorizations                             2007–2026
+    EF  — Surgical and obstetric centers            2007–2026
+    EP  — Health teams                              2007–2026
+    RC  — Contract rules                            2007–2026
+    IN  — Incentives                                2007–2026
+    GM  — Management and targets                    2014–2026
 
-Subtipos encerrados (ainda disponíveis no FTP):
-  EE  — Equipamentos e produções                2007–2019
+Retired subtypes (still available on FTP):
+    EE  — Equipment and production                 2007–2019
 """
 
 from pathlib import Path
@@ -45,22 +45,22 @@ def _validar_subtipo(tipo: str) -> str:
     tipo = tipo.upper()
     if tipo not in _SUBTIPOS:
         raise ValueError(
-            f"Subtipo inválido: '{tipo}'. "
-            f"Disponíveis: {sorted(_SUBTIPOS)}"
+            f"Invalid subtype: '{tipo}'. "
+            f"Available: {sorted(_SUBTIPOS)}"
         )
     return tipo
 
 
 def _validar(tipo: str, uf: str, ano: int, mes: int) -> None:
     if uf.upper() not in UFS:
-        raise ValueError(f"UF inválida: '{uf}'. Valores aceitos: {UFS}")
+        raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
     if not (1 <= mes <= 12):
-        raise ValueError(f"Mês inválido: {mes}. Use 1–12.")
+        raise ValueError(f"Invalid month: {mes}. Use 1–12.")
     _, ano_min, ano_max = _SUBTIPOS[tipo]
     if not (ano_min <= ano <= ano_max):
         raise ValueError(
-            f"Ano {ano} fora do intervalo para o subtipo '{tipo}' "
-            f"(disponível: {ano_min}–{ano_max})"
+            f"Year {ano} out of range for subtype '{tipo}' "
+            f"(available: {ano_min}–{ano_max})"
         )
 
 
@@ -81,14 +81,14 @@ def _baixar_arquivo(tipo: str, nome: str, destino: Path | None, forcar: bool) ->
 
 
 def subtipos() -> dict[str, str]:
-    """Retorna os subtipos disponíveis: {tipo: descrição}."""
+    """Return available subtypes: {type: description}."""
     return {k: v[0] for k, v in _SUBTIPOS.items()}
 
 
 def listar(uf: str | None = None, tipo: str = "ST") -> list[str]:
-    """
-    Lista arquivos disponíveis no FTP para o subtipo informado.
-    Filtra por UF se informada. Subtipo padrão: ST (Estabelecimentos).
+    """List files available on the FTP for the given subtype.
+
+    Filters by state (UF) if provided. Default subtype: `ST` (Establishments).
     """
     tipo     = _validar_subtipo(tipo)
     arquivos = _ftp.listar(_ftp_dir(tipo))
@@ -106,9 +106,9 @@ def baixar(
     destino: Path | None = None,
     forcar: bool = False,
 ) -> Path:
-    """
-    Baixa {TYPE}{UF}{YY}{MM}.dbc para o cache local.
-    Subtipo padrão: ST (Estabelecimentos).
+    """Download `{TYPE}{UF}{YY}{MM}.dbc` to local cache.
+
+    Default subtype: `ST` (Establishments).
     """
     tipo = _validar_subtipo(tipo)
     _validar(tipo, uf, ano, mes)
@@ -123,5 +123,5 @@ def ler(
     destino: Path | None = None,
     forcar: bool = False,
 ) -> pd.DataFrame:
-    """Baixa (se necessário) e retorna os dados como DataFrame."""
+    """Download (if needed) and return the data as a DataFrame."""
     return _ler(baixar(uf, ano, mes, tipo=tipo, destino=destino, forcar=forcar))

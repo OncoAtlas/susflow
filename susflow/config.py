@@ -1,16 +1,16 @@
 """
 susflow/config.py
 =================
-Metadados de todos os sistemas do DATASUS.
+Metadata for all DATASUS systems.
 
-Campos de cada sistema:
-  ftp_dir       — caminho absoluto no FTP
-  pattern       — padrão do nome ({UF}, {YYYY}, {YY}, {PREFIX}, {DISEASE}, {TYPE})
-  granularity   — "year" | "month"
-  year_digits   — 2 ou 4
-  format        — "dbc" | "dbf" | "zip"
-  scope         — "uf" | "national"
-  year_range    — (ano_inicio, ano_fim) inclusive
+Fields for each system:
+    ftp_dir       — absolute path on the FTP
+    pattern       — name pattern ({UF}, {YYYY}, {YY}, {PREFIX}, {DISEASE}, {TYPE})
+    granularity   — "year" | "month"
+    year_digits   — 2 or 4
+    format        — "dbc" | "dbf" | "zip"
+    scope         — "uf" | "national"
+    year_range    — (start_year, end_year) inclusive
 """
 
 FTP_HOST = "ftp.datasus.gov.br"
@@ -28,38 +28,38 @@ UFS = [
 #             tipos: EXT, FET, INF, MAT
 # ---------------------------------------------------------------------------
 SIM = {
-    "description": "Sistema de Informações sobre Mortalidade",
+    "description": "Mortality Information System",
     "ftp_base":    "/dissemin/publicos/SIM/CID10",
 
-    # Documentação técnica e layouts de campos
+    # Technical documentation and field layouts
     "docs": {
         "ftp_dir": "/dissemin/publicos/SIM/CID10/DOCS",
         "arquivos": {
-            "Docs_Tabs_CID10.zip":       "Layouts, tabelas e dicionário de variáveis",
-            "Estrutura_do_SIM_2025.pdf": "Estrutura atual dos arquivos (referência principal)",
-            "Estrutura_SIM_Anterior.pdf": "Estrutura anterior — necessária para bases legadas",
+            "Docs_Tabs_CID10.zip":       "Layouts, tables and variable dictionary",
+            "Estrutura_do_SIM_2025.pdf": "Current file structure (main reference)",
+            "Estrutura_SIM_Anterior.pdf": "Previous structure — needed for legacy datasets",
         },
     },
 
-    # Dados agregados tabulados
+    # Aggregated tabulated data
     "tab": {
         "ftp_dir": "/dissemin/publicos/SIM/CID10/TAB",
         "arquivos": {
-            "OBITOS_CID10_TAB.zip": "Óbitos agregados por CID-10 (série histórica tabulada)",
+            "OBITOS_CID10_TAB.zip": "Deaths aggregated by ICD-10 (tabulated historical series)",
         },
     },
 
-    # Tabelas de apoio (CID-10, municípios, ocupações, países, UFs)
+    # Support tables (ICD-10, municipalities, occupations, countries, UFs)
     "tabelas": {
         "ftp_dir": "/dissemin/publicos/SIM/CID10/TABELAS",
         "arquivos": {
-            "CID10.DBF":      "Classificação Internacional de Doenças — CID-10",
-            "CIDCAP10.DBF":   "Capítulos do CID-10",
-            "CADMUN.DBF":     "Cadastro de municípios",
-            "CADMUN.xls":     "Cadastro de municípios (formato Excel)",
-            "TABOCUP.DBF":    "Tabela de ocupações (CBO)",
-            "TABPAIS.DBF":    "Tabela de países",
-            "TABUF.DBF":      "Tabela de unidades federativas",
+            "CID10.DBF":      "International Classification of Diseases — ICD-10",
+            "CIDCAP10.DBF":   "ICD-10 chapters",
+            "CADMUN.DBF":     "Municipality registry",
+            "CADMUN.xls":     "Municipality registry (Excel format)",
+            "TABOCUP.DBF":    "Occupations table (CBO)",
+            "TABPAIS.DBF":    "Countries table",
+            "TABUF.DBF":      "Federative units table",
         },
     },
 
@@ -82,23 +82,23 @@ SIM = {
         "scope":       "national",
         "year_range":  (1996, 2024),
         "types": {
-            "EXT": "Óbitos por causas externas",
-            "FET": "Óbitos fetais",
-            "INF": "Óbitos infantis",
-            "MAT": "Óbitos maternos",
+            "EXT": "Deaths by external causes",
+            "FET": "Fetal deaths",
+            "INF": "Infant deaths",
+            "MAT": "Maternal deaths",
         },
     },
 }
 
 # ---------------------------------------------------------------------------
 # SINASC — /dissemin/publicos/SINASC/NOV/
-#   DNRES/  → DN{UF}{YYYY}.dbc      por UF, anual, 4 dígitos
-#   DNRES/  → DNBR{YYYY}.dbc        agregado nacional (2014–2017 apenas)
-#   DNRES/  → DNEX{YYYY}.dbc        exceções/suplementar (pontual, ex: 2021)
-#   DOCS/   → documentação técnica  (caminho a confirmar — não mapeado ainda)
+#   DNRES/  → DN{UF}{YYYY}.dbc      by UF, annual, 4 digits
+#   DNRES/  → DNBR{YYYY}.dbc        national aggregate (2014–2017 only)
+#   DNRES/  → DNEX{YYYY}.dbc        exceptions/supplementary (one-off, e.g. 2021)
+#   DOCS/   → technical documentation  (path to confirm — not mapped yet)
 # ---------------------------------------------------------------------------
 SINASC = {
-    "description": "Sistema de Informações sobre Nascidos Vivos",
+    "description": "Live Births Information System",
 
     "uf": {
         "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
@@ -110,7 +110,7 @@ SINASC = {
         "year_range":  (1996, 2022),
     },
 
-    # Agregado nacional — série incompleta (apenas 2014–2017 confirmados no FTP)
+    # National aggregate — incomplete series (only 2014–2017 confirmed on FTP)
     "nacional": {
         "ftp_dir":     "/dissemin/publicos/SINASC/NOV/DNRES",
         "pattern":     "DNBR{YYYY}.dbc",
@@ -121,24 +121,24 @@ SINASC = {
         "year_range":  (2014, 2017),
     },
 
-    # Arquivo de exceção/suplementar — pontual, não é uma série regular
+    # Exception/supplementary files — one-off, not a regular series
     "excecoes": {
         "ftp_dir": "/dissemin/publicos/SINASC/NOV/DNRES",
         "pattern": "DNEX{YYYY}.dbc",
         "format":  "dbc",
-        "nota":    "Arquivos pontuais com registros suplementares. Confirmado: DNEX2021.dbc.",
+        "nota":    "One-off files with supplementary records. Confirmed: DNEX2021.dbc.",
     },
 
-    # Documentação técnica — caminho exato a confirmar (não mapeado ainda)
+    # Technical documentation — exact FTP path to confirm (not mapped yet)
     "docs": {
         "ftp_dir": "/dissemin/publicos/SINASC/NOV/DOCS",
         "arquivos": {
-            "Estrutura_SINASC_para_CD.pdf": "Estrutura dos arquivos (formato legado de CD-ROM)",
-            "Legislacao_PDF.pdf":           "Legislação relacionada ao SINASC",
-            "NASC98.HLP":                   "Arquivo de ajuda do sistema legado (1998)",
-            "Portaria.pdf":                 "Portaria regulamentadora",
+            "Estrutura_SINASC_para_CD.pdf": "File structure (legacy CD-ROM format)",
+            "Legislacao_PDF.pdf":           "Legislation related to SINASC",
+            "NASC98.HLP":                   "Legacy system help file (1998)",
+            "Portaria.pdf":                 "Regulatory ordinance",
         },
-        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
+        "nota": "FTP path not confirmed — DOCS directory not mapped yet.",
     },
 }
 
@@ -149,7 +149,7 @@ SINASC = {
 #   DOCS/                         documentação técnica (caminho a confirmar)
 # ---------------------------------------------------------------------------
 SINAN = {
-    "description":    "Sistema de Informações de Agravos de Notificação",
+    "description":    "Notifiable Diseases Information System",
     "ftp_dir":        "/dissemin/publicos/SINAN/DADOS/FINAIS",
     "ftp_dir_prelim": "/dissemin/publicos/SINAN/DADOS/PRELIM",
     "pattern":        "{DISEASE}BR{YY}.dbc",
@@ -204,29 +204,29 @@ SINAN = {
         "ZIKA": "Zika vírus",
     },
 
-    # Documentação técnica — caminho FTP a confirmar (não mapeado ainda)
+    # Technical documentation — FTP path to confirm (not mapped yet)
     "docs": {
         "ftp_dir": "/dissemin/publicos/SINAN/DOCS",
         "arquivos": {
-            "Docs_TAB_SINAN.zip":                              "Layouts, tabelas e dicionário de variáveis de todos os agravos",
-            "POP_I_Acesso_a_Microdados_5.pdf":                 "Guia de acesso aos microdados do SINAN",
-            "POP_II_Descompactacao_expansao_conversao_3.pdf":  "Guia de descompactação e conversão dos arquivos .dbc",
-            "POP_III_Instalacao_do_tabulador_TabWin_3.pdf":    "Guia de instalação do TabWin (tabulador oficial)",
-            "Nota_Tecnica_Doenca_de_Creutzfeldt-Jakob(DCJ).pdf": "Nota técnica — Doença de Creutzfeldt-Jakob",
-            "Nota_Tecnica_Intoxicacao_Exogena.pdf":            "Nota técnica — Intoxicação Exógena",
-            "Nota_Tecnica_Rotavirus.pdf":                      "Nota técnica — Rotavírus",
-            "Nota_Tecnica_Surtos_de_DTA.pdf":                  "Nota técnica — Surtos de Doença Transmitida por Alimento",
-            "Nota_Tecnica_Toxoplasmose.pdf":                   "Nota técnica — Toxoplasmose",
+            "Docs_TAB_SINAN.zip":                              "Layouts, tables and variable dictionary for all conditions",
+            "POP_I_Acesso_a_Microdados_5.pdf":                 "Guide to access SINAN microdata",
+            "POP_II_Descompactacao_expansao_conversao_3.pdf":  "Guide to decompress and convert .dbc files",
+            "POP_III_Instalacao_do_tabulador_TabWin_3.pdf":    "Installation guide for TabWin (official tabulator)",
+            "Nota_Tecnica_Doenca_de_Creutzfeldt-Jakob(DCJ).pdf": "Technical note — Creutzfeldt-Jakob disease",
+            "Nota_Tecnica_Intoxicacao_Exogena.pdf":            "Technical note — Exogenous poisoning",
+            "Nota_Tecnica_Rotavirus.pdf":                      "Technical note — Rotavirus",
+            "Nota_Tecnica_Surtos_de_DTA.pdf":                  "Technical note — Foodborne disease outbreaks",
+            "Nota_Tecnica_Toxoplasmose.pdf":                   "Technical note — Toxoplasmosis",
         },
-        "nota": "Caminho FTP não confirmado — diretório DOCS não foi mapeado ainda.",
+        "nota": "FTP path not confirmed — DOCS directory not mapped yet.",
     },
 }
 
 # ---------------------------------------------------------------------------
 # SIHSUS — /dissemin/publicos/SIHSUS/200801_/Dados/
-#   {PREFIX}{UF}{YY}{MM}.dbc    por UF, mensal, 2 dígitos
-#   Prefixo principal: RD (AIH Reduzida — registro de internação)
-#   Exceção: CH e CM usam BR fixo (escopo nacional), não {UF}
+#   {PREFIX}{UF}{YY}{MM}.dbc    by UF, monthly, 2 digits
+#   Main prefix: RD (Reduced AIH — hospitalization record)
+#   Exception: CH and CM use fixed BR (national scope), not {UF}
 # ---------------------------------------------------------------------------
 SIHSUS = {
     "description": "Sistema de Informações Hospitalares do SUS",
