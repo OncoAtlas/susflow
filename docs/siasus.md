@@ -1,159 +1,159 @@
-# SIASUS — Sistema de Informações Ambulatoriais do SUS
+ # SIASUS — Ambulatory Information System (SUS)
 
-Base FTP: `ftp.datasus.gov.br/dissemin/publicos/SIASUS/200801_/Dados/`
+ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SIASUS/200801_/Dados/`
 
----
+ ---
 
-## Tipos de dados disponíveis
+ ## Available data types
 
-| Tipo | Função | Retorno | Descrição |
-|------|--------|---------|-----------|
-| Por UF | `ler(uf, ano, mes)` | `DataFrame` | Microdados ambulatoriais de uma UF |
-| Por UF | `baixar(uf, ano, mes)` | `Path` | Arquivo `.dbc` bruto |
+ | Type | Function | Returns | Description |
+ |------|----------|---------|-------------|
+ | By state | `ler(uf, ano, mes)` | `DataFrame` | Ambulatory microdata for a state |
+ | By state | `baixar(uf, ano, mes)` | `Path` | Raw `.dbc` file |
 
----
+ ---
 
-## Prefixos disponíveis
+ ## Available prefixes
 
-**Padrão de arquivo:** `{PREFIX}{UF}{YY}{MM}.dbc`  
-**Granularidade:** mensal / por UF
+ **File pattern:** `{PREFIX}{UF}{YY}{MM}.dbc`  
+ **Granularity:** monthly / by state
 
-```python
-from susflow.systems import siasus
+ ```python
+ from susflow.systems import siasus
 
-# ver todos os prefixos disponíveis
-print(siasus.prefixos())
+ # show all available prefixes
+ print(siasus.prefixos())
 
-# Produção Ambulatorial — prefixo padrão
-df = siasus.ler(uf="SP", ano=2023, mes=1)
-df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="PA")
+ # Ambulatory production — default prefix
+ df = siasus.ler(uf="SP", ano=2023, mes=1)
+ df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="PA")
 
-# outros prefixos
-df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ")   # quimioterapia
-df = siasus.ler(uf="RJ", ano=2023, mes=6, prefixo="ATD")  # diálise
+ # other prefixes
+ df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ")   # chemotherapy
+ df = siasus.ler(uf="RJ", ano=2023, mes=6, prefixo="ATD")  # dialysis
 
-# só baixar
-path = siasus.baixar(uf="SP", ano=2023, mes=1)
-path = siasus.baixar(uf="MG", ano=2023, mes=3, prefixo="AM")
+ # download only
+ path = siasus.baixar(uf="SP", ano=2023, mes=1)
+ path = siasus.baixar(uf="MG", ano=2023, mes=3, prefixo="AM")
 
-# listar arquivos disponíveis
-siasus.listar()                         # todos os PA
-siasus.listar(uf="SP")                  # PA de SP
-siasus.listar(uf="SP", prefixo="AQ")    # quimioterapia de SP
-```
+ # list available files
+ siasus.listar()                         # all PA files
+ siasus.listar(uf="SP")                  # PA files for SP
+ siasus.listar(uf="SP", prefixo="AQ")    # chemotherapy for SP
+ ```
 
-### Prefixos ativos
+ ### Active prefixes
 
-| Prefixo | Arquivo exemplo | Conteúdo | Cobertura |
-|---------|----------------|----------|-----------|
-| `PA` | `PASP2301.dbc` | **Produção Ambulatorial (BPA)** — dado principal | 2008–2026 |
-| `BI` | `BISP2301.dbc` | BPA Individualizado | 2008–2026 |
-| `AD` | `ADSP2301.dbc` | APAC de Laudos Diversos | 2008–2026 |
-| `AM` | `AMSP2301.dbc` | APAC de Medicamentos | 2008–2026 |
-| `AMP` | `AMPSP2301.dbc` | APAC de Medicamentos Padronizados | 2020–2026 |
-| `AQ` | `AQSP2301.dbc` | APAC de Quimioterapia | 2008–2026 |
-| `AR` | `ARSP2301.dbc` | APAC de Radioterapia | 2008–2026 |
-| `ACF` | `ACFSP1408.dbc` | APAC Confecção de Fístula Arteriovenosa | 2014–2026 |
-| `ATD` | `ATDSP1408.dbc` | APAC Tratamento Dialítico | 2014–2026 |
-| `PS` | `PSSP1305.dbc` | RAAS Psicossocial | 2013–2026 |
-| `AB` | `ABSP2501.dbc` | APAC Acompanhamento Pós Cirurgia Bariátrica (novo) | 2025–2026 |
+ | Prefix | Example file | Content | Coverage |
+ |--------|---------------|---------|----------|
+ | `PA` | `PASP2301.dbc` | **Ambulatory Production (BPA)** — main dataset | 2008–2026 |
+ | `BI` | `BISP2301.dbc` | Individualized BPA | 2008–2026 |
+ | `AD` | `ADSP2301.dbc` | APAC for Miscellaneous Reports | 2008–2026 |
+ | `AM` | `AMSP2301.dbc` | APAC for Medications | 2008–2026 |
+ | `AMP` | `AMPSP2301.dbc` | APAC for Standardized Medications | 2020–2026 |
+ | `AQ` | `AQSP2301.dbc` | APAC for Chemotherapy | 2008–2026 |
+ | `AR` | `ARSP2301.dbc` | APAC for Radiotherapy | 2008–2026 |
+ | `ACF` | `ACFSP1408.dbc` | APAC for AV fistula creation | 2014–2026 |
+ | `ATD` | `ATDSP1408.dbc` | APAC for Dialysis Treatment | 2014–2026 |
+ | `PS` | `PSSP1305.dbc` | Psychosocial RAAS | 2013–2026 |
+ | `AB` | `ABSP2501.dbc` | APAC for Post-Bariatric Surgery Follow-up (new) | 2025–2026 |
 
-### Prefixos encerrados (ainda disponíveis no FTP)
+ ### Retired prefixes (still available on the FTP)
 
-| Prefixo | Arquivo exemplo | Conteúdo | Cobertura | Observação |
-|---------|----------------|----------|-----------|------------|
-| `ABO` | `ABOSP1502.dbc` | APAC Pós Cirurgia Bariátrica (legado) | 2015–2018 | Substituído por `AB` |
-| `AN` | `ANSP0801.dbc` | APAC de Nefrologia | 2008–2014 | Substituído por `ATD` |
-| `SAD` | `SADSP1307.dbc` | RAAS Atenção Domiciliar | 2013–2015 | Encerrado |
+ | Prefix | Example file | Content | Coverage | Note |
+ |--------|--------------|---------|----------|------|
+ | `ABO` | `ABOSP1502.dbc` | Legacy post-bariatric APAC | 2015–2018 | Replaced by `AB` |
+ | `AN` | `ANSP0801.dbc` | Nephrology APAC | 2008–2014 | Replaced by `ATD` |
+ | `SAD` | `SADSP1307.dbc` | Home care RAAS | 2013–2015 | Retired |
 
-> A validação de ano respeita a cobertura individual de cada prefixo. Tentar baixar `AN` para 2020 levanta erro.
+ > Year validation respects each prefix coverage. Attempting to download `AN` for 2020 will raise an error.
 
----
+ ---
 
-## Diferença entre PA e BI
+ ## Difference between PA and BI
 
-- `PA` (BPA Consolidado) — cada linha representa o total de procedimentos realizados por um estabelecimento em um mês. Dado agregado.
-- `BI` (BPA Individualizado) — cada linha representa um atendimento individual. Dado de microdados com identificação do paciente.
+ - `PA` (Consolidated BPA) — each row represents the total procedures performed by an establishment in a month. Aggregated data.
+ - `BI` (Individualized BPA) — each row represents a single attendance. Microdata with patient identifiers.
 
-Para análises individuais (perfil de pacientes, trajetória de cuidado), use `BI`. Para análises de produção por estabelecimento, use `PA`.
+ For individual-level analyses (patient profiles, care trajectories) use `BI`. For production-by-establishment analyses use `PA`.
 
----
+ ---
 
-## Diferença entre AM e AMP
+ ## Difference between AM and AMP
 
-- `AM` — APAC de Medicamentos (todos os medicamentos do componente especializado)
-- `AMP` — APAC de Medicamentos Padronizados (subconjunto específico, disponível a partir de 2020)
+ - `AM` — APAC for Medications (all medications in the specialized component)
+ - `AMP` — APAC for Standardized Medications (specific subset, available from 2020)
 
----
+ ---
 
-## Principais variáveis do DataFrame (PA — Produção Ambulatorial)
+ ## Main DataFrame variables (PA — Ambulatory Production)
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `PA_CODUNI` | str | Código CNES do estabelecimento |
-| `PA_GESTAO` | str | Código da gestão |
-| `PA_CONDIC` | str | Condição de atendimento |
-| `PA_UFMUN` | str | Código IBGE do município |
-| `PA_REGCT` | str | Registro contratual |
-| `PA_INCOUT` | str | Incremento outros |
-| `PA_INCURG` | str | Incremento urgência |
-| `PA_TPUPS` | str | Tipo de UPS |
-| `PA_TIPPRE` | str | Tipo de prestador |
-| `PA_MN_IND` | str | Modalidade/natureza |
-| `PA_CNPJCPF` | str | CNPJ/CPF do estabelecimento |
-| `PA_CNPJMNT` | str | CNPJ mantenedora |
-| `PA_CNPJ_CC` | str | CNPJ contrato |
-| `PA_MVM` | str | Mês/ano de movimento (AAAAMM) |
-| `PA_CMP` | str | Mês/ano de competência (AAAAMM) |
-| `PA_PROC_ID` | str | Código do procedimento (SIGTAP) |
-| `PA_TPFIN` | str | Tipo de financiamento |
-| `PA_SUBFIN` | str | Subfonte de financiamento |
-| `PA_NIVCPL` | str | Nível de complexidade |
-| `PA_DOCORIG` | str | Documento de origem |
-| `PA_AUTORIZ` | str | Número de autorização |
-| `PA_CNSMED` | str | CNS do profissional |
-| `PA_CBOCOD` | str | CBO do profissional |
-| `PA_MOTSAI` | str | Motivo de saída |
-| `PA_OBITO` | str | Indicador de óbito |
-| `PA_ENCERR` | str | Indicador de encerramento |
-| `PA_PERMAN` | str | Indicador de permanência |
-| `PA_ALTA` | str | Indicador de alta |
-| `PA_TRANSF` | str | Indicador de transferência |
-| `PA_QTDPRO` | str | Quantidade produzida |
-| `PA_QTDAPR` | str | Quantidade aprovada |
-| `PA_VALPRO` | float | Valor produzido (R$) |
-| `PA_VALAPR` | float | Valor aprovado (R$) |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `PA_CODUNI` | str | Establishment CNES code |
+ | `PA_GESTAO` | str | Management code |
+ | `PA_CONDIC` | str | Attendance condition |
+ | `PA_UFMUN` | str | Municipality IBGE code |
+ | `PA_REGCT` | str | Contractual registration |
+ | `PA_INCOUT` | str | Other increment |
+ | `PA_INCURG` | str | Emergency increment |
+ | `PA_TPUPS` | str | UPS type |
+ | `PA_TIPPRE` | str | Provider type |
+ | `PA_MN_IND` | str | Modality/nature |
+ | `PA_CNPJCPF` | str | Establishment CNPJ/CPF |
+ | `PA_CNPJMNT` | str | Maintainer CNPJ |
+ | `PA_CNPJ_CC` | str | Contract CNPJ |
+ | `PA_MVM` | str | Movement month/year (YYYYMM) |
+ | `PA_CMP` | str | Competence month/year (YYYYMM) |
+ | `PA_PROC_ID` | str | Procedure code (SIGTAP) |
+ | `PA_TPFIN` | str | Funding type |
+ | `PA_SUBFIN` | str | Funding subsource |
+ | `PA_NIVCPL` | str | Complexity level |
+ | `PA_DOCORIG` | str | Originating document |
+ | `PA_AUTORIZ` | str | Authorization number |
+ | `PA_CNSMED` | str | Professional CNS |
+ | `PA_CBOCOD` | str | Professional CBO |
+ | `PA_MOTSAI` | str | Discharge reason |
+ | `PA_OBITO` | str | Death indicator |
+ | `PA_ENCERR` | str | Closing indicator |
+ | `PA_PERMAN` | str | Permanence indicator |
+ | `PA_ALTA` | str | Discharge indicator |
+ | `PA_TRANSF` | str | Transfer indicator |
+ | `PA_QTDPRO` | str | Produced quantity |
+ | `PA_QTDAPR` | str | Approved quantity |
+ | `PA_VALPRO` | float | Produced value (BRL) |
+ | `PA_VALAPR` | float | Approved value (BRL) |
 
-> Para o dicionário completo de variáveis por prefixo, consulte a documentação oficial do DATASUS (SIGTAP).
+ > For a complete variable dictionary per prefix, consult DATASUS official documentation (SIGTAP).
 
----
+ ---
 
-## Fluxo recomendado
+ ## Recommended workflow
 
-```
-1. Explorar o que existe
-   print(siasus.prefixos())             ← todos os prefixos e descrições
-   siasus.listar(uf="SP")               ← arquivos PA de SP disponíveis
-   siasus.listar(uf="SP", prefixo="AQ") ← quimioterapia de SP
+ ```
+ 1. Explore what's available
+    print(siasus.prefixos())             ← all prefixes and descriptions
+    siasus.listar(uf="SP")               ← PA files available for SP
+    siasus.listar(uf="SP", prefixo="AQ") ← chemotherapy for SP
 
-2. Baixar os dados
-   df = siasus.ler(uf="SP", ano=2023, mes=1)              ← produção ambulatorial
-   df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ") ← quimioterapia
+ 2. Download the data
+    df = siasus.ler(uf="SP", ano=2023, mes=1)              ← ambulatory production
+    df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ") ← chemotherapy
 
-3. Combinar meses em série histórica
-   import pandas as pd
-   dfs = [siasus.ler(uf="SP", ano=2023, mes=m) for m in range(1, 13)]
-   df_ano = pd.concat(dfs, ignore_index=True)
-```
+ 3. Combine months into a time series
+    import pandas as pd
+    dfs = [siasus.ler(uf="SP", ano=2023, mes=m) for m in range(1, 13)]
+    df_ano = pd.concat(dfs, ignore_index=True)
+ ```
 
----
+ ---
 
-## Notas
+ ## Notes
 
-- Arquivos `.dbc` são DBF comprimidos com o algoritmo proprietário **blast** (PKWARE). A biblioteca descomprime automaticamente via `pyreaddbc`.
-- O ano usa **2 dígitos** e o mês **2 dígitos com zero à esquerda**: `PASP2301.dbc` = SP, janeiro de 2023.
-- Cada prefixo tem sua própria cobertura temporal. A validação de ano é feita por prefixo — tentar baixar `AN` para 2020 levanta erro com a cobertura correta.
-- `PA` é o arquivo mais volumoso — estados grandes (SP, RJ, MG) podem ter centenas de MB por mês.
-- Procedimentos são identificados pelo código SIGTAP (`PA_PROC_ID`). Consulte a tabela SIGTAP para descrições.
-- Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
-- Para cruzar estabelecimentos com dados cadastrais, use o CNES.
+ - `.dbc` files are DBF files compressed with the proprietary **blast** (PKWARE) algorithm. The library decompresses them automatically via `pyreaddbc`.
+ - The year uses **2 digits** and the month **2 digits with leading zero**: `PASP2301.dbc` = SP, January 2023.
+ - Each prefix has its own temporal coverage. Year validation is prefix-specific — attempting to download `AN` for 2020 will raise an error with the correct coverage.
+ - `PA` is the largest file — large states (SP, RJ, MG) may have hundreds of MB per month.
+ - Procedures are identified by SIGTAP code (`PA_PROC_ID`). Consult the SIGTAP table for descriptions.
+ - To map municipalities to names, use `CADMUN.DBF` available in SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - To join establishments with registration data, use CNES.

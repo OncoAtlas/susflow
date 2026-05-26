@@ -25,3 +25,11 @@ htmlcov/
 # Mapas FTP gerados
 tools/mapas/mapa_ftp_*.txt
 NEXT.md
+
+CONTEXT.md
+
+.venv
+.env
+venv/
+*.parquet
+*.txt
