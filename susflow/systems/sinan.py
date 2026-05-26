@@ -1,16 +1,16 @@
 """
 susflow/systems/sinan.py
 ========================
-SINAN — Sistema de Informações de Agravos de Notificação.
+SINAN — Notifiable Diseases Information System.
 
-Dados de agravos:
+Disease data:
 
-  finais      → {DOENÇA}BR{YY}.dbc  em DADOS/FINAIS/   ex: DENGBR23.dbc
-  preliminares→ {DOENÇA}BR{YY}.dbc  em DADOS/PRELIM/   (flag preliminar=True)
+    final        → {DISEASE}BR{YY}.dbc  in DADOS/FINAIS/   e.g. DENGBR23.dbc
+    preliminary  → {DISEASE}BR{YY}.dbc  in DADOS/PRELIM/   (use flag `preliminar=True`)
 
-Arquivos auxiliares (apenas download, sem leitura como DataFrame):
+Auxiliary files (download only, not read as DataFrame):
 
-  docs        → layouts, dicionário de variáveis e notas técnicas por agravo
+    docs         → layouts, variable dictionary and technical notes per disease
 """
 
 from pathlib import Path
@@ -33,10 +33,10 @@ def _validar(doenca: str, ano: int) -> str:
     doenca = doenca.upper()
     if doenca not in _DOENCAS:
         disponiveis = ", ".join(sorted(_DOENCAS))
-        raise ValueError(f"Doença inválida: '{doenca}'.\nDisponíveis: {disponiveis}")
+        raise ValueError(f"Invalid disease code: '{doenca}'.\nAvailable: {disponiveis}")
     
     if not (_ANO_MIN <= ano <= _ANO_MAX):
-        raise ValueError(f"Ano fora do intervalo: {ano} (disponível: {_ANO_MIN}–{_ANO_MAX})")
+        raise ValueError(f"Year out of range: {ano} (available: {_ANO_MIN}–{_ANO_MAX})")
     
     return doenca
 
@@ -54,14 +54,14 @@ def _baixar_arquivo(ftp_dir: str, nome: str, destino: Path | None, forcar: bool)
 
 
 def doencas() -> dict[str, str]:
-    """Retorna o dicionário {código: descrição} de todas as doenças disponíveis."""
+    """Return the dictionary {code: description} of all available diseases."""
     return dict(_DOENCAS)
 
 def listar(doenca: str | None = None, preliminar: bool = False) -> list[str]:
     """
-    Lista arquivos disponíveis no FTP.
-    Se `doenca` for informada, filtra pelo código.
-    Use `preliminar=True` para listar dados preliminares.
+    List files available on the FTP.
+    If `doenca` is provided, filter by disease code.
+    Use `preliminar=True` to list preliminary data.
     """
     diretorio = _DIR_PRELIM if preliminar else _DIR_FINAL
     arquivos  = _ftp.listar(diretorio)
@@ -76,8 +76,8 @@ def listar(doenca: str | None = None, preliminar: bool = False) -> list[str]:
 def baixar(doenca: str, ano: int, destino: Path | None = None,
            forcar: bool = False, preliminar: bool = False) -> Path:
     """
-    Baixa {DOENÇA}BR{YY}.dbc para o cache local.
-    Use `preliminar=True` para baixar dados preliminares.
+    Download `{DISEASE}BR{YY}.dbc` to local cache.
+    Use `preliminar=True` to download preliminary data.
     """
     doenca  = _validar(doenca, ano)
     dirftp  = _DIR_PRELIM if preliminar else _DIR_FINAL
@@ -93,17 +93,17 @@ def baixar(doenca: str, ano: int, destino: Path | None = None,
 def ler(doenca: str, ano: int, destino: Path | None = None,
         forcar: bool = False, preliminar: bool = False) -> pd.DataFrame:
     """
-    Baixa (se necessário) e retorna os dados como DataFrame.
+    Download (if needed) and return the data as a DataFrame.
     """
     return _ler(baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar))
 
 
 # ---------------------------------------------------------------------------
-# Documentação técnica — apenas download
+# Technical documentation — download only
 # ---------------------------------------------------------------------------
 
 def listar_docs() -> dict[str, str]:
-    """Retorna os documentos técnicos disponíveis para download: {nome: descrição}."""
+    """Return available technical documents for download: {name: description}."""
     return dict(_CFG_DOC["arquivos"])
 
 
@@ -112,21 +112,20 @@ def baixar_docs(
     destino: Path | None = None,
     forcar: bool = False,
 ) -> "Path | list[Path]":
-    """
-    Baixa documentos técnicos do SINAN (layouts, dicionário de variáveis, notas técnicas).
+    """Download SINAN technical documents (layouts, variable dictionary, technical notes).
 
-    Atenção: o caminho FTP deste diretório ainda não foi confirmado.
-    Se o download falhar, use mapear_ftp.py para localizar o diretório correto.
+    Note: the FTP path for this directory has not been fully confirmed.
+    If download fails, use `mapear_ftp.py` to locate the correct directory.
 
-    - Se `arquivo` for informado, baixa apenas aquele arquivo.
-    - Se omitido, baixa todos os disponíveis.
+    - If `arquivo` is provided, download only that file.
+    - If omitted, download all available files.
     """
     disponiveis = _CFG_DOC["arquivos"]
     ftp_dir     = _CFG_DOC["ftp_dir"]
 
     if arquivo:
         if arquivo not in disponiveis:
-            raise ValueError(f"Documento não disponível: '{arquivo}'.\nDisponíveis: {list(disponiveis)}")
+            raise ValueError(f"Document not available: '{arquivo}'.\nAvailable: {list(disponiveis)}")
         return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
 
     return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]

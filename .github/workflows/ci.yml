@@ -1,0 +1,110 @@
+name: CI — linters, tests and coverage
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: 'Run integration tests (contact FTP)'
+        required: false
+        default: 'false'
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.11, 3.12]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . || pip install .
+          pip install ruff black isort pytest pytest-mock coverage
+
+      - name: Run ruff
+        run: ruff .
+
+      - name: Check import sorting
+        run: isort --check-only .
+
+      - name: Check formatting with black
+        run: black --check .
+
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest -q
+          coverage xml -o coverage.xml
+          coverage report -m --fail-under=75
+
+  integration:
+    needs: checks
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_integration == 'true' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . || pip install .
+          pip install pytest pytest-mock
+
+      - name: Run integration tests
+        env:
+          RUN_INTEGRATION: 'true'
+        run: pytest tests/integration -q
+
+  autofix:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install formatters
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort
+
+      - name: Run isort
+        run: isort .
+
+      - name: Run black
+        run: black .
+
+      - name: Create pull request with formatting changes
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: fix/auto-format
+          commit-message: chore: apply automatic formatting
+          title: chore: apply automatic formatting
+          body: 'This PR applies `isort` and `black` formatting fixes.'
+          labels: automated,format

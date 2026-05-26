@@ -33,3 +33,5 @@ CONTEXT.md
 venv/
 *.parquet
 *.txt
+
+tools/mapas/mapa_ftp_*.txt
