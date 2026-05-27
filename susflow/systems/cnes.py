@@ -32,21 +32,21 @@ from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import CNES as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import CNES as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_BASE     = _CFG["ftp_base"]
-_SUBTIPOS = _CFG["subtypes"]   # {tipo: (descricao, ano_min, ano_max)}
+_BASE = _CFG["ftp_base"]
+_SUBTIPOS = _CFG["subtypes"]  # {tipo: (descricao, ano_min, ano_max)}
 
 
 def _validar_subtipo(tipo: str) -> str:
     tipo = tipo.upper()
     if tipo not in _SUBTIPOS:
         raise ValueError(
-            f"Invalid subtype: '{tipo}'. "
-            f"Available: {sorted(_SUBTIPOS)}"
+            f"Invalid subtype: '{tipo}'. " f"Available: {sorted(_SUBTIPOS)}"
         )
     return tipo
 
@@ -74,7 +74,7 @@ def _nome(tipo: str, uf: str, ano: int, mes: int) -> str:
 
 def _baixar_arquivo(tipo: str, nome: str, destino: Path | None, forcar: bool) -> Path:
     caminho = f"{_ftp_dir(tipo)}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
     if local.exists() and not forcar:
         return local
     return _ftp.baixar(caminho, local)
@@ -90,10 +90,10 @@ def listar(uf: str | None = None, tipo: str = "ST") -> list[str]:
 
     Filters by state (UF) if provided. Default subtype: `ST` (Establishments).
     """
-    tipo     = _validar_subtipo(tipo)
+    tipo = _validar_subtipo(tipo)
     arquivos = _ftp.listar(_ftp_dir(tipo))
     if uf:
-        filtro   = f"{tipo}{uf.upper()}"
+        filtro = f"{tipo}{uf.upper()}"
         arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
     return arquivos
 

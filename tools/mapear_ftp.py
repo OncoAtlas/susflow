@@ -52,7 +52,13 @@ def nova_conexao() -> FTP:
     return ftp
 
 
-def listar_pasta(ftp: FTP, caminho: str, linhas: list[str], profundidade: int = 0, max_prof: int = MAX_PROF_PADRAO) -> None:
+def listar_pasta(
+    ftp: FTP,
+    caminho: str,
+    linhas: list[str],
+    profundidade: int = 0,
+    max_prof: int = MAX_PROF_PADRAO,
+) -> None:
     try:
         ftp.cwd(caminho)
         itens: list[str] = []
@@ -74,14 +80,21 @@ def listar_pasta(ftp: FTP, caminho: str, linhas: list[str], profundidade: int = 
 
         if profundidade < max_prof:
             for sub in subdirs:
-                listar_pasta(ftp, f"{caminho}/{sub}", linhas, profundidade + 1, max_prof)
+                listar_pasta(
+                    ftp, f"{caminho}/{sub}", linhas, profundidade + 1, max_prof
+                )
                 ftp.cwd(caminho)
 
     except Exception as e:
         linhas.append("  " * profundidade + f"ERRO {caminho}: {e}")
 
 
-def mapear(alvos: list[str], max_prof: int = MAX_PROF_PADRAO, imprimir: bool = True, salvar: bool = False) -> list[str]:
+def mapear(
+    alvos: list[str],
+    max_prof: int = MAX_PROF_PADRAO,
+    imprimir: bool = True,
+    salvar: bool = False,
+) -> list[str]:
     todas: list[str] = [
         f"DATASUS FTP Map — {FTP_HOST}",
         f"Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -118,15 +131,21 @@ def mapear(alvos: list[str], max_prof: int = MAX_PROF_PADRAO, imprimir: bool = T
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Map the DATASUS FTP.")
-    parser.add_argument("--salvar",   action="store_true", help="Save result to .txt")
-    parser.add_argument("--quiet",    action="store_true", help="Do not print to terminal")
-    parser.add_argument("--profundo", action="store_true", help=f"Descend {MAX_PROF_PADRAO + 1} levels instead of {MAX_PROF_PADRAO}")
-    parser.add_argument("--alvo",     action="append",     help="Specific FTP path (repeatable)")
+    parser.add_argument("--salvar", action="store_true", help="Save result to .txt")
+    parser.add_argument("--quiet", action="store_true", help="Do not print to terminal")
+    parser.add_argument(
+        "--profundo",
+        action="store_true",
+        help=f"Descend {MAX_PROF_PADRAO + 1} levels instead of {MAX_PROF_PADRAO}",
+    )
+    parser.add_argument(
+        "--alvo", action="append", help="Specific FTP path (repeatable)"
+    )
     args = parser.parse_args()
 
     mapear(
-        alvos    = args.alvo or ALVOS_PADRAO,
-        max_prof = MAX_PROF_PADRAO + 1 if args.profundo else MAX_PROF_PADRAO,
-        imprimir = not args.quiet,
-        salvar   = args.salvar,
+        alvos=args.alvo or ALVOS_PADRAO,
+        max_prof=MAX_PROF_PADRAO + 1 if args.profundo else MAX_PROF_PADRAO,
+        imprimir=not args.quiet,
+        salvar=args.salvar,
     )

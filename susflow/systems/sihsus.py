@@ -23,13 +23,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import SIHSUS as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import SIHSUS as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_DIR        = _CFG["ftp_dir"]
-_PREFIXOS   = set(_CFG["prefixes"].keys())           # RD, SP, RJ, ER
+_DIR = _CFG["ftp_dir"]
+_PREFIXOS = set(_CFG["prefixes"].keys())  # RD, SP, RJ, ER
 _PREFIXOS_N = set(_CFG["prefixes_nacionais"].keys())  # CH, CM
 _ANO_MIN, _ANO_MAX = _CFG["year_range"]
 
@@ -51,10 +52,7 @@ def _validar_prefixo(prefixo: str, nacional: bool = False) -> str:
     prefixo = prefixo.upper()
     pool = _PREFIXOS_N if nacional else _PREFIXOS
     if prefixo not in pool:
-        raise ValueError(
-            f"Invalid prefix: '{prefixo}'. "
-            f"Available: {sorted(pool)}"
-        )
+        raise ValueError(f"Invalid prefix: '{prefixo}'. " f"Available: {sorted(pool)}")
     return prefixo
 
 
@@ -64,7 +62,7 @@ def _nome(prefixo: str, uf_ou_br: str, ano: int, mes: int) -> str:
 
 def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
     caminho = f"{_DIR}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
     if local.exists() and not forcar:
         return local
     return _ftp.baixar(caminho, local)
@@ -73,6 +71,7 @@ def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
 # ---------------------------------------------------------------------------
 # By state (UF)
 # ---------------------------------------------------------------------------
+
 
 def prefixos() -> dict[str, str]:
     """Return available prefixes for data by state (UF): {prefix: description}."""
@@ -84,10 +83,13 @@ def listar(uf: str | None = None, prefixo: str = "RD") -> list[str]:
 
     Filters by prefix (default: `RD`) and optionally by state (UF).
     """
-    prefixo  = prefixo.upper()
+    prefixo = prefixo.upper()
     arquivos = _ftp.listar(_DIR)
-    arquivos = [a for a in arquivos if a.upper().startswith(prefixo)
-                and not a.upper().startswith(f"{prefixo}BR")]
+    arquivos = [
+        a
+        for a in arquivos
+        if a.upper().startswith(prefixo) and not a.upper().startswith(f"{prefixo}BR")
+    ]
     if uf:
         filtro = f"{prefixo}{uf.upper()}"
         arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
@@ -127,6 +129,7 @@ def ler(
 # National (CH and CM — use fixed BR)
 # ---------------------------------------------------------------------------
 
+
 def prefixos_nacionais() -> dict[str, str]:
     """Return available national prefixes: {prefix: description}."""
     return dict(_CFG["prefixes_nacionais"])
@@ -137,7 +140,7 @@ def listar_nacional(prefixo: str = "CH") -> list[str]:
 
     Default prefix: `CH` (national header).
     """
-    prefixo  = prefixo.upper()
+    prefixo = prefixo.upper()
     arquivos = _ftp.listar(_DIR)
     return [a for a in arquivos if a.upper().startswith(f"{prefixo}BR")]
 
@@ -163,4 +166,6 @@ def ler_nacional(
     forcar: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return national data as a DataFrame."""
-    return _ler(baixar_nacional(ano, mes, prefixo=prefixo, destino=destino, forcar=forcar))
+    return _ler(
+        baixar_nacional(ano, mes, prefixo=prefixo, destino=destino, forcar=forcar)
+    )
