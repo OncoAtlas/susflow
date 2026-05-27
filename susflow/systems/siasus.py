@@ -30,13 +30,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import SIASUS as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import SIASUS as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_DIR      = _CFG["ftp_dir"]
-_PREFIXOS = _CFG["prefixes"]   # {prefixo: (descricao, ano_min, ano_max)}
+_DIR = _CFG["ftp_dir"]
+_PREFIXOS = _CFG["prefixes"]  # {prefixo: (descricao, ano_min, ano_max)}
 _ANO_MIN, _ANO_MAX = _CFG["year_range"]
 
 
@@ -44,8 +45,7 @@ def _validar_prefixo(prefixo: str) -> str:
     prefixo = prefixo.upper()
     if prefixo not in _PREFIXOS:
         raise ValueError(
-            f"Invalid prefix: '{prefixo}'. "
-            f"Available: {sorted(_PREFIXOS)}"
+            f"Invalid prefix: '{prefixo}'. " f"Available: {sorted(_PREFIXOS)}"
         )
     return prefixo
 
@@ -53,7 +53,7 @@ def _validar_prefixo(prefixo: str) -> str:
 def _validar(prefixo: str, uf: str, ano: int, mes: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
-    
+
     if not (1 <= mes <= 12):
         raise ValueError(f"Invalid month: {mes}. Use 1–12.")
     _, ano_min, ano_max = _PREFIXOS[prefixo]
@@ -71,11 +71,11 @@ def _nome(prefixo: str, uf: str, ano: int, mes: int) -> str:
 
 def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
     caminho = f"{_DIR}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
 
     if local.exists() and not forcar:
         return local
-    
+
     return _ftp.baixar(caminho, local)
 
 
@@ -89,12 +89,12 @@ def listar(uf: str | None = None, prefixo: str = "PA") -> list[str]:
 
     Filters by prefix (default: `PA`) and optionally by state (UF).
     """
-    prefixo  = _validar_prefixo(prefixo)
+    prefixo = _validar_prefixo(prefixo)
     arquivos = _ftp.listar(_DIR)
     arquivos = [a for a in arquivos if a.upper().startswith(prefixo)]
-    
+
     if uf:
-        filtro   = f"{prefixo}{uf.upper()}"
+        filtro = f"{prefixo}{uf.upper()}"
         arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
     return arquivos
 
