@@ -106,7 +106,8 @@ jobs:
       - name: Create pull request with formatting changes
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ github.event.inputs.base }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: ${{ github.event.inputs.base }}
           branch: fix/auto-format
           commit-message: "chore: apply automatic formatting"
           title: "chore: apply automatic formatting"
