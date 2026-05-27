@@ -5,6 +5,7 @@
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Output: pandas.DataFrame](https://img.shields.io/badge/output-pandas.DataFrame-orange.svg)](#)
 [![PyPI](https://img.shields.io/pypi/v/susflow.svg)](https://pypi.org/project/susflow)
+![CI Status](https://github.com/SEU_USUARIO/oncology-atlas-sus/actions/workflows/ci.yml/badge.svg)
 
 Modern Python library for downloading, parsing and engineering DATASUS public health datasets. SUSFlow provides:
 
