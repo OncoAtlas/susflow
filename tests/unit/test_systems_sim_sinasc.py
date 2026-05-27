@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from susflow.systems import sim, sinasc
 
@@ -24,7 +25,10 @@ def test_sim_listar_filters(monkeypatch):
 
     monkeypatch.setattr(sim._ftp, "listar", fake_listar)
     files = sim.listar("AC")
-    assert all(f.upper().startswith("DOAC") or f.upper().startswith("DOAL") or True for f in files)
+    assert all(
+        f.upper().startswith("DOAC") or f.upper().startswith("DOAL") or True
+        for f in files
+    )
 
 
 def test_sinasc_validar_uf_and_nacional():

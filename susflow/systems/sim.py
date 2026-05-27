@@ -20,15 +20,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import SIM as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import SIM as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_DIR_UF      = _CFG["uf"]["ftp_dir"]
-_DIR_ESP     = _CFG["special"]["ftp_dir"]
-_TIPOS_ESP   = set(_CFG["special"]["types"].keys())
-_ANO_MIN_UF,  _ANO_MAX_UF  = _CFG["uf"]["year_range"]
+_DIR_UF = _CFG["uf"]["ftp_dir"]
+_DIR_ESP = _CFG["special"]["ftp_dir"]
+_TIPOS_ESP = set(_CFG["special"]["types"].keys())
+_ANO_MIN_UF, _ANO_MAX_UF = _CFG["uf"]["year_range"]
 _ANO_MIN_ESP, _ANO_MAX_ESP = _CFG["special"]["year_range"]
 
 
@@ -36,19 +37,27 @@ def _validar_uf(uf: str, ano: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
     if not (_ANO_MIN_UF <= ano <= _ANO_MAX_UF):
-        raise ValueError(f"Year out of range: {ano} (available: {_ANO_MIN_UF}–{_ANO_MAX_UF})")
+        raise ValueError(
+            f"Year out of range: {ano} (available: {_ANO_MIN_UF}–{_ANO_MAX_UF})"
+        )
 
 
 def _validar_especial(tipo: str, ano: int) -> None:
     if tipo.upper() not in _TIPOS_ESP:
-        raise ValueError(f"Invalid type: '{tipo}'. Accepted values: {sorted(_TIPOS_ESP)}")
+        raise ValueError(
+            f"Invalid type: '{tipo}'. Accepted values: {sorted(_TIPOS_ESP)}"
+        )
     if not (_ANO_MIN_ESP <= ano <= _ANO_MAX_ESP):
-        raise ValueError(f"Year out of range: {ano} (available: {_ANO_MIN_ESP}–{_ANO_MAX_ESP})")
+        raise ValueError(
+            f"Year out of range: {ano} (available: {_ANO_MIN_ESP}–{_ANO_MAX_ESP})"
+        )
 
 
-def _baixar_arquivo(ftp_dir: str, nome: str, destino: Path | None, forcar: bool) -> Path:
+def _baixar_arquivo(
+    ftp_dir: str, nome: str, destino: Path | None, forcar: bool
+) -> Path:
     caminho = f"{ftp_dir}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
     if local.exists() and not forcar:
         return local
     return _ftp.baixar(caminho, local)
@@ -57,6 +66,7 @@ def _baixar_arquivo(ftp_dir: str, nome: str, destino: Path | None, forcar: bool)
 # ---------------------------------------------------------------------------
 # By state (UF)
 # ---------------------------------------------------------------------------
+
 
 def listar(uf: str | None = None) -> list[str]:
     """List files by state (UF) available on the FTP. Filters by UF if provided."""
@@ -67,13 +77,17 @@ def listar(uf: str | None = None) -> list[str]:
     return arquivos
 
 
-def baixar(uf: str, ano: int, destino: Path | None = None, forcar: bool = False) -> Path:
+def baixar(
+    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+) -> Path:
     """Download `DO{UF}{YYYY}.dbc` to local cache."""
     _validar_uf(uf, ano)
     return _baixar_arquivo(_DIR_UF, f"DO{uf.upper()}{ano}.dbc", destino, forcar)
 
 
-def ler(uf: str, ano: int, destino: Path | None = None, forcar: bool = False) -> pd.DataFrame:
+def ler(
+    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
     return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
 
@@ -81,6 +95,7 @@ def ler(uf: str, ano: int, destino: Path | None = None, forcar: bool = False) ->
 # ---------------------------------------------------------------------------
 # Special (DOFET — national data by category)
 # ---------------------------------------------------------------------------
+
 
 def listar_especial(tipo: str | None = None) -> list[str]:
     """List special files (EXT/FET/INF/MAT). Filters by type if provided."""
@@ -91,14 +106,18 @@ def listar_especial(tipo: str | None = None) -> list[str]:
     return arquivos
 
 
-def baixar_especial(tipo: str, ano: int, destino: Path | None = None, forcar: bool = False) -> Path:
+def baixar_especial(
+    tipo: str, ano: int, destino: Path | None = None, forcar: bool = False
+) -> Path:
     """Download `DO{TYPE}{YY}.dbc` (e.g. `DOEXT24.dbc`) to local cache."""
     _validar_especial(tipo, ano)
     nome = f"DO{tipo.upper()}{str(ano)[-2:]}.dbc"
     return _baixar_arquivo(_DIR_ESP, nome, destino, forcar)
 
 
-def ler_especial(tipo: str, ano: int, destino: Path | None = None, forcar: bool = False) -> pd.DataFrame:
+def ler_especial(
+    tipo: str, ano: int, destino: Path | None = None, forcar: bool = False
+) -> pd.DataFrame:
     """Download (if needed) and return special data as a DataFrame."""
     return _ler(baixar_especial(tipo, ano, destino=destino, forcar=forcar))
 
@@ -106,6 +125,7 @@ def ler_especial(tipo: str, ano: int, destino: Path | None = None, forcar: bool 
 # ---------------------------------------------------------------------------
 # Arquivos auxiliares — apenas download
 # ---------------------------------------------------------------------------
+
 
 def listar_docs() -> dict[str, str]:
     """Return the technical documents available for download: {name: description}."""
@@ -135,11 +155,13 @@ def baixar_docs(
     Returns the Path of the file (or list of Paths if downloading all).
     """
     disponiveis = _CFG["docs"]["arquivos"]
-    ftp_dir     = _CFG["docs"]["ftp_dir"]
+    ftp_dir = _CFG["docs"]["ftp_dir"]
 
     if arquivo:
         if arquivo not in disponiveis:
-            raise ValueError(f"Document not available: '{arquivo}'. Available: {list(disponiveis)}")
+            raise ValueError(
+                f"Document not available: '{arquivo}'. Available: {list(disponiveis)}"
+            )
         return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
 
     return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]
@@ -156,11 +178,13 @@ def baixar_tabelas(
     - If omitted, download all available tables.
     """
     disponiveis = _CFG["tabelas"]["arquivos"]
-    ftp_dir     = _CFG["tabelas"]["ftp_dir"]
+    ftp_dir = _CFG["tabelas"]["ftp_dir"]
 
     if arquivo:
         if arquivo not in disponiveis:
-            raise ValueError(f"Table not available: '{arquivo}'. Available: {list(disponiveis)}")
+            raise ValueError(
+                f"Table not available: '{arquivo}'. Available: {list(disponiveis)}"
+            )
         return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
 
     return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]
@@ -177,11 +201,13 @@ def baixar_tab(
     - If omitted, download all available files.
     """
     disponiveis = _CFG["tab"]["arquivos"]
-    ftp_dir     = _CFG["tab"]["ftp_dir"]
+    ftp_dir = _CFG["tab"]["ftp_dir"]
 
     if arquivo:
         if arquivo not in disponiveis:
-            raise ValueError(f"File not available: '{arquivo}'. Available: {list(disponiveis)}")
+            raise ValueError(
+                f"File not available: '{arquivo}'. Available: {list(disponiveis)}"
+            )
         return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
 
     return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]

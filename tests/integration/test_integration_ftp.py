@@ -1,8 +1,8 @@
 import os
+
 import pytest
 
 from susflow import ftp as _ftp
-
 
 RUN_INTEGRATION = os.getenv("RUN_INTEGRATION", "false").lower() == "true"
 

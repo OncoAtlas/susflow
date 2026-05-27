@@ -15,8 +15,8 @@ def test__ler_dbc_uses_dbc2dbf_and_calls_ler_dbf(tmp_path: Path, monkeypatch):
     called = {}
 
     def fake_dbc2dbf(src, dst):
-        called['src'] = src
-        called['dst'] = dst
+        called["src"] = src
+        called["dst"] = dst
 
     expected = pd.DataFrame({"A": [1]})
 
@@ -25,15 +25,15 @@ def test__ler_dbc_uses_dbc2dbf_and_calls_ler_dbf(tmp_path: Path, monkeypatch):
 
     df = reader._ler_dbc(dbc_file)
     assert df.equals(expected)
-    assert called['src'].endswith("sample.dbc")
-    assert called['dst'].endswith(".dbf")
+    assert called["src"].endswith("sample.dbc")
+    assert called["dst"].endswith(".dbf")
 
 
 def test__ler_dbf_returns_dataframe_and_uppercases_columns(monkeypatch, tmp_path: Path):
     # prepare a fake DBF iterable
     class FakeDBF:
         def __init__(self, path, encoding=None, load=False):
-            self._rows = [ { 'col': 'x', 'num': 1 } ]
+            self._rows = [{"col": "x", "num": 1}]
 
         def __iter__(self):
             return iter(self._rows)

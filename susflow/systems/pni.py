@@ -22,35 +22,39 @@ from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import PNI as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import PNI as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_BASE       = _CFG["ftp_dir"]
+_BASE = _CFG["ftp_dir"]
 _ANO_MIN, _ANO_MAX = _CFG["year_range"]
+
 
 def _validar(uf: str, ano: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
-    
+
     if not (_ANO_MIN <= ano <= _ANO_MAX):
         raise ValueError(
-            f"Year {ano} out of range for PNI "
-            f"(available: {_ANO_MIN}–{_ANO_MAX})"
+            f"Year {ano} out of range for PNI " f"(available: {_ANO_MIN}–{_ANO_MAX})"
         )
+
 
 def _nome(uf: str, ano: int) -> str:
     return f"DPNI{uf.upper()}{ano % 100:02d}.DBF"
 
+
 def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
     caminho = f"{_BASE}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
 
     if local.exists() and not forcar:
         return local
-    
+
     return _ftp.baixar(caminho, local)
+
 
 def listar(uf: str | None = None) -> list[str]:
     """List files available on the FTP for PNI.
@@ -59,9 +63,10 @@ def listar(uf: str | None = None) -> list[str]:
     """
     arquivos = _ftp.listar(_BASE)
     if uf:
-        filtro   = f"DPNI{uf.upper()}"
+        filtro = f"DPNI{uf.upper()}"
         arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
     return arquivos
+
 
 def baixar(
     uf: str,
@@ -81,7 +86,9 @@ def baixar(
     _validar(uf, ano)
     return _baixar_arquivo(_nome(uf, ano), destino, forcar)
 
-def ler(uf: str,
+
+def ler(
+    uf: str,
     ano: int,
     destino: Path | None = None,
     forcar: bool = False,
