@@ -1,5 +1,6 @@
-import pytest
 from pathlib import Path
+
+import pytest
 
 from susflow.systems import sim
 
@@ -48,7 +49,9 @@ def test_baixar_docs_invalid():
 def test_baixar_docs_all(monkeypatch, tmp_path):
     # Patch _baixar_arquivo to return a Path so function returns list
     dummy = tmp_path / "doc.zip"
-    monkeypatch.setattr(sim, "_baixar_arquivo", lambda ftp_dir, nome, dest, forcar: dummy)
+    monkeypatch.setattr(
+        sim, "_baixar_arquivo", lambda ftp_dir, nome, dest, forcar: dummy
+    )
 
     result = sim.baixar_docs()
     assert isinstance(result, list)
