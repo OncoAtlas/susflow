@@ -1,67 +1,72 @@
 """
 susflow/systems/pni.py
 ======================
-PNI — Programa Nacional de Imunizações.
+PNI — National Immunization Program.
 
-Padrão de arquivo: DPNI{UF}{YY}.DBF
-Granularidade:     anual / por UF
-Cobertura:         1994–2019
+File pattern: DPNI{UF}{YY}.DBF
+Granularity: annual / by state (UF)
+Coverage:    1994–2019
 
-O arquivo fica diretamente em DADOS/ (sem subdiretório):
-  ex: /dissemin/publicos/PNI/DADOS/DPNISP02.DBF
+Files are located directly in `DADOS/` (no nested folder):
+    e.g. /dissemin/publicos/PNI/DADOS/DPNISP02.DBF
 
-Observações:
-  - Formato .DBF puro (sem blast); lido com dbfread via reader.py.
-  - O sufixo de ano usa 2 dígitos (94–19); anos 2000–2009 ficam
-    como 00–09, portanto a normalização é feita com (ano % 100).
-  - UF codificada com 2 letras maiúsculas (ex: SP, RJ, AM).
-  - Cobertura termina em 2019; não há dados preliminares.
+Notes:
+    - Pure .DBF format (no blast); read with `dbfread` via `reader.py`.
+    - Year suffix uses 2 digits (94–19); years 2000–2009 appear as
+        00–09, so normalization is done with `(ano % 100)`.
+    - UF encoded as 2 uppercase letters (e.g. SP, RJ, AM).
+    - Coverage ends in 2019; there are no preliminary files.
 """
 
 from pathlib import Path
 
 import pandas as pd
 
-from .. import ftp as _ftp
 from .. import cache as _cache
-from ..config import PNI as _CFG, UFS
+from .. import ftp as _ftp
+from ..config import PNI as _CFG
+from ..config import UFS
 from ..reader import ler as _ler
 
-_BASE       = _CFG["ftp_dir"]
+_BASE = _CFG["ftp_dir"]
 _ANO_MIN, _ANO_MAX = _CFG["year_range"]
+
 
 def _validar(uf: str, ano: int) -> None:
     if uf.upper() not in UFS:
-        raise ValueError(f"UF inválida: '{uf}'. Valores aceitos: {UFS}")
-    
+        raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
+
     if not (_ANO_MIN <= ano <= _ANO_MAX):
         raise ValueError(
-            f"Ano {ano} fora do intervalo do PNI "
-            f"(disponível: {_ANO_MIN}–{_ANO_MAX})"
+            f"Year {ano} out of range for PNI " f"(available: {_ANO_MIN}–{_ANO_MAX})"
         )
+
 
 def _nome(uf: str, ano: int) -> str:
     return f"DPNI{uf.upper()}{ano % 100:02d}.DBF"
 
+
 def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
     caminho = f"{_BASE}/{nome}"
-    local   = _cache.caminho_local(caminho, destino)
+    local = _cache.caminho_local(caminho, destino)
 
     if local.exists() and not forcar:
         return local
-    
+
     return _ftp.baixar(caminho, local)
 
+
 def listar(uf: str | None = None) -> list[str]:
-    """
-    Lista arquivos disponíveis no FTP para o PNI.
-    Filtra por UF se informada.
+    """List files available on the FTP for PNI.
+
+    Filters by state (UF) if provided.
     """
     arquivos = _ftp.listar(_BASE)
     if uf:
-        filtro   = f"DPNI{uf.upper()}"
+        filtro = f"DPNI{uf.upper()}"
         arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
     return arquivos
+
 
 def baixar(
     uf: str,
@@ -69,23 +74,24 @@ def baixar(
     destino: Path | None = None,
     forcar: bool = False,
 ) -> Path:
-    """
-    Baixa DPNI{UF}{YY}.DBF para o cache local e retorna o path.
+    """Download `DPNI{UF}{YY}.DBF` to local cache and return the path.
 
-    Parâmetros
+    Parameters
     ----------
-    uf      : sigla da UF (ex: 'SP')
-    ano     : ano com 4 dígitos (ex: 2010)
-    destino : pasta de destino; usa o cache padrão se None
-    forcar  : se True, baixa mesmo que o arquivo já exista no cache
+    uf      : state code (e.g. 'SP')
+    ano     : year with 4 digits (e.g. 2010)
+    destino : destination folder; uses default cache if None
+    forcar  : if True, download even if file exists in cache
     """
     _validar(uf, ano)
     return _baixar_arquivo(_nome(uf, ano), destino, forcar)
 
-def ler(uf: str,
+
+def ler(
+    uf: str,
     ano: int,
     destino: Path | None = None,
     forcar: bool = False,
 ) -> pd.DataFrame:
-    """Baixa (se necessário) e retorna os dados como DataFrame."""
+    """Download (if needed) and return the data as a DataFrame."""
     return _ler(baixar(uf, ano, destino=destino, forcar=forcar))

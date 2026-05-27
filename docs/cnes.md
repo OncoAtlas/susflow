@@ -1,160 +1,160 @@
-# CNES — Cadastro Nacional de Estabelecimentos de Saúde
+ # CNES — National Register of Health Establishments
 
-Base FTP: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
+ FTP base: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
 
----
+ ---
 
-## Tipos de dados disponíveis
+ ## Available data types
 
-| Tipo | Função | Retorno | Descrição |
-|------|--------|---------|-----------|
-| Por UF | `ler(uf, ano, mes)` | `DataFrame` | Dados cadastrais de um subtipo para uma UF |
-| Por UF | `baixar(uf, ano, mes)` | `Path` | Arquivo `.dbc` bruto |
+ | Type | Function | Returns | Description |
+ |------|----------|---------|-------------|
+ | By state | `ler(uf, ano, mes)` | `DataFrame` | Registration data for a subtype and state |
+ | By state | `baixar(uf, ano, mes)` | `Path` | Raw `.dbc` file |
 
----
+ ---
 
-## Subtipos disponíveis
+ ## Available subtypes
 
-**Padrão de arquivo:** `{TYPE}/{TYPE}{UF}{YY}{MM}.dbc`  
-**Granularidade:** mensal / por UF  
+ **File pattern:** `{TYPE}/{TYPE}{UF}{YY}{MM}.dbc`  
+ **Granularity:** monthly / by state  
 
-> O arquivo fica dentro de um subdiretório com o mesmo nome do subtipo:  
-> ex: `ST/STSP2501.dbc` → estabelecimentos de SP, janeiro de 2025.
+ > Files are stored inside a subdirectory named after the subtype:  
+ > e.g. `ST/STSP2501.dbc` → establishments in SP, January 2025.
 
-```python
-from susflow.systems import cnes
+ ```python
+ from susflow.systems import cnes
 
-# ver todos os subtipos disponíveis
-print(cnes.subtipos())
+ # show all available subtypes
+ print(cnes.subtipos())
 
-# Estabelecimentos — subtipo padrão
-df = cnes.ler(uf="SP", ano=2025, mes=1)
-df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="ST")
+ # Establishments — default subtype
+ df = cnes.ler(uf="SP", ano=2025, mes=1)
+ df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="ST")
 
-# outros subtipos
-df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   # profissionais
-df = cnes.ler(uf="RJ", ano=2024, mes=6, tipo="LT")   # leitos
-df = cnes.ler(uf="MG", ano=2023, mes=3, tipo="EQ")   # equipamentos
+ # other subtypes
+ df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   # professionals
+ df = cnes.ler(uf="RJ", ano=2024, mes=6, tipo="LT")   # beds
+ df = cnes.ler(uf="MG", ano=2023, mes=3, tipo="EQ")   # equipment
 
-# só baixar
-path = cnes.baixar(uf="SP", ano=2025, mes=1)
-path = cnes.baixar(uf="SP", ano=2025, mes=1, tipo="PF")
+ # download only
+ path = cnes.baixar(uf="SP", ano=2025, mes=1)
+ path = cnes.baixar(uf="SP", ano=2025, mes=1, tipo="PF")
 
-# listar arquivos disponíveis
-cnes.listar()                       # todos os ST
-cnes.listar(uf="SP")                # ST de SP
-cnes.listar(uf="SP", tipo="PF")     # profissionais de SP
-```
+ # list available files
+ cnes.listar()                       # all ST files
+ cnes.listar(uf="SP")                # ST files for SP
+ cnes.listar(uf="SP", tipo="PF")     # professionals for SP
+ ```
 
-### Subtipos ativos
+ ### Active subtypes
 
-| Tipo | Arquivo exemplo | Conteúdo | Cobertura |
-|------|----------------|----------|-----------|
-| `ST` | `STSP2501.dbc` | **Estabelecimentos** — identificação, localização, tipo | 2005–2026 |
-| `PF` | `PFSP2501.dbc` | **Profissionais de saúde** — vínculos e CBO | 2005–2026 |
-| `DC` | `DCSP2501.dbc` | Dados complementares do estabelecimento | 2005–2026 |
-| `EQ` | `EQSP2501.dbc` | Equipamentos disponíveis | 2005–2026 |
-| `SR` | `SRSP2501.dbc` | Serviços especializados ofertados | 2005–2026 |
-| `LT` | `LTSP0510.dbc` | Leitos (SUS e não-SUS) | 2005–2026 |
-| `HB` | `HBSP0703.dbc` | Habilitações e certificações | 2007–2026 |
-| `EF` | `EFSP0703.dbc` | Centros cirúrgicos e obstétricos | 2007–2026 |
-| `EP` | `EPSP0704.dbc` | Equipes de saúde (eSF, eAP, etc.) | 2007–2026 |
-| `RC` | `RCSP0703.dbc` | Regras contratuais | 2007–2026 |
-| `IN` | `INSP0711.dbc` | Incentivos financeiros | 2007–2026 |
-| `GM` | `GMSP1407.dbc` | Gestão e metas | 2014–2026 |
+ | Type | Example file | Content | Coverage |
+ |------|---------------|---------|----------|
+ | `ST` | `STSP2501.dbc` | **Establishments** — identification, location, type | 2005–2026 |
+ | `PF` | `PFSP2501.dbc` | **Health professionals** — employment links and CBO | 2005–2026 |
+ | `DC` | `DCSP2501.dbc` | Additional establishment data | 2005–2026 |
+ | `EQ` | `EQSP2501.dbc` | Available equipment | 2005–2026 |
+ | `SR` | `SRSP2501.dbc` | Specialized services offered | 2005–2026 |
+ | `LT` | `LTSP0510.dbc` | Beds (SUS and non-SUS) | 2005–2026 |
+ | `HB` | `HBSP0703.dbc` | Authorizations and certifications | 2007–2026 |
+ | `EF` | `EFSP0703.dbc` | Surgical and obstetric centers | 2007–2026 |
+ | `EP` | `EPSP0704.dbc` | Health teams (eSF, eAP, etc.) | 2007–2026 |
+ | `RC` | `RCSP0703.dbc` | Contractual rules | 2007–2026 |
+ | `IN` | `INSP0711.dbc` | Financial incentives | 2007–2026 |
+ | `GM` | `GMSP1407.dbc` | Management and goals | 2014–2026 |
 
-### Subtipos encerrados (ainda disponíveis no FTP)
+ ### Retired subtypes (still available on the FTP)
 
-| Tipo | Arquivo exemplo | Conteúdo | Cobertura | Observação |
-|------|----------------|----------|-----------|------------|
-| `EE` | `EESP0703.dbc` | Equipamentos e produções | 2007–2019 | Encerrado em dez/2019 |
+ | Type | Example file | Content | Coverage | Note |
+ |------|--------------|---------|----------|------|
+ | `EE` | `EESP0703.dbc` | Equipment and production | 2007–2019 | Retired in Dec/2019 |
 
----
+ ---
 
-## Principais variáveis por subtipo
+ ## Main variables by subtype
 
-### ST — Estabelecimentos
+ ### ST — Establishments
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `CNES` | str | Código CNES (identificador único) |
-| `CODUFMUN` | str | Código IBGE do município |
-| `REGSAUDE` | str | Região de saúde |
-| `MICR_REG` | str | Microrregião de saúde |
-| `DISTRSAN` | str | Distrito sanitário |
-| `DISTRADM` | str | Distrito administrativo |
-| `TPGESTAO` | str | Tipo de gestão (M=municipal, E=estadual, D=dupla) |
-| `PF_PJ` | str | Pessoa física ou jurídica |
-| `CPF_CNPJ` | str | CPF ou CNPJ |
-| `NIV_DEP` | str | Nível de dependência |
-| `CNPJ_MAN` | str | CNPJ da mantenedora |
-| `ESFERA_A` | str | Esfera administrativa |
-| `ATIVIDAD` | str | Atividade de ensino/pesquisa |
-| `RETENCAO` | str | Tipo de retenção |
-| `NATUREZA` | str | Natureza jurídica |
-| `CLIENTEL` | str | Clientela atendida |
-| `TP_UNID` | str | Tipo de unidade |
-| `TURNO_AT` | str | Turno de atendimento |
-| `NIV_HIER` | str | Nível hierárquico |
-| `TERCEIRO` | str | Indicador de terceirização |
-| `COMPETEN` | str | Competência (AAAAMM) |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `CNES` | str | CNES code (unique identifier) |
+ | `CODUFMUN` | str | IBGE municipality code |
+ | `REGSAUDE` | str | Health region |
+ | `MICR_REG` | str | Health microregion |
+ | `DISTRSAN` | str | Sanitary district |
+ | `DISTRADM` | str | Administrative district |
+ | `TPGESTAO` | str | Management type (M=municipal, E=state, D=both) |
+ | `PF_PJ` | str | Individual or legal entity |
+ | `CPF_CNPJ` | str | CPF or CNPJ |
+ | `NIV_DEP` | str | Dependency level |
+ | `CNPJ_MAN` | str | Maintainer's CNPJ |
+ | `ESFERA_A` | str | Administrative sphere |
+ | `ATIVIDAD` | str | Teaching/research activity |
+ | `RETENCAO` | str | Retention type |
+ | `NATUREZA` | str | Legal nature |
+ | `CLIENTEL` | str | Served clientele |
+ | `TP_UNID` | str | Unit type |
+ | `TURNO_AT` | str | Service shift |
+ | `NIV_HIER` | str | Hierarchy level |
+ | `TERCEIRO` | str | Outsourcing indicator |
+ | `COMPETEN` | str | Competence (YYYYMM) |
 
-### PF — Profissionais
+ ### PF — Professionals
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `CNES` | str | Código CNES do estabelecimento |
-| `CBO` | str | Código CBO da ocupação |
-| `NOMEPROF` | str | Nome do profissional |
-| `CNS_PROF` | str | CNS do profissional |
-| `CONSELHO` | str | Conselho profissional |
-| `REGISTRO` | str | Número de registro no conselho |
-| `VINCULAC` | str | Tipo de vínculo |
-| `SUBVINCUL` | str | Subtipo de vínculo |
-| `TP_SUS` | str | Atende pelo SUS |
-| `COMPETEN` | str | Competência (AAAAMM) |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `CNES` | str | Establishment CNES code |
+ | `CBO` | str | Occupation CBO code |
+ | `NOMEPROF` | str | Professional's name |
+ | `CNS_PROF` | str | Professional's CNS |
+ | `CONSELHO` | str | Professional council |
+ | `REGISTRO` | str | Council registration number |
+ | `VINCULAC` | str | Employment link type |
+ | `SUBVINCUL` | str | Employment subtype |
+ | `TP_SUS` | str | Provides services to SUS |
+ | `COMPETEN` | str | Competence (YYYYMM) |
 
-### LT — Leitos
+ ### LT — Beds
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `CNES` | str | Código CNES do estabelecimento |
-| `TP_LEITO` | str | Tipo de leito |
-| `CODLEITO` | str | Código do leito |
-| `QT_EXIST` | str | Quantidade existente |
-| `QT_CONTR` | str | Quantidade contratada (SUS) |
-| `QT_SUS` | str | Quantidade SUS |
-| `COMPETEN` | str | Competência (AAAAMM) |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `CNES` | str | Establishment CNES code |
+ | `TP_LEITO` | str | Bed type |
+ | `CODLEITO` | str | Bed code |
+ | `QT_EXIST` | str | Existing quantity |
+ | `QT_CONTR` | str | Contracted quantity (SUS) |
+ | `QT_SUS` | str | SUS quantity |
+ | `COMPETEN` | str | Competence (YYYYMM) |
 
----
+ ---
 
-## Fluxo recomendado
+ ## Recommended workflow
 
-```
-1. Explorar o que existe
-   print(cnes.subtipos())              ← todos os subtipos e descrições
-   cnes.listar(uf="SP")                ← arquivos ST de SP disponíveis
-   cnes.listar(uf="SP", tipo="PF")     ← profissionais de SP
+ ```
+ 1. Explore available data
+    print(cnes.subtipos())              ← all subtypes and descriptions
+    cnes.listar(uf="SP")                ← ST files available for SP
+    cnes.listar(uf="SP", tipo="PF")     ← professionals for SP
 
-2. Baixar os dados
-   df = cnes.ler(uf="SP", ano=2025, mes=1)              ← estabelecimentos
-   df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   ← profissionais
-   df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="LT")   ← leitos
+ 2. Download data
+    df = cnes.ler(uf="SP", ano=2025, mes=1)              ← establishments
+    df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   ← professionals
+    df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="LT")   ← beds
 
-3. Combinar meses em série histórica
-   import pandas as pd
-   dfs = [cnes.ler(uf="SP", ano=2024, mes=m) for m in range(1, 13)]
-   df_ano = pd.concat(dfs, ignore_index=True)
-```
+ 3. Combine months into a time series
+    import pandas as pd
+    dfs = [cnes.ler(uf="SP", ano=2024, mes=m) for m in range(1, 13)]
+    df_ano = pd.concat(dfs, ignore_index=True)
+ ```
 
----
+ ---
 
-## Notas
+ ## Notes
 
-- Arquivos `.dbc` são DBF comprimidos com o algoritmo proprietário **blast** (PKWARE). A biblioteca descomprime automaticamente via `pyreaddbc`.
-- O ano usa **2 dígitos** e o mês **2 dígitos com zero à esquerda**: `STSP2501.dbc` = SP, janeiro de 2025.
-- O arquivo fica dentro de um subdiretório com o mesmo nome do subtipo — isso é tratado automaticamente pela biblioteca.
-- Cada subtipo tem sua própria cobertura temporal. Tentar baixar `EE` para 2022 levanta erro com a cobertura correta (2007–2019).
-- `ST` e `PF` são os subtipos mais usados: `ST` para análises de distribuição de estabelecimentos, `PF` para análises de força de trabalho em saúde.
-- O campo `CNES` é a chave de cruzamento entre todos os subtipos — use-o para enriquecer `ST` com dados de `LT`, `EQ`, `PF`, etc.
-- Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - `.dbc` files are DBF files compressed with the proprietary **blast** (PKWARE) algorithm. The library decompresses them automatically via `pyreaddbc`.
+ - The year uses **2 digits** and the month **2 digits with leading zero**: `STSP2501.dbc` = SP, January 2025.
+ - Files are stored in a subdirectory with the same name as the subtype — this is handled automatically by the library.
+ - Each subtype has its own temporal coverage. Attempting to download `EE` for 2022 will raise an error with the correct coverage (2007–2019).
+ - `ST` and `PF` are the most used subtypes: `ST` for analyses of establishment distribution, `PF` for workforce analyses.
+ - The `CNES` field is the key to join all subtypes — use it to enrich `ST` with `LT`, `EQ`, `PF`, etc.
+ - To map municipality codes to names, use `CADMUN.DBF` available in SIM (`sim.baixar_tabelas("CADMUN.DBF")`).

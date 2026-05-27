@@ -1,186 +1,187 @@
-# SIM — Sistema de Informações sobre Mortalidade
+ # SIM — Mortality Information System
 
-Base FTP: `ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/`
+ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SIM/CID10/`
 
----
+ ---
 
-## Tipos de dados disponíveis
+ ## Available data types
 
-| Tipo | Função | Retorno | Descrição |
-|------|--------|---------|-----------|
-| Por UF | `ler(uf, ano)` | `DataFrame` | Óbitos registrados em uma UF, por ano |
-| Por UF | `baixar(uf, ano)` | `Path` | Arquivo `.dbc` bruto da UF |
-| Especial | `ler_especial(tipo, ano)` | `DataFrame` | Óbitos nacionais por categoria (EXT/FET/INF/MAT) |
-| Especial | `baixar_especial(tipo, ano)` | `Path` | Arquivo `.dbc` bruto da categoria |
-| Documentação | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, estrutura e dicionário de variáveis |
-| Tabelas de apoio | `baixar_tabelas(arquivo?)` | `Path / list[Path]` | CID-10, municípios, ocupações, países, UFs |
-| Dados tabulados | `baixar_tab(arquivo?)` | `Path / list[Path]` | Óbitos agregados por CID-10 (série histórica) |
+ | Type | Function | Returns | Description |
+ |------|----------|---------|-------------|
+ | By state | `ler(uf, ano)` | `DataFrame` | Registered deaths in a state, by year |
+ | By state | `baixar(uf, ano)` | `Path` | Raw `.dbc` file for the state |
+ | Special | `ler_especial(tipo, ano)` | `DataFrame` | National deaths by category (EXT/FET/INF/MAT) |
+ | Special | `baixar_especial(tipo, ano)` | `Path` | Raw `.dbc` file for the category |
+ | Documentation | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, structure and variable dictionary |
+ | Support tables | `baixar_tabelas(arquivo?)` | `Path / list[Path]` | CID-10, municipalities, occupations, countries, UFs |
+ | Tabulated data | `baixar_tab(arquivo?)` | `Path / list[Path]` | Aggregated deaths by CID-10 (time series) |
 
----
+ ---
 
-## Dados por UF — `DORES/`
+ ## Data by state — `DORES/`
 
-**Padrão de arquivo:** `DO{UF}{YYYY}.dbc`  
-**Cobertura:** 1996–2024, todas as 27 UFs  
-**Granularidade:** anual / por UF
+ **File pattern:** `DO{UF}{YYYY}.dbc`  
+ **Coverage:** 1996–2024, all 27 states  
+ **Granularity:** annual / by state
 
-```python
-from susflow.systems import sim
+ ```python
+ from susflow.systems import sim
 
-df = sim.ler(uf="SP", ano=2023)
-path = sim.baixar(uf="RJ", ano=2022)
-arquivos = sim.listar(uf="MG")
-```
+ df = sim.ler(uf="SP", ano=2023)
+ path = sim.baixar(uf="RJ", ano=2022)
+ arquivos = sim.listar(uf="MG")
+ ```
 
-### Principais variáveis do DataFrame
+ ### Main DataFrame variables
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `DTOBITO` | str | Data do óbito (DDMMAAAA) |
-| `CAUSABAS` | str | Causa básica do óbito (CID-10) |
-| `SEXO` | str | Sexo (1=Masc, 2=Fem, 9=Ignorado) |
-| `IDADE` | str | Idade codificada (ver dicionário) |
-| `CODMUNRES` | str | Código IBGE do município de residência |
-| `CODMUNOCI` | str | Código IBGE do município de ocorrência |
-| `ESTCIV` | str | Estado civil |
-| `ESC` | str | Escolaridade |
-| `OCUP` | str | Ocupação (CBO) |
-| `RACACOR` | str | Raça/cor |
-| `LOCOCOR` | str | Local de ocorrência (hospital, domicílio, etc.) |
-| `ASSISTMED` | str | Assistência médica recebida |
-| `ATESTANTE` | str | Tipo de atestante |
-| `CIRCOBITO` | str | Circunstância do óbito |
-| `ACIDTRAB` | str | Acidente de trabalho |
-| `FONTE` | str | Fonte da informação |
-| `TPMORTEOCO` | str | Tipo de morte |
-| `CAUSABAS_O` | str | Causa básica original (antes de correção) |
-| `UFINFORM` | str | UF informante |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `DTOBITO` | str | Date of death (DDMMYYYY) |
+ | `CAUSABAS` | str | Underlying cause of death (ICD-10) |
+ | `SEXO` | str | Sex (1=Male, 2=Female, 9=Ignored) |
+ | `IDADE` | str | Encoded age (see dictionary) |
+ | `CODMUNRES` | str | IBGE code of municipality of residence |
+ | `CODMUNOCI` | str | IBGE code of municipality of occurrence |
+ | `ESTCIV` | str | Marital status |
+ | `ESC` | str | Education level |
+ | `OCUP` | str | Occupation (CBO) |
+ | `RACACOR` | str | Race/color |
+ | `LOCOCOR` | str | Place of occurrence (hospital, home, etc.) |
+ | `ASSISTMED` | str | Medical assistance received |
+ | `ATESTANTE` | str | Type of certifier |
+ | `CIRCOBITO` | str | Circumstance of death |
+ | `ACIDTRAB` | str | Work accident |
+ | `FONTE` | str | Information source |
+ | `TPMORTEOCO` | str | Type of death |
+ | `CAUSABAS_O` | str | Original underlying cause (before correction) |
+ | `UFINFORM` | str | Reporting UF |
 
-> Para a lista completa de variáveis e seus códigos, baixe `Estrutura_do_SIM_2025.pdf` ou `Docs_Tabs_CID10.zip`.
+ > For a complete list of variables and codes, download `Estrutura_do_SIM_2025.pdf` or `Docs_Tabs_CID10.zip`.
 
----
+ ---
 
-## Dados especiais — `DOFET/`
+ ## Special data — `DOFET/`
 
-**Padrão de arquivo:** `DO{TIPO}{YY}.dbc`  
-**Cobertura:** 1996–2024, escopo nacional  
-**Granularidade:** anual / nacional
+ **File pattern:** `DO{TIPO}{YY}.dbc`  
+ **Coverage:** 1996–2024, national scope  
+ **Granularity:** annual / national
 
-| Tipo | Arquivo exemplo | Conteúdo |
-|------|----------------|----------|
-| `EXT` | `DOEXT24.dbc` | Óbitos por causas externas (acidentes, homicídios, suicídios) |
-| `FET` | `DOFET24.dbc` | Óbitos fetais |
-| `INF` | `DOINF24.dbc` | Óbitos infantis (0–1 ano) |
-| `MAT` | `DOMAT24.dbc` | Óbitos maternos |
+ | Type | Example file | Content |
+ |------|--------------|---------|
+ | `EXT` | `DOEXT24.dbc` | Deaths due to external causes (accidents, homicides, suicides) |
+ | `FET` | `DOFET24.dbc` | Fetal deaths |
+ | `INF` | `DOINF24.dbc` | Infant deaths (0–1 year) |
+ | `MAT` | `DOMAT24.dbc` | Maternal deaths |
 
-```python
-df = sim.ler_especial(tipo="EXT", ano=2023)
-df = sim.ler_especial(tipo="MAT", ano=2022)
+ ```python
+ df = sim.ler_especial(tipo="EXT", ano=2023)
+ df = sim.ler_especial(tipo="MAT", ano=2022)
 
-path = sim.baixar_especial(tipo="INF", ano=2024)
-arquivos = sim.listar_especial(tipo="FET")
-```
+ path = sim.baixar_especial(tipo="INF", ano=2024)
+ arquivos = sim.listar_especial(tipo="FET")
+ ```
 
----
+ ---
 
-## Documentação técnica — `DOCS/`
+ ## Technical documentation — `DOCS/`
 
-Arquivos disponíveis para download (não lidos como DataFrame):
+ Files available for download (not read as DataFrame):
 
-| Arquivo | Descrição | Quando usar |
-|---------|-----------|-------------|
-| `Docs_Tabs_CID10.zip` | Layouts completos, tabelas e dicionário de variáveis | Referência principal para entender os campos |
-| `Estrutura_do_SIM_2025.pdf` | Estrutura atual dos arquivos | Bases de 2010 em diante |
-| `Estrutura_SIM_Anterior.pdf` | Estrutura anterior dos arquivos | **Necessário para bases legadas (antes de 2010)** |
+ | File | Description | When to use |
+ |------|-------------|-------------|
+ | `Docs_Tabs_CID10.zip` | Full layouts, tables and variable dictionary | Main reference to understand fields |
+ | `Estrutura_do_SIM_2025.pdf` | Current file structure | Bases from 2010 onwards |
+ | `Estrutura_SIM_Anterior.pdf` | Previous file structure | **Needed for legacy data (before 2010)** |
 
-```python
-# ver o que está disponível
-print(sim.listar_docs())
+ ```python
+ # see what's available
+ print(sim.listar_docs())
 
-# baixar um documento específico
-path = sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
-path = sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  # para bases antigas
+ # download a specific document
+ path = sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
+ path = sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  # for older bases
 
-# baixar todos de uma vez
-paths = sim.baixar_docs()
+ # download all at once
+ paths = sim.baixar_docs()
 
-# salvar em pasta específica
-path = sim.baixar_docs("Docs_Tabs_CID10.zip", destino="/meus/dados/sim")
-```
+ # save to a specific folder
+ path = sim.baixar_docs("Docs_Tabs_CID10.zip", destino="/meus/dados/sim")
+ ```
 
----
+ ---
 
-## Tabelas de apoio — `TABELAS/`
+ ## Support tables — `TABELAS/`
 
-Tabelas de referência usadas para decodificar os campos dos DataFrames:
+ Reference tables used to decode DataFrame fields:
 
-| Arquivo | Formato | Conteúdo |
-|---------|---------|----------|
-| `CID10.DBF` | DBF | Classificação Internacional de Doenças — CID-10 (códigos e descrições) |
-| `CIDCAP10.DBF` | DBF | Capítulos do CID-10 |
-| `CADMUN.DBF` | DBF | Cadastro de municípios brasileiros (código IBGE, nome, UF) |
-| `CADMUN.xls` | Excel | Cadastro de municípios (formato Excel) |
-| `TABOCUP.DBF` | DBF | Tabela de ocupações — CBO |
-| `TABPAIS.DBF` | DBF | Tabela de países |
-| `TABUF.DBF` | DBF | Tabela de unidades federativas |
+ | File | Format | Content |
+ |------|--------|---------|
+ | `CID10.DBF` | DBF | International Classification of Diseases — ICD-10 (codes and descriptions) |
+ | `CIDCAP10.DBF` | DBF | ICD-10 chapters |
+ | `CADMUN.DBF` | DBF | Brazilian municipalities registry (IBGE code, name, UF) |
+ | `CADMUN.xls` | Excel | Municipality registry (Excel format) |
+ | `TABOCUP.DBF` | DBF | Occupations table — CBO |
+ | `TABPAIS.DBF` | DBF | Countries table |
+ | `TABUF.DBF` | DBF | Federative units table |
 
-```python
-# ver o que está disponível
-print(sim.listar_tabelas())
+ ```python
+ # see what's available
+ print(sim.listar_tabelas())
 
-# baixar uma tabela específica
-path = sim.baixar_tabelas("CID10.DBF")
-path = sim.baixar_tabelas("CADMUN.DBF")
+ # download a specific table
+ path = sim.baixar_tabelas("CID10.DBF")
+ path = sim.baixar_tabelas("CADMUN.DBF")
 
-# baixar todas de uma vez
-paths = sim.baixar_tabelas()
-```
+ # download all at once
+ paths = sim.baixar_tabelas()
+ ```
 
----
+ ---
 
-## Dados tabulados — `TAB/`
+ ## Tabulated data — `TAB/`
 
-Dados já agregados, úteis para análises sem precisar processar os microdados:
+ Pre-aggregated data, useful for analysis without processing microdata:
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `OBITOS_CID10_TAB.zip` | Série histórica de óbitos agregados por CID-10 |
+ | File | Content |
+ |------|---------|
+ | `OBITOS_CID10_TAB.zip` | Time series of deaths aggregated by ICD-10 |
 
-```python
-print(sim.listar_tab())
+ ```python
+ print(sim.listar_tab())
 
-path = sim.baixar_tab("OBITOS_CID10_TAB.zip")
-paths = sim.baixar_tab()  # baixa todos
-```
+ path = sim.baixar_tab("OBITOS_CID10_TAB.zip")
+ paths = sim.baixar_tab()  # download all
+ ```
 
----
+ ---
 
-## Fluxo recomendado
+ ## Recommended workflow
 
-```
-1. Explorar o que existe
-   sim.listar(uf="SP")
-   sim.listar_especial()
+ ```
+ 1. Explore what's available
+    sim.listar(uf="SP")
+    sim.listar_especial()
 
-2. Baixar os dados
-   df = sim.ler(uf="SP", ano=2023)          ← microdados por UF
-   df = sim.ler_especial(tipo="MAT", ano=2022)  ← dados nacionais especiais
+ 2. Download the data
+    df = sim.ler(uf="SP", ano=2023)          ← microdata by state
+    df = sim.ler_especial(tipo="MAT", ano=2022)  ← national special data
 
-3. Baixar referências para decodificar os campos
-   sim.baixar_tabelas("CID10.DBF")
-   sim.baixar_tabelas("CADMUN.DBF")
+ 3. Download reference tables to decode fields
+    sim.baixar_tabelas("CID10.DBF")
+    sim.baixar_tabelas("CADMUN.DBF")
 
-4. Consultar a estrutura dos campos (se necessário)
-   sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
-   sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  ← para anos anteriores a 2010
-```
+ 4. Inspect field structure (if needed)
+    sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
+    sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  ← for years prior to 2010
+ ```
 
----
+ ---
 
-## Notas
+ ## Notes
 
-- Arquivos `.dbc` são DBF comprimidos com o algoritmo proprietário **blast** (PKWARE). A biblioteca descomprime automaticamente via `pyreaddbc`.
-- O campo `IDADE` usa codificação própria do DATASUS: o primeiro dígito indica a unidade (1=horas, 2=dias, 3=meses, 4=anos) e os dois seguintes o valor.
-- Municípios são identificados pelo código IBGE de 6 dígitos (`CODMUNRES`, `CODMUNOCI`). Use `CADMUN.DBF` para cruzar com nomes.
-- Causas de óbito seguem o CID-10. Use `CID10.DBF` para obter as descrições dos códigos.
-- Para bases anteriores a 2010, a estrutura dos campos pode diferir — consulte `Estrutura_SIM_Anterior.pdf`.
+ - `.dbc` files are DBF files compressed with the proprietary **blast** (PKWARE) algorithm. The library decompresses them automatically via `pyreaddbc`.
+ - The `IDADE` field uses DATASUS encoding: the first digit indicates the unit (1=hours, 2=days, 3=months, 4=years) and the next two digits the value.
+ - Municipalities are identified by the 6-digit IBGE code (`CODMUNRES`, `CODMUNOCI`). Use `CADMUN.DBF` to join with names.
+ - Causes of death follow ICD-10. Use `CID10.DBF` to obtain code descriptions.
+ - For pre-2010 bases, field structure may differ — consult `Estrutura_SIM_Anterior.pdf`.
+ ```

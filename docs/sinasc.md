@@ -1,149 +1,149 @@
-# SINASC — Sistema de Informações sobre Nascidos Vivos
+ # SINASC — Live Births Information System
 
-Base FTP: `ftp.datasus.gov.br/dissemin/publicos/SINASC/NOV/`
+ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SINASC/NOV/`
 
----
+ ---
 
-## Tipos de dados disponíveis
+ ## Available data types
 
-| Tipo | Função | Retorno | Descrição |
-|------|--------|---------|-----------|
-| Por UF | `ler(uf, ano)` | `DataFrame` | Nascidos vivos registrados em uma UF, por ano |
-| Por UF | `baixar(uf, ano)` | `Path` | Arquivo `.dbc` bruto da UF |
-| Nacional | `ler_nacional(ano)` | `DataFrame` | Agregado nacional (série incompleta: 2014–2017) |
-| Nacional | `baixar_nacional(ano)` | `Path` | Arquivo `.dbc` do agregado nacional |
-| Exceções | `ler_excecao(ano)` | `DataFrame` | Registros suplementares pontuais |
-| Exceções | `baixar_excecao(ano)` | `Path` | Arquivo `.dbc` de exceção |
-| Documentação | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, estrutura e legislação |
+ | Type | Function | Returns | Description |
+ |------|----------|---------|-------------|
+ | By state (UF) | `ler(uf, ano)` | `DataFrame` | Live births recorded in a state, by year |
+ | By state (UF) | `baixar(uf, ano)` | `Path` | Raw `.dbc` file for the state |
+ | National | `ler_nacional(ano)` | `DataFrame` | National aggregate (incomplete series: 2014–2017) |
+ | National | `baixar_nacional(ano)` | `Path` | `.dbc` file of the national aggregate |
+ | Exceptions | `ler_excecao(ano)` | `DataFrame` | Supplementary, one-off records |
+ | Exceptions | `baixar_excecao(ano)` | `Path` | `.dbc` exception file |
+ | Documentation | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, structure and legislation |
 
----
+ ---
 
-## Dados por UF — `DNRES/`
+ ## Data by state — `DNRES/`
 
-**Padrão de arquivo:** `DN{UF}{YYYY}.dbc`  
-**Cobertura:** 1996–2022, todas as 27 UFs  
-**Granularidade:** anual / por UF
+ **File pattern:** `DN{UF}{YYYY}.dbc`  
+ **Coverage:** 1996–2022, all 27 states  
+ **Granularity:** annual / by state
 
-```python
-from susflow.systems import sinasc
+ ```python
+ from susflow.systems import sinasc
 
-df = sinasc.ler(uf="SP", ano=2022)
-path = sinasc.baixar(uf="RJ", ano=2021)
-arquivos = sinasc.listar(uf="MG")
-```
+ df = sinasc.ler(uf="SP", ano=2022)
+ path = sinasc.baixar(uf="RJ", ano=2021)
+ files = sinasc.listar(uf="MG")
+ ```
 
-### Principais variáveis do DataFrame
+ ### Main DataFrame variables
 
-| Variável | Tipo | Descrição |
-|----------|------|-----------|
-| `DTNASC` | str | Data do nascimento (DDMMAAAA) |
-| `SEXO` | str | Sexo (1=Masc, 2=Fem, 0=Ignorado) |
-| `PESO` | str | Peso ao nascer (gramas) |
-| `GESTACAO` | str | Semanas de gestação (codificado) |
-| `GRAVIDEZ` | str | Tipo de gravidez (1=Única, 2=Dupla, 3=Tripla+) |
-| `PARTO` | str | Tipo de parto (1=Vaginal, 2=Cesáreo) |
-| `CONSULTAS` | str | Número de consultas pré-natal |
-| `APGAR1` | str | Índice de Apgar no 1º minuto |
-| `APGAR5` | str | Índice de Apgar no 5º minuto |
-| `RACACOR` | str | Raça/cor do recém-nascido |
-| `IDADEMAE` | str | Idade da mãe |
-| `ESTCIVMAE` | str | Estado civil da mãe |
-| `ESCMAE` | str | Escolaridade da mãe |
-| `CODMUNRES` | str | Código IBGE do município de residência da mãe |
-| `CODMUNNASC` | str | Código IBGE do município de nascimento |
-| `CODESTAB` | str | Código do estabelecimento de saúde |
-| `LOCNASC` | str | Local do nascimento (hospital, domicílio, etc.) |
-| `IDANOMAL` | str | Anomalia congênita identificada |
-| `KOTELCHUCK` | str | Índice de Kotelchuck (adequação do pré-natal) |
+ | Variable | Type | Description |
+ |----------|------|-------------|
+ | `DTNASC` | str | Birth date (DDMMYYYY) |
+ | `SEXO` | str | Sex (1=Male, 2=Female, 0=Ignored) |
+ | `PESO` | str | Birth weight (grams) |
+ | `GESTACAO` | str | Gestational age (coded) |
+ | `GRAVIDEZ` | str | Pregnancy type (1=Single, 2=Twins, 3=Triplets+) |
+ | `PARTO` | str | Delivery type (1=Vaginal, 2=Cesarean) |
+ | `CONSULTAS` | str | Number of prenatal visits |
+ | `APGAR1` | str | Apgar score at 1 minute |
+ | `APGAR5` | str | Apgar score at 5 minutes |
+ | `RACACOR` | str | Newborn race/color |
+ | `IDADEMAE` | str | Mother's age |
+ | `ESTCIVMAE` | str | Mother's marital status |
+ | `ESCMAE` | str | Mother's education |
+ | `CODMUNRES` | str | IBGE code of mother's residence municipality |
+ | `CODMUNNASC` | str | IBGE code of birth municipality |
+ | `CODESTAB` | str | Health establishment code |
+ | `LOCNASC` | str | Place of birth (hospital, home, etc.) |
+ | `IDANOMAL` | str | Identified congenital anomaly |
+ | `KOTELCHUCK` | str | Kotelchuck index (prenatal adequacy) |
 
-> Para a lista completa de variáveis e seus códigos, baixe a documentação técnica com `sinasc.baixar_docs()`.
+ > For the full list of variables and codes, download the technical documentation with `sinasc.baixar_docs()`.
 
----
+ ---
 
-## Agregado nacional — `DNBR`
+ ## National aggregate — `DNBR`
 
-**Padrão de arquivo:** `DNBR{YYYY}.dbc`  
-**Cobertura:** 2014–2017 (série incompleta — apenas esses anos foram confirmados no FTP)  
-**Granularidade:** anual / nacional
+ **File pattern:** `DNBR{YYYY}.dbc`  
+ **Coverage:** 2014–2017 (incomplete series — only these years were confirmed on the FTP)  
+ **Granularity:** annual / national
 
-```python
-df = sinasc.ler_nacional(ano=2015)
-path = sinasc.baixar_nacional(ano=2016)
-arquivos = sinasc.listar_nacional()
-```
+ ```python
+ df = sinasc.ler_nacional(ano=2015)
+ path = sinasc.baixar_nacional(ano=2016)
+ files = sinasc.listar_nacional()
+ ```
 
-> Para análises nacionais fora desse intervalo, consolide os dados por UF manualmente.
+ > For national analyses outside this range, aggregate state data manually.
 
----
+ ---
 
-## Arquivos de exceção — `DNEX`
+ ## Exception files — `DNEX`
 
-**Padrão de arquivo:** `DNEX{YYYY}.dbc`  
-**Natureza:** arquivos pontuais com registros suplementares — não é uma série regular  
-**Confirmado no FTP:** `DNEX2021.dbc` (único arquivo identificado)
+ **File pattern:** `DNEX{YYYY}.dbc`  
+ **Nature:** one-off files with supplementary records — not a regular series  
+ **Confirmed on FTP:** `DNEX2021.dbc` (only file identified)
 
-```python
-df = sinasc.ler_excecao(ano=2021)
-path = sinasc.baixar_excecao(ano=2021)
-arquivos = sinasc.listar_excecoes()
-```
+ ```python
+ df = sinasc.ler_excecao(ano=2021)
+ path = sinasc.baixar_excecao(ano=2021)
+ files = sinasc.listar_excecoes()
+ ```
 
----
+ ---
 
-## Documentação técnica — `DOCS/`
+ ## Technical documentation — `DOCS/`
 
-> **Atenção:** o caminho FTP deste diretório ainda não foi confirmado por mapeamento direto. Se o download falhar, rode `python tools/mapear_ftp.py --alvo /dissemin/publicos/SINASC/NOV` para localizar o diretório correto.
+ > **Note:** the FTP path for this directory has not been fully confirmed by direct mapping. If download fails, run `python tools/mapear_ftp.py --alvo /dissemin/publicos/SINASC/NOV` to locate the correct directory.
 
-| Arquivo | Descrição | Quando usar |
-|---------|-----------|-------------|
-| `Estrutura_SINASC_para_CD.pdf` | Estrutura dos arquivos (formato legado de CD-ROM) | Bases antigas distribuídas em CD |
-| `Legislacao_PDF.pdf` | Legislação relacionada ao SINASC | Referência normativa |
-| `NASC98.HLP` | Arquivo de ajuda do sistema legado (1998) | Bases de 1996–1998 |
-| `Portaria.pdf` | Portaria regulamentadora | Referência normativa |
+ | File | Description | When to use |
+ |---------|-----------|-------------|
+ | `Estrutura_SINASC_para_CD.pdf` | File structure (legacy CD-ROM format) | Old datasets distributed on CD |
+ | `Legislacao_PDF.pdf` | Legislation related to SINASC | Normative reference |
+ | `NASC98.HLP` | Legacy help file (1998) | For datasets from 1996–1998 |
+ | `Portaria.pdf` | Regulatory ordinance | Normative reference |
 
-```python
-# ver o que está disponível
-print(sinasc.listar_docs())
+ ```python
+ # see what's available
+ print(sinasc.listar_docs())
 
-# baixar um documento específico
-path = sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
-path = sinasc.baixar_docs("NASC98.HLP")  # para bases de 1996–1998
+ # download a specific document
+ path = sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
+ path = sinasc.baixar_docs("NASC98.HLP")  # for 1996–1998 datasets
 
-# baixar todos de uma vez
-paths = sinasc.baixar_docs()
+ # download all at once
+ paths = sinasc.baixar_docs()
 
-# salvar em pasta específica
-path = sinasc.baixar_docs("Legislacao_PDF.pdf", destino="/meus/dados/sinasc")
-```
+ # save to a specific folder
+ path = sinasc.baixar_docs("Legislacao_PDF.pdf", destino="/meus/dados/sinasc")
+ ```
 
----
+ ---
 
-## Fluxo recomendado
+ ## Recommended workflow
 
-```
-1. Explorar o que existe
-   sinasc.listar(uf="SP")
-   sinasc.listar_nacional()
-   sinasc.listar_excecoes()
+ ```
+ 1. Explore what's available
+    sinasc.listar(uf="SP")
+    sinasc.listar_nacional()
+    sinasc.listar_excecoes()
 
-2. Baixar os dados
-   df = sinasc.ler(uf="SP", ano=2022)           ← microdados por UF
-   df = sinasc.ler_nacional(ano=2015)            ← agregado nacional
-   df = sinasc.ler_excecao(ano=2021)             ← registros suplementares
+ 2. Download data
+    df = sinasc.ler(uf="SP", ano=2022)           ← microdata by state
+    df = sinasc.ler_nacional(ano=2015)            ← national aggregate
+    df = sinasc.ler_excecao(ano=2021)             ← supplementary records
 
-3. Baixar referências para entender os campos
-   sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
-   sinasc.baixar_docs("NASC98.HLP")              ← para bases de 1996–1998
-```
+ 3. Download references to understand the fields
+    sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
+    sinasc.baixar_docs("NASC98.HLP")              ← for datasets from 1996–1998
+ ```
 
----
+ ---
 
-## Notas
+ ## Notes
 
-- Arquivos `.dbc` são DBF comprimidos com o algoritmo proprietário **blast** (PKWARE). A biblioteca descomprime automaticamente via `pyreaddbc`.
-- O campo `GESTACAO` usa codificação própria: 1=menos de 22 semanas, 2=22–27, 3=28–31, 4=32–36, 5=37–41, 6=42+, 9=ignorado.
-- O campo `PESO` está em gramas. Valores como `9999` indicam ignorado.
-- Municípios são identificados pelo código IBGE de 6 dígitos. Use `CADMUN.DBF` do SIM para cruzar com nomes.
-- O índice de Kotelchuck (`KOTELCHUCK`) classifica a adequação do pré-natal combinando número de consultas e início do acompanhamento.
-- Para bases anteriores a 1999, a estrutura dos campos pode diferir — consulte `NASC98.HLP` e `Estrutura_SINASC_para_CD.pdf`.
-- O agregado nacional `DNBR` só existe para 2014–2017. Para outros anos, some os dados por UF.
+ - `.dbc` files are DBF files compressed with the proprietary **blast** (PKWARE) algorithm. The library decompresses them automatically via `pyreaddbc`.
+ - The `GESTACAO` field uses a custom coding: 1=<22 weeks, 2=22–27, 3=28–31, 4=32–36, 5=37–41, 6=42+, 9=ignored.
+ - The `PESO` field is in grams. Values like `9999` indicate ignored/missing.
+ - Municipalities are identified by the 6-digit IBGE code. Use `CADMUN.DBF` from SIM to join to names.
+ - The Kotelchuck index (`KOTELCHUCK`) classifies prenatal adequacy combining number of visits and start of care.
+ - For datasets before 1999, field structures may differ — consult `NASC98.HLP` and `Estrutura_SINASC_para_CD.pdf`.
+ - The national aggregate `DNBR` exists only for 2014–2017. For other years, sum state data.
