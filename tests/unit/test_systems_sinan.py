@@ -36,7 +36,11 @@ def test_baixar_uses_cache_if_exists(monkeypatch, tmp_path):
     monkeypatch.setattr(sinan._cache, "caminho_local", lambda caminho, destino: local)
 
     # _ftp.baixar should not be called; monkeypatch to raise if called
-    monkeypatch.setattr(sinan._ftp, "baixar", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("ftp called")))
+    monkeypatch.setattr(
+        sinan._ftp,
+        "baixar",
+        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("ftp called")),
+    )
 
     result = sinan.baixar("DENG", 2023)
     assert result == local
