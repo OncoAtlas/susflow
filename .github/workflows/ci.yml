@@ -16,6 +16,10 @@ on:
         required: true
         default: 'main'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -28,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -60,7 +64,40 @@ jobs:
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }} # Required if your repo is private
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  autofix:
+    needs: checks
+    # Só executa se o checks falhar devido a erro de formatação no pull request
+    if: failure() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install formatters
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade black isort
+
+      - name: Run formatting fixes
+        run: |
+          isort .
+          black .
+
+      - name: Commit changes directly to PR branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-format python code (isort + black)"
+          file_pattern: "*.py"
 
   integration:
     needs: checks
@@ -71,7 +108,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -85,44 +122,3 @@ jobs:
         env:
           RUN_INTEGRATION: 'true'
         run: pytest tests/integration -q
-
-  autofix:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install formatters
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade black isort
-
-      - name: Run isort
-        run: isort .
-
-      - name: Run black
-        run: black .
-
-      - name: Create pull request with formatting changes
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: ${{ github.event.inputs.base || github.event.pull_request.base.ref || github.ref_name || 'main' }}
-          branch: fix/auto-format-${{ github.run_id }}
-          delete-branch: true
-          commit-message: "chore: apply automatic formatting"
-          title: "chore: apply automatic formatting"
-          body: 'This PR applies `isort` and `black` formatting fixes.'
-          labels: "automated,format"
