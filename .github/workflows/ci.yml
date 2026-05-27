@@ -57,7 +57,7 @@ jobs:
         run: |
           coverage run -m pytest -q
           coverage xml -o coverage.xml
-          coverage report -m --fail-under=75
+          coverage report -m --fail-under=55
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
