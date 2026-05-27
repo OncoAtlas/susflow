@@ -1,12 +1,12 @@
 from pathlib import Path
 
 from susflow import config
-from susflow.systems import sinan, sihsus, siasus, cnes
+from susflow.systems import cnes, siasus, sihsus, sinan
 
 
 def test_sinan_has_diseases_and_pattern():
     # config contains SINAN metadata
-    assert 'DENG' in config.SINAN['diseases']
+    assert "DENG" in config.SINAN["diseases"]
 
 
 def test_sihsus_and_siasus_have_prefixes():
@@ -22,11 +22,11 @@ def test_sihsus_and_siasus_have_prefixes():
 
 def test_cnes_pattern_and_subtypes():
     # config has CNES metadata and module exposes subtypes
-    assert 'pattern' in config.CNES
+    assert "pattern" in config.CNES
     s = cnes.subtipos()
     assert isinstance(s, dict)
-    assert 'ST' in s
+    assert "ST" in s
 
 
 def test_pni_format_dbf():
-    assert config.PNI['format'] == 'dbf'
+    assert config.PNI["format"] == "dbf"

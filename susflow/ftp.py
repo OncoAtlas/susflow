@@ -5,22 +5,23 @@ Transport layer: all communication with the DATASUS FTP happens here.
 """
 
 import time
-
 from ftplib import FTP, all_errors
 from pathlib import Path
 
 from .config import FTP_HOST
 
-_TIMEOUT    = 30   # segundos
+_TIMEOUT = 30  # segundos
 _TENTATIVAS = 3
-_BACKOFF    = 2    # segundos entre tentativas
+_BACKOFF = 2  # segundos entre tentativas
 
 
 class FTPError(Exception):
     """Communication error with the DATASUS FTP."""
 
+
 class ArquivoNaoEncontradoError(FTPError):
     """File does not exist on the FTP."""
+
 
 def _conectar() -> FTP:
     """Open a fresh FTP connection. Reconnecting per operation avoids '200 Type set to A' bug."""
@@ -37,13 +38,15 @@ def _tentar(fn, *args, **kwargs):
     for tentativa in range(_TENTATIVAS):
         try:
             return fn(*args, **kwargs)
-        
+
         except all_errors as e:
             ultimo_erro = e
             if tentativa < _TENTATIVAS - 1:
                 time.sleep(_BACKOFF)
 
-    raise FTPError(f"Failed after {_TENTATIVAS} attempts: {ultimo_erro}") from ultimo_erro
+    raise FTPError(
+        f"Failed after {_TENTATIVAS} attempts: {ultimo_erro}"
+    ) from ultimo_erro
 
 
 def listar(caminho: str) -> list[str]:
@@ -51,6 +54,7 @@ def listar(caminho: str) -> list[str]:
     List file names in an FTP directory.
     Returns files only (no subdirectories).
     """
+
     def _listar():
         ftp = _conectar()
 
@@ -68,9 +72,9 @@ def listar(caminho: str) -> list[str]:
 
                 nome = linha.split()[-1]
                 arquivos.append(nome)
-            
+
             return arquivos
-        
+
         finally:
             ftp.quit()
 
@@ -88,7 +92,7 @@ def baixar(caminho_ftp: str, destino: Path) -> Path:
 
     def _baixar():
         ftp = _conectar()
-        
+
         try:
             with open(destino, "wb") as f:
                 ftp.retrbinary(f"RETR {caminho_ftp}", f.write)
