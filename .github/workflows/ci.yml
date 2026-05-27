@@ -11,13 +11,17 @@ on:
         description: 'Run integration tests (contact FTP)'
         required: false
         default: 'false'
+      base:
+        description: 'Base branch'
+        required: true
+        default: 'main'
 
 jobs:
   checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10, 3.11, 3.12]
+        python-version: ['3.10', '3.11', '3.12']
 
     steps:
       - name: Checkout
@@ -102,7 +106,7 @@ jobs:
       - name: Create pull request with formatting changes
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.event.inputs.base }}
           branch: fix/auto-format
           commit-message: "chore: apply automatic formatting"
           title: "chore: apply automatic formatting"
