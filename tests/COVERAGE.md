@@ -46,7 +46,11 @@ coverage report -m
 
 CI notes
 
-- The repository CI (`.github/workflows/ci.yml`) runs `coverage run -m pytest` and fails the job if coverage is below the threshold (`--fail-under=70`).
-- If you want coverage uploaded to a service such as Codecov, add a step to the workflow that uploads `coverage.xml` using the official Codecov action and provide the `CODECOV_TOKEN` secret.
+- The repository CI (`.github/workflows/ci.yml`) runs `coverage run -m pytest`, generates `coverage.xml`, and fails the job if coverage is below the threshold (`--fail-under=75`).
+- We intentionally removed automatic Codecov upload from CI; if you want to publish coverage to an external service, add an explicit upload step and provide the required token as a repository secret.
+
+Autofix/formatting PRs
+
+- The CI includes an `autofix` job that creates a formatting PR using `peter-evans/create-pull-request`. The workflow now creates a unique branch per run and auto-deletes the branch after merge to avoid collisions with previous runs.
 
 If you want, I can add a `coverage` make target or a small script to simplify these commands. 
