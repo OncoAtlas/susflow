@@ -1,4 +1,3 @@
-import tempfile
 from pathlib import Path
 
 from susflow.cache import caminho_local, existe
