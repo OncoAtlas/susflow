@@ -104,7 +104,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: fix/auto-format
-          commit-message: chore: apply automatic formatting
-          title: chore: apply automatic formatting
+          commit-message: "chore: apply automatic formatting"
+          title: "chore: apply automatic formatting"
           body: 'This PR applies `isort` and `black` formatting fixes.'
-          labels: automated,format
+          labels: "automated,format"
