@@ -1,7 +1,5 @@
-from pathlib import Path
-
 from susflow import config
-from susflow.systems import cnes, siasus, sihsus, sinan
+from susflow.systems import cnes, siasus, sihsus
 
 
 def test_sinan_has_diseases_and_pattern():
