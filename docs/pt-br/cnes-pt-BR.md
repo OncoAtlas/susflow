@@ -8,8 +8,8 @@ Base FTP: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
 
 | Tipo | Função | Retorno | Descrição |
 |------|--------|---------|-----------|
-| Por UF | `ler(uf, ano, mes)` | `DataFrame` | Dados cadastrais de um subtipo para uma UF |
-| Por UF | `baixar(uf, ano, mes)` | `Path` | Arquivo `.dbc` bruto |
+| Por UF | `read(uf, year, month)` | `DataFrame` | Dados cadastrais de um subtipo para uma UF |
+| Por UF | `download(uf, year, month)` | `Path` | Arquivo `.dbc` bruto |
 
 ---
 
@@ -25,25 +25,25 @@ Base FTP: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
 from susflow.systems import cnes
 
 # ver todos os subtipos disponíveis
-print(cnes.subtipos())
+print(cnes.subtypes())
 
 # Estabelecimentos — subtipo padrão
-df = cnes.ler(uf="SP", ano=2025, mes=1)
-df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="ST")
+df = cnes.read(uf="SP", year=2025, month=1)
+df = cnes.read(uf="SP", year=2025, month=1, type_="ST")
 
 # outros subtipos
-df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   # profissionais
-df = cnes.ler(uf="RJ", ano=2024, mes=6, tipo="LT")   # leitos
-df = cnes.ler(uf="MG", ano=2023, mes=3, tipo="EQ")   # equipamentos
+df = cnes.read(uf="SP", year=2025, month=1, type_="PF")   # profissionais
+df = cnes.read(uf="RJ", year=2024, month=6, type_="LT")   # leitos
+df = cnes.read(uf="MG", year=2023, month=3, type_="EQ")   # equipamentos
 
 # só baixar
-path = cnes.baixar(uf="SP", ano=2025, mes=1)
-path = cnes.baixar(uf="SP", ano=2025, mes=1, tipo="PF")
+path = cnes.download(uf="SP", year=2025, month=1)
+path = cnes.download(uf="SP", year=2025, month=1, type_="PF")
 
 # listar arquivos disponíveis
-cnes.listar()                       # todos os ST
-cnes.listar(uf="SP")                # ST de SP
-cnes.listar(uf="SP", tipo="PF")     # profissionais de SP
+cnes.list_files()                       # todos os ST
+cnes.list_files(uf="SP")                # ST de SP
+cnes.list_files(uf="SP", type_="PF")     # profissionais de SP
 ```
 
 ### Subtipos ativos
@@ -132,18 +132,18 @@ cnes.listar(uf="SP", tipo="PF")     # profissionais de SP
 
 ```
 1. Explorar o que existe
-   print(cnes.subtipos())              ← todos os subtipos e descrições
-   cnes.listar(uf="SP")                ← arquivos ST de SP disponíveis
-   cnes.listar(uf="SP", tipo="PF")     ← profissionais de SP
+   print(cnes.subtypes())              ← todos os subtipos e descrições
+   cnes.list_files(uf="SP")                ← arquivos ST de SP disponíveis
+   cnes.list_files(uf="SP", type_="PF")     ← profissionais de SP
 
 2. Baixar os dados
-   df = cnes.ler(uf="SP", ano=2025, mes=1)              ← estabelecimentos
-   df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   ← profissionais
-   df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="LT")   ← leitos
+   df = cnes.read(uf="SP", year=2025, month=1)              ← estabelecimentos
+   df = cnes.read(uf="SP", year=2025, month=1, type_="PF")   ← profissionais
+   df = cnes.read(uf="SP", year=2025, month=1, type_="LT")   ← leitos
 
 3. Combinar meses em série histórica
    import pandas as pd
-   dfs = [cnes.ler(uf="SP", ano=2024, mes=m) for m in range(1, 13)]
+   dfs = [cnes.read(uf="SP", year=2024, month=m) for m in range(1, 13)]
    df_ano = pd.concat(dfs, ignore_index=True)
 ```
 
@@ -157,4 +157,4 @@ cnes.listar(uf="SP", tipo="PF")     # profissionais de SP
 - Cada subtipo tem sua própria cobertura temporal. Tentar baixar `EE` para 2022 levanta erro com a cobertura correta (2007–2019).
 - `ST` e `PF` são os subtipos mais usados: `ST` para análises de distribuição de estabelecimentos, `PF` para análises de força de trabalho em saúde.
 - O campo `CNES` é a chave de cruzamento entre todos os subtipos — use-o para enriquecer `ST` com dados de `LT`, `EQ`, `PF`, etc.
-- Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+- Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.download_tables("CADMUN.DBF")`).

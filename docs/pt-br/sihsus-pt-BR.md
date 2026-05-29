@@ -8,10 +8,10 @@
 
  | Tipo | Função | Retorno | Descrição |
  |------|--------|---------|-----------|
- | Por UF | `ler(uf, ano, mes)` | `DataFrame` | Microdados de internações de uma UF |
- | Por UF | `baixar(uf, ano, mes)` | `Path` | Arquivo `.dbc` bruto por UF |
- | Nacional | `ler_nacional(ano, mes)` | `DataFrame` | Dados nacionais agregados (CH ou CM) |
- | Nacional | `baixar_nacional(ano, mes)` | `Path` | Arquivo `.dbc` nacional |
+ | Por UF | `read(uf, year, month)` | `DataFrame` | Microdados de internações de uma UF |
+ | Por UF | `download(uf, year, month)` | `Path` | Arquivo `.dbc` bruto por UF |
+ | Nacional | `read_national(year, month)` | `DataFrame` | Dados nacionais agregados (CH ou CM) |
+ | Nacional | `download_national(year, month)` | `Path` | Arquivo `.dbc` nacional |
 
  ---
 
@@ -25,24 +25,24 @@
  from susflow.systems import sihsus
 
  # ver prefixos disponíveis
- print(sihsus.prefixos())
+ print(sihsus.prefixes())
 
  # AIH Reduzida — dado principal (prefixo padrão: RD)
- df = sihsus.ler(uf="SP", ano=2023, mes=1)
- df = sihsus.ler(uf="RJ", ano=2022, mes=12)
+ df = sihsus.read(uf="SP", year=2023, month=1)
+ df = sihsus.read(uf="RJ", year=2022, month=12)
 
  # outros prefixos
- df = sihsus.ler(uf="MG", ano=2023, mes=6, prefixo="SP")  # serviços profissionais
- df = sihsus.ler(uf="BA", ano=2023, mes=3, prefixo="RJ")  # AIH rejeitada
+ df = sihsus.read(uf="MG", year=2023, month=6, prefix="SP")  # serviços profissionais
+ df = sihsus.read(uf="BA", year=2023, month=3, prefix="RJ")  # AIH rejeitada
 
  # só baixar o arquivo
- path = sihsus.baixar(uf="SP", ano=2023, mes=1)
- path = sihsus.baixar(uf="SP", ano=2023, mes=1, prefixo="ER")
+ path = sihsus.download(uf="SP", year=2023, month=1)
+ path = sihsus.download(uf="SP", year=2023, month=1, prefix="ER")
 
  # listar arquivos disponíveis
- sihsus.listar()                        # todos os RD
- sihsus.listar(uf="SP")                 # RD de SP
- sihsus.listar(uf="SP", prefixo="SP")   # serviços profissionais de SP
+ sihsus.list_files()                        # todos os RD
+ sihsus.list_files(uf="SP")                 # RD de SP
+ sihsus.list_files(uf="SP", prefix="SP")   # serviços profissionais de SP
  ```
 
  ### Prefixos por UF
@@ -66,15 +66,15 @@
  print(sihsus.prefixos_nacionais())
 
  # cabeçalho nacional (prefixo padrão: CH)
- df = sihsus.ler_nacional(ano=2023, mes=1)
- path = sihsus.baixar_nacional(ano=2023, mes=1)
+ df = sihsus.read_national(year=2023, month=1)
+ path = sihsus.download_national(year=2023, month=1)
 
  # comunicação de movimento
- df = sihsus.ler_nacional(ano=2023, mes=1, prefixo="CM")
+ df = sihsus.read_national(year=2023, month=1, prefix="CM")
 
  # listar disponíveis
- sihsus.listar_nacional()               # CH (padrão)
- sihsus.listar_nacional(prefixo="CM")   # CM
+ sihsus.list_national()               # CH (padrão)
+ sihsus.list_national(prefix="CM")   # CM
  ```
 
  ### Prefixos nacionais
@@ -122,16 +122,16 @@
 
  ```
  1. Explorar o que existe
-    sihsus.listar(uf="SP")              ← arquivos RD de SP disponíveis
-    sihsus.listar_nacional()            ← arquivos CH nacionais
+    sihsus.list_files(uf="SP")              ← arquivos RD de SP disponíveis
+    sihsus.list_national()            ← arquivos CH nacionais
 
  2. Baixar os dados
-    df = sihsus.ler(uf="SP", ano=2023, mes=1)       ← internações SP jan/2023
-    df = sihsus.ler_nacional(ano=2023, mes=1)        ← cabeçalho nacional
+    df = sihsus.read(uf="SP", year=2023, month=1)       ← internações SP jan/2023
+    df = sihsus.read_national(year=2023, month=1)        ← cabeçalho nacional
 
  3. Combinar meses em série histórica
     import pandas as pd
-    dfs = [sihsus.ler(uf="SP", ano=2023, mes=m) for m in range(1, 13)]
+    dfs = [sihsus.read(uf="SP", year=2023, month=m) for m in range(1, 13)]
     df_ano = pd.concat(dfs, ignore_index=True)
  ```
 
@@ -145,5 +145,5 @@
  - `SP`, `RJ` e `ER` são complementares ao `RD` e compartilham o campo `N_AIH` para cruzamento.
  - `CH` e `CM` têm escopo nacional (`BR`) e não existem por UF.
  - Arquivos grandes: `RD` de estados populosos (SP, RJ, MG) podem ter dezenas de MB por mês.
- - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.download_tables("CADMUN.DBF")`).
  - Para cruzar estabelecimentos com dados cadastrais, use o CNES.
