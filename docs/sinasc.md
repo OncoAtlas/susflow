@@ -8,13 +8,13 @@
 
  | Type | Function | Returns | Description |
  |------|----------|---------|-------------|
- | By state (UF) | `ler(uf, ano)` | `DataFrame` | Live births recorded in a state, by year |
- | By state (UF) | `baixar(uf, ano)` | `Path` | Raw `.dbc` file for the state |
- | National | `ler_nacional(ano)` | `DataFrame` | National aggregate (incomplete series: 2014–2017) |
- | National | `baixar_nacional(ano)` | `Path` | `.dbc` file of the national aggregate |
- | Exceptions | `ler_excecao(ano)` | `DataFrame` | Supplementary, one-off records |
- | Exceptions | `baixar_excecao(ano)` | `Path` | `.dbc` exception file |
- | Documentation | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, structure and legislation |
+ | By state (UF) | `read(uf, year)` | `DataFrame` | Live births recorded in a state, by year |
+ | By state (UF) | `download(uf, year)` | `Path` | Raw `.dbc` file for the state |
+ | National | `read_national(year)` | `DataFrame` | National aggregate (incomplete series: 2014–2017) |
+ | National | `download_national(year)` | `Path` | `.dbc` file of the national aggregate |
+ | Exceptions | `read_exception(year)` | `DataFrame` | Supplementary, one-off records |
+ | Exceptions | `download_exception(year)` | `Path` | `.dbc` exception file |
+ | Documentation | `download_docs(file?)` | `Path / list[Path]` | Layouts, structure and legislation |
 
  ---
 
@@ -27,9 +27,9 @@
  ```python
  from susflow.systems import sinasc
 
- df = sinasc.ler(uf="SP", ano=2022)
- path = sinasc.baixar(uf="RJ", ano=2021)
- files = sinasc.listar(uf="MG")
+ df = sinasc.read(uf="SP", year=2022)
+ path = sinasc.download(uf="RJ", year=2021)
+ files = sinasc.list_files(uf="MG")
  ```
 
  ### Main DataFrame variables
@@ -67,9 +67,9 @@
  **Granularity:** annual / national
 
  ```python
- df = sinasc.ler_nacional(ano=2015)
- path = sinasc.baixar_nacional(ano=2016)
- files = sinasc.listar_nacional()
+ df = sinasc.read_national(year=2015)
+ path = sinasc.download_national(year=2016)
+ files = sinasc.list_national()
  ```
 
  > For national analyses outside this range, aggregate state data manually.
@@ -83,9 +83,9 @@
  **Confirmed on FTP:** `DNEX2021.dbc` (only file identified)
 
  ```python
- df = sinasc.ler_excecao(ano=2021)
- path = sinasc.baixar_excecao(ano=2021)
- files = sinasc.listar_excecoes()
+ df = sinasc.read_exception(year=2021)
+ path = sinasc.download_exception(year=2021)
+ files = sinasc.list_exceptions()
  ```
 
  ---
@@ -103,17 +103,17 @@
 
  ```python
  # see what's available
- print(sinasc.listar_docs())
+ print(sinasc.list_docs())
 
  # download a specific document
- path = sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
- path = sinasc.baixar_docs("NASC98.HLP")  # for 1996–1998 datasets
+ path = sinasc.download_docs("Estrutura_SINASC_para_CD.pdf")
+ path = sinasc.download_docs("NASC98.HLP")  # for 1996–1998 datasets
 
  # download all at once
- paths = sinasc.baixar_docs()
+ paths = sinasc.download_docs()
 
  # save to a specific folder
- path = sinasc.baixar_docs("Legislacao_PDF.pdf", destino="/meus/dados/sinasc")
+ path = sinasc.download_docs("Legislacao_PDF.pdf", destination="/my/data/sinasc")
  ```
 
  ---
@@ -122,18 +122,18 @@
 
  ```
  1. Explore what's available
-    sinasc.listar(uf="SP")
-    sinasc.listar_nacional()
-    sinasc.listar_excecoes()
+    sinasc.list_files(uf="SP")
+    sinasc.list_national()
+    sinasc.list_exceptions()
 
  2. Download data
-    df = sinasc.ler(uf="SP", ano=2022)           ← microdata by state
-    df = sinasc.ler_nacional(ano=2015)            ← national aggregate
-    df = sinasc.ler_excecao(ano=2021)             ← supplementary records
+    df = sinasc.read(uf="SP", year=2022)          ← microdata by state
+    df = sinasc.read_national(year=2015)           ← national aggregate
+    df = sinasc.read_exception(year=2021)          ← supplementary records
 
  3. Download references to understand the fields
-    sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
-    sinasc.baixar_docs("NASC98.HLP")              ← for datasets from 1996–1998
+    sinasc.download_docs("Estrutura_SINASC_para_CD.pdf")
+    sinasc.download_docs("NASC98.HLP")             ← for datasets from 1996–1998
  ```
 
  ---
@@ -144,6 +144,3 @@
  - The `GESTACAO` field uses a custom coding: 1=<22 weeks, 2=22–27, 3=28–31, 4=32–36, 5=37–41, 6=42+, 9=ignored.
  - The `PESO` field is in grams. Values like `9999` indicate ignored/missing.
  - Municipalities are identified by the 6-digit IBGE code. Use `CADMUN.DBF` from SIM to join to names.
- - The Kotelchuck index (`KOTELCHUCK`) classifies prenatal adequacy combining number of visits and start of care.
- - For datasets before 1999, field structures may differ — consult `NASC98.HLP` and `Estrutura_SINASC_para_CD.pdf`.
- - The national aggregate `DNBR` exists only for 2014–2017. For other years, sum state data.
