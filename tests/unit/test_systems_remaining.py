@@ -3,25 +3,22 @@ from susflow.systems import cnes, siasus, sihsus
 
 
 def test_sinan_has_diseases_and_pattern():
-    # config contains SINAN metadata
     assert "DENG" in config.SINAN["diseases"]
 
 
 def test_sihsus_and_siasus_have_prefixes():
-    # modules expose prefix listing functions
-    p1 = sihsus.prefixos()
+    p1 = sihsus.prefixes()
     assert isinstance(p1, dict)
-    pn = sihsus.prefixos_nacionais()
+    pn = sihsus.national_prefixes()
     assert isinstance(pn, dict)
 
-    p2 = siasus.prefixos()
+    p2 = siasus.prefixes()
     assert isinstance(p2, dict)
 
 
 def test_cnes_pattern_and_subtypes():
-    # config has CNES metadata and module exposes subtypes
     assert "pattern" in config.CNES
-    s = cnes.subtipos()
+    s = cnes.subtypes()
     assert isinstance(s, dict)
     assert "ST" in s
 
