@@ -36,92 +36,92 @@ from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import CNES as _CFG
 from ..config import UFS
-from ..reader import ler as _ler
+from ..reader import read as _read
 
 _BASE = _CFG["ftp_base"]
-_SUBTIPOS = _CFG["subtypes"]  # {tipo: (descricao, ano_min, ano_max)}
+_SUBTYPES = _CFG["subtypes"]  # {type: (description, year_min, year_max)}
 
 
-def _validar_subtipo(tipo: str) -> str:
-    tipo = tipo.upper()
-    if tipo not in _SUBTIPOS:
+def _validate_subtype(type_: str) -> str:
+    type_ = type_.upper()
+    if type_ not in _SUBTYPES:
         raise ValueError(
-            f"Invalid subtype: '{tipo}'. " f"Available: {sorted(_SUBTIPOS)}"
+            f"Invalid subtype: '{type_}'. Available: {sorted(_SUBTYPES)}"
         )
-    return tipo
+    return type_
 
 
-def _validar(tipo: str, uf: str, ano: int, mes: int) -> None:
+def _validate(type_: str, uf: str, year: int, month: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
-    if not (1 <= mes <= 12):
-        raise ValueError(f"Invalid month: {mes}. Use 1–12.")
-    _, ano_min, ano_max = _SUBTIPOS[tipo]
-    if not (ano_min <= ano <= ano_max):
+    if not (1 <= month <= 12):
+        raise ValueError(f"Invalid month: {month}. Use 1–12.")
+    _, year_min, year_max = _SUBTYPES[type_]
+    if not (year_min <= year <= year_max):
         raise ValueError(
-            f"Year {ano} out of range for subtype '{tipo}' "
-            f"(available: {ano_min}–{ano_max})"
+            f"Year {year} out of range for subtype '{type_}' "
+            f"(available: {year_min}–{year_max})"
         )
 
 
-def _ftp_dir(tipo: str) -> str:
-    return f"{_BASE}/{tipo}"
+def _ftp_dir(type_: str) -> str:
+    return f"{_BASE}/{type_}"
 
 
-def _nome(tipo: str, uf: str, ano: int, mes: int) -> str:
-    return f"{tipo}{uf}{str(ano)[-2:]}{mes:02d}.dbc"
+def _file_name(type_: str, uf: str, year: int, month: int) -> str:
+    return f"{type_}{uf}{str(year)[-2:]}{month:02d}.dbc"
 
 
-def _baixar_arquivo(tipo: str, nome: str, destino: Path | None, forcar: bool) -> Path:
-    caminho = f"{_ftp_dir(tipo)}/{nome}"
-    local = _cache.caminho_local(caminho, destino)
-    if local.exists() and not forcar:
+def _download_file(type_: str, name: str, destination: Path | None, force: bool) -> Path:
+    path = f"{_ftp_dir(type_)}/{name}"
+    local = _cache.local_path(path, destination)
+    if local.exists() and not force:
         return local
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
-def subtipos() -> dict[str, str]:
+def subtypes() -> dict[str, str]:
     """Return available subtypes: {type: description}."""
-    return {k: v[0] for k, v in _SUBTIPOS.items()}
+    return {k: v[0] for k, v in _SUBTYPES.items()}
 
 
-def listar(uf: str | None = None, tipo: str = "ST") -> list[str]:
+def list_files(uf: str | None = None, type_: str = "ST") -> list[str]:
     """List files available on the FTP for the given subtype.
 
     Filters by state (UF) if provided. Default subtype: `ST` (Establishments).
     """
-    tipo = _validar_subtipo(tipo)
-    arquivos = _ftp.listar(_ftp_dir(tipo))
+    type_ = _validate_subtype(type_)
+    files = _ftp.list_files(_ftp_dir(type_))
     if uf:
-        filtro = f"{tipo}{uf.upper()}"
-        arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
-    return arquivos
+        filter_ = f"{type_}{uf.upper()}"
+        files = [f for f in files if f.upper().startswith(filter_)]
+    return files
 
 
-def baixar(
+def download(
     uf: str,
-    ano: int,
-    mes: int,
-    tipo: str = "ST",
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    month: int,
+    type_: str = "ST",
+    destination: Path | None = None,
+    force: bool = False,
 ) -> Path:
     """Download `{TYPE}{UF}{YY}{MM}.dbc` to local cache.
 
     Default subtype: `ST` (Establishments).
     """
-    tipo = _validar_subtipo(tipo)
-    _validar(tipo, uf, ano, mes)
-    return _baixar_arquivo(tipo, _nome(tipo, uf.upper(), ano, mes), destino, forcar)
+    type_ = _validate_subtype(type_)
+    _validate(type_, uf, year, month)
+    return _download_file(type_, _file_name(type_, uf.upper(), year, month), destination, force)
 
 
-def ler(
+def read(
     uf: str,
-    ano: int,
-    mes: int,
-    tipo: str = "ST",
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    month: int,
+    type_: str = "ST",
+    destination: Path | None = None,
+    force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, mes, tipo=tipo, destino=destino, forcar=forcar))
+    return _read(download(uf, year, month, type_=type_, destination=destination, force=force))
