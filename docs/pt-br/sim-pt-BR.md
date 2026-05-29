@@ -8,13 +8,13 @@
 
  | Tipo | Função | Retorno | Descrição |
  |------|--------|---------|-----------|
- | Por UF | `ler(uf, ano)` | `DataFrame` | Óbitos registrados em uma UF, por ano |
- | Por UF | `baixar(uf, ano)` | `Path` | Arquivo `.dbc` bruto da UF |
- | Especial | `ler_especial(tipo, ano)` | `DataFrame` | Óbitos nacionais por categoria (EXT/FET/INF/MAT) |
- | Especial | `baixar_especial(tipo, ano)` | `Path` | Arquivo `.dbc` bruto da categoria |
- | Documentação | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, estrutura e dicionário de variáveis |
- | Tabelas de apoio | `baixar_tabelas(arquivo?)` | `Path / list[Path]` | CID-10, municípios, ocupações, países, UFs |
- | Dados tabulados | `baixar_tab(arquivo?)` | `Path / list[Path]` | Óbitos agregados por CID-10 (série histórica) |
+ | Por UF | `read(uf, year)` | `DataFrame` | Óbitos registrados em uma UF, por ano |
+ | Por UF | `download(uf, year)` | `Path` | Arquivo `.dbc` bruto da UF |
+ | Especial | `read_special(type_, year)` | `DataFrame` | Óbitos nacionais por categoria (EXT/FET/INF/MAT) |
+ | Especial | `download_special(type_, year)` | `Path` | Arquivo `.dbc` bruto da categoria |
+ | Documentação | `download_docs(file?)` | `Path / list[Path]` | Layouts, estrutura e dicionário de variáveis |
+ | Tabelas de apoio | `download_tables(file?)` | `Path / list[Path]` | CID-10, municípios, ocupações, países, UFs |
+ | Dados tabulados | `download_tab(file?)` | `Path / list[Path]` | Óbitos agregados por CID-10 (série histórica) |
 
  ---
 
@@ -27,9 +27,9 @@
  ```python
  from susflow.systems import sim
 
- df = sim.ler(uf="SP", ano=2023)
- path = sim.baixar(uf="RJ", ano=2022)
- arquivos = sim.listar(uf="MG")
+ df = sim.read(uf="SP", year=2023)
+ path = sim.download(uf="RJ", year=2022)
+ arquivos = sim.list_files(uf="MG")
  ```
 
  ### Principais variáveis do DataFrame
@@ -74,11 +74,11 @@
  | `MAT` | `DOMAT24.dbc` | Óbitos maternos |
 
  ```python
- df = sim.ler_especial(tipo="EXT", ano=2023)
- df = sim.ler_especial(tipo="MAT", ano=2022)
+ df = sim.read_special(type_="EXT", year=2023)
+ df = sim.read_special(type_="MAT", year=2022)
 
- path = sim.baixar_especial(tipo="INF", ano=2024)
- arquivos = sim.listar_especial(tipo="FET")
+ path = sim.download_special(type_="INF", year=2024)
+ arquivos = sim.list_special(type_="FET")
  ```
 
  ---
@@ -95,17 +95,17 @@
 
  ```python
  # ver o que está disponível
- print(sim.listar_docs())
+ print(sim.list_docs())
 
  # baixar um documento específico
- path = sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
- path = sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  # para bases antigas
+ path = sim.download_docs("Estrutura_do_SIM_2025.pdf")
+ path = sim.download_docs("Estrutura_SIM_Anterior.pdf")  # para bases antigas
 
  # baixar todos de uma vez
- paths = sim.baixar_docs()
+ paths = sim.download_docs()
 
  # salvar em pasta específica
- path = sim.baixar_docs("Docs_Tabs_CID10.zip", destino="/meus/dados/sim")
+ path = sim.download_docs("Docs_Tabs_CID10.zip", destination="/meus/dados/sim")
  ```
 
  ---
@@ -126,14 +126,14 @@
 
  ```python
  # ver o que está disponível
- print(sim.listar_tabelas())
+ print(sim.list_tables())
 
  # baixar uma tabela específica
- path = sim.baixar_tabelas("CID10.DBF")
- path = sim.baixar_tabelas("CADMUN.DBF")
+ path = sim.download_tables("CID10.DBF")
+ path = sim.download_tables("CADMUN.DBF")
 
  # baixar todas de uma vez
- paths = sim.baixar_tabelas()
+ paths = sim.download_tables()
  ```
 
  ---
@@ -147,10 +147,10 @@
  | `OBITOS_CID10_TAB.zip` | Série histórica de óbitos agregados por CID-10 |
 
  ```python
- print(sim.listar_tab())
+ print(sim.list_tab())
 
- path = sim.baixar_tab("OBITOS_CID10_TAB.zip")
- paths = sim.baixar_tab()  # baixa todos
+ path = sim.download_tab("OBITOS_CID10_TAB.zip")
+ paths = sim.download_tab()  # baixa todos
  ```
 
  ---
@@ -159,20 +159,20 @@
 
  ```
  1. Explorar o que existe
-    sim.listar(uf="SP")
-    sim.listar_especial()
+    sim.list_files(uf="SP")
+    sim.list_special()
 
  2. Baixar os dados
-    df = sim.ler(uf="SP", ano=2023)          ← microdados por UF
-    df = sim.ler_especial(tipo="MAT", ano=2022)  ← dados nacionais especiais
+    df = sim.read(uf="SP", year=2023)          ← microdados por UF
+    df = sim.read_special(type_="MAT", year=2022)  ← dados nacionais especiais
 
  3. Baixar referências para decodificar os campos
-    sim.baixar_tabelas("CID10.DBF")
-    sim.baixar_tabelas("CADMUN.DBF")
+    sim.download_tables("CID10.DBF")
+    sim.download_tables("CADMUN.DBF")
 
  4. Consultar a estrutura dos campos (se necessário)
-    sim.baixar_docs("Estrutura_do_SIM_2025.pdf")
-    sim.baixar_docs("Estrutura_SIM_Anterior.pdf")  ← para anos anteriores a 2010
+    sim.download_docs("Estrutura_do_SIM_2025.pdf")
+    sim.download_docs("Estrutura_SIM_Anterior.pdf")  ← para anos anteriores a 2010
  ```
 
  ---

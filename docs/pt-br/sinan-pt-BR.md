@@ -8,11 +8,11 @@
 
  | Tipo | Função | Retorno | Descrição |
  |------|--------|---------|-----------|
- | Dados finais | `ler(doenca, ano)` | `DataFrame` | Microdados consolidados do agravo |
- | Dados finais | `baixar(doenca, ano)` | `Path` | Arquivo `.dbc` bruto (dados finais) |
- | Dados preliminares | `ler(doenca, ano, preliminar=True)` | `DataFrame` | Dados ainda não consolidados |
- | Dados preliminares | `baixar(doenca, ano, preliminar=True)` | `Path` | Arquivo `.dbc` bruto (preliminar) |
- | Documentação | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, dicionário e notas técnicas |
+ | Dados finais | `read(disease, year)` | `DataFrame` | Microdados consolidados do agravo |
+ | Dados finais | `download(disease, year)` | `Path` | Arquivo `.dbc` bruto (dados finais) |
+ | Dados preliminares | `read(disease, year, preliminary=True)` | `DataFrame` | Dados ainda não consolidados |
+ | Dados preliminares | `download(disease, year, preliminary=True)` | `Path` | Arquivo `.dbc` bruto (preliminar) |
+ | Documentação | `download_docs(file?)` | `Path / list[Path]` | Layouts, dicionário e notas técnicas |
 
  ---
 
@@ -26,22 +26,22 @@
  from susflow.systems import sinan
 
  # ver todas as doenças disponíveis
- print(sinan.doencas())   # {código: descrição}
+ print(sinan.diseases())   # {código: descrição}
 
  # dados finais
- df = sinan.ler(doenca="DENG", ano=2023)
- df = sinan.ler(doenca="TUBE", ano=2022)
+ df = sinan.read(disease="DENG", year=2023)
+ df = sinan.read(disease="TUBE", year=2022)
 
  # dados preliminares do ano corrente
- df = sinan.ler(doenca="DENG", ano=2024, preliminar=True)
+ df = sinan.read(disease="DENG", year=2024, preliminary=True)
 
  # só baixar o arquivo
- path = sinan.baixar(doenca="CHIK", ano=2023)
- path = sinan.baixar(doenca="HANS", ano=2022, preliminar=True)
+ path = sinan.download(disease="CHIK", year=2023)
+ path = sinan.download(disease="HANS", year=2022, preliminary=True)
 
  # listar arquivos disponíveis
- sinan.listar(doenca="DENG")
- sinan.listar(preliminar=True)
+ sinan.list_files(disease="DENG")
+ sinan.list_files(preliminary=True)
  ```
 
  ---
@@ -95,8 +95,8 @@
  | `VIOL` | Violência doméstica / sexual / autoprovocada | 2009–2024 |
  | `ZIKA` | Zika vírus | 2016–2024 |
 
- > Dados preliminares disponíveis para anos mais recentes — use `preliminar=True`.  
- > A cobertura exata por agravo varia. Use `sinan.listar(doenca="CÓDIGO")` para confirmar os anos disponíveis.
+ > Dados preliminares disponíveis para anos mais recentes — use `preliminary=True`.  
+ > A cobertura exata por agravo varia. Use `sinan.list_files(disease="CÓDIGO")` para confirmar os anos disponíveis.
 
  ---
 
@@ -145,22 +145,22 @@
 
  ```python
  # ver o que está disponível
- print(sinan.listar_docs())
+ print(sinan.list_docs())
 
  # baixar o dicionário principal (referência para todos os agravos)
- path = sinan.baixar_docs("Docs_TAB_SINAN.zip")
+ path = sinan.download_docs("Docs_TAB_SINAN.zip")
 
  # baixar nota técnica de um agravo específico
- path = sinan.baixar_docs("Nota_Tecnica_Intoxicacao_Exogena.pdf")
+ path = sinan.download_docs("Nota_Tecnica_Intoxicacao_Exogena.pdf")
 
  # baixar os guias de acesso a microdados
- path = sinan.baixar_docs("POP_I_Acesso_a_Microdados_5.pdf")
+ path = sinan.download_docs("POP_I_Acesso_a_Microdados_5.pdf")
 
  # baixar todos de uma vez
- paths = sinan.baixar_docs()
+ paths = sinan.download_docs()
 
  # salvar em pasta específica
- path = sinan.baixar_docs("Docs_TAB_SINAN.zip", destino="/meus/dados/sinan")
+ path = sinan.download_docs("Docs_TAB_SINAN.zip", destination="/meus/dados/sinan")
  ```
 
  ---
@@ -169,17 +169,17 @@
 
  ```
  1. Explorar o que existe
-    print(sinan.doencas())              ← lista todos os agravos disponíveis
-    sinan.listar(doenca="DENG")         ← anos disponíveis para dengue
-    sinan.listar(preliminar=True)       ← dados preliminares disponíveis
+    print(sinan.diseases())              ← lista todos os agravos disponíveis
+    sinan.list_files(disease="DENG")         ← anos disponíveis para dengue
+    sinan.list_files(preliminary=True)       ← dados preliminares disponíveis
 
  2. Baixar os dados
-    df = sinan.ler(doenca="DENG", ano=2023)              ← dados finais
-    df = sinan.ler(doenca="DENG", ano=2024, preliminar=True)  ← preliminar
+    df = sinan.read(disease="DENG", year=2023)              ← dados finais
+    df = sinan.read(disease="DENG", year=2024, preliminary=True)  ← preliminar
 
  3. Baixar referências para entender os campos
-    sinan.baixar_docs("Docs_TAB_SINAN.zip")              ← dicionário completo
-    sinan.baixar_docs("Nota_Tecnica_Rotavirus.pdf")      ← nota do agravo específico
+    sinan.download_docs("Docs_TAB_SINAN.zip")              ← dicionário completo
+    sinan.download_docs("Nota_Tecnica_Rotavirus.pdf")      ← nota do agravo específico
  ```
 
  ---
@@ -192,4 +192,4 @@
  - `CLASSI_FIN` classifica o caso: 1=Confirmado, 2=Descartado, 3=Inconclusivo (varia por agravo).
  - Dados preliminares (`PRELIM/`) são atualizados continuamente e podem diferir dos finais. Use dados finais para análises históricas.
  - Alguns agravos têm cobertura histórica curta (ex: CHIK desde 2015, ZIKA desde 2016) por serem doenças emergentes.
- - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.download_tables("CADMUN.DBF")`).

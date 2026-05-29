@@ -8,13 +8,13 @@
 
  | Tipo | Função | Retorno | Descrição |
  |------|--------|---------|-----------|
- | Por UF | `ler(uf, ano)` | `DataFrame` | Nascidos vivos registrados em uma UF, por ano |
- | Por UF | `baixar(uf, ano)` | `Path` | Arquivo `.dbc` bruto da UF |
- | Nacional | `ler_nacional(ano)` | `DataFrame` | Agregado nacional (série incompleta: 2014–2017) |
- | Nacional | `baixar_nacional(ano)` | `Path` | Arquivo `.dbc` do agregado nacional |
- | Exceções | `ler_excecao(ano)` | `DataFrame` | Registros suplementares pontuais |
- | Exceções | `baixar_excecao(ano)` | `Path` | Arquivo `.dbc` de exceção |
- | Documentação | `baixar_docs(arquivo?)` | `Path / list[Path]` | Layouts, estrutura e legislação |
+ | Por UF | `read(uf, year)` | `DataFrame` | Nascidos vivos registrados em uma UF, por ano |
+ | Por UF | `download(uf, year)` | `Path` | Arquivo `.dbc` bruto da UF |
+ | Nacional | `read_national(year)` | `DataFrame` | Agregado nacional (série incompleta: 2014–2017) |
+ | Nacional | `download_national(year)` | `Path` | Arquivo `.dbc` do agregado nacional |
+ | Exceções | `read_exception(year)` | `DataFrame` | Registros suplementares pontuais |
+ | Exceções | `download_exception(year)` | `Path` | Arquivo `.dbc` de exceção |
+ | Documentação | `download_docs(file?)` | `Path / list[Path]` | Layouts, estrutura e legislação |
 
  ---
 
@@ -27,9 +27,9 @@
  ```python
  from susflow.systems import sinasc
 
- df = sinasc.ler(uf="SP", ano=2022)
- path = sinasc.baixar(uf="RJ", ano=2021)
- arquivos = sinasc.listar(uf="MG")
+ df = sinasc.read(uf="SP", year=2022)
+ path = sinasc.download(uf="RJ", year=2021)
+ arquivos = sinasc.list_files(uf="MG")
  ```
 
  ### Principais variáveis do DataFrame
@@ -56,7 +56,7 @@
  | `IDANOMAL` | str | Anomalia congênita identificada |
  | `KOTELCHUCK` | str | Índice de Kotelchuck (adequação do pré-natal) |
 
- > Para a lista completa de variáveis e seus códigos, baixe a documentação técnica com `sinasc.baixar_docs()`.
+ > Para a lista completa de variáveis e seus códigos, baixe a documentação técnica com `sinasc.download_docs()`.
 
  ---
 
@@ -67,9 +67,9 @@
  **Granularidade:** anual / nacional
 
  ```python
- df = sinasc.ler_nacional(ano=2015)
- path = sinasc.baixar_nacional(ano=2016)
- arquivos = sinasc.listar_nacional()
+ df = sinasc.read_national(year=2015)
+ path = sinasc.download_national(year=2016)
+ arquivos = sinasc.list_national()
  ```
 
  > Para análises nacionais fora desse intervalo, consolide os dados por UF manualmente.
@@ -83,9 +83,9 @@
  **Confirmado no FTP:** `DNEX2021.dbc` (único arquivo identificado)
 
  ```python
- df = sinasc.ler_excecao(ano=2021)
- path = sinasc.baixar_excecao(ano=2021)
- arquivos = sinasc.listar_excecoes()
+ df = sinasc.read_exception(year=2021)
+ path = sinasc.download_exception(year=2021)
+ arquivos = sinasc.list_exceptions()
  ```
 
  ---
@@ -103,17 +103,17 @@
 
  ```python
  # ver o que está disponível
- print(sinasc.listar_docs())
+ print(sinasc.list_docs())
 
  # baixar um documento específico
- path = sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
- path = sinasc.baixar_docs("NASC98.HLP")  # para bases de 1996–1998
+ path = sinasc.download_docs("Estrutura_SINASC_para_CD.pdf")
+ path = sinasc.download_docs("NASC98.HLP")  # para bases de 1996–1998
 
  # baixar todos de uma vez
- paths = sinasc.baixar_docs()
+ paths = sinasc.download_docs()
 
  # salvar em pasta específica
- path = sinasc.baixar_docs("Legislacao_PDF.pdf", destino="/meus/dados/sinasc")
+ path = sinasc.download_docs("Legislacao_PDF.pdf", destination="/meus/dados/sinasc")
  ```
 
  ---
@@ -122,18 +122,18 @@
 
  ```
  1. Explorar o que existe
-    sinasc.listar(uf="SP")
-    sinasc.listar_nacional()
-    sinasc.listar_excecoes()
+    sinasc.list_files(uf="SP")
+    sinasc.list_national()
+    sinasc.list_exceptions()
 
  2. Baixar os dados
-    df = sinasc.ler(uf="SP", ano=2022)           ← microdados por UF
-    df = sinasc.ler_nacional(ano=2015)            ← agregado nacional
-    df = sinasc.ler_excecao(ano=2021)             ← registros suplementares
+    df = sinasc.read(uf="SP", year=2022)           ← microdados por UF
+    df = sinasc.read_national(year=2015)            ← agregado nacional
+    df = sinasc.read_exception(year=2021)             ← registros suplementares
 
  3. Baixar referências para entender os campos
-    sinasc.baixar_docs("Estrutura_SINASC_para_CD.pdf")
-    sinasc.baixar_docs("NASC98.HLP")              ← para bases de 1996–1998
+    sinasc.download_docs("Estrutura_SINASC_para_CD.pdf")
+    sinasc.download_docs("NASC98.HLP")              ← para bases de 1996–1998
  ```
 
  ---
