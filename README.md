@@ -27,6 +27,8 @@ Quick links
 - [SIM](./docs/sim.md) — mortality
 - [SINAN](./docs/sinan.md) — notifiable diseases
 - [SINASC](./docs/sinasc.md) — live births
+- [FTP file patterns summary](./docs/summary.md)
+- [Português do Brasil](./docs/pt-br/README.md)
 
 Installation
 -
@@ -115,7 +117,8 @@ Utilities
 
 Contributing
 -
-See `CONTRIBUTING.md` for guidelines: coding style, tests, and PR workflow.
+See [docs/contributing/CONTRIBUTING.md](./docs/contributing/CONTRIBUTING.md) for guidelines: coding style, tests, and PR workflow.
+See [docs/contributing/coverage.md](./docs/contributing/coverage.md) for coverage instructions.
 
 License
 -
