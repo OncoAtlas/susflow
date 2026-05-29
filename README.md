@@ -62,7 +62,7 @@ Core runtime dependencies are declared in `pyproject.toml`. Typical extras for p
 
 Basic usage
 -
-Each DATASUS system is available under `susflow.systems`. APIs are lightweight: `listar`, `baixar` and `ler` helpers manage discovery, download and conversion.
+Each DATASUS system is available under `susflow.systems`. APIs are lightweight: `list_files`, `download` and `read` helpers manage discovery, download and conversion.
 
 Example: SINASC (Live Births)
 
@@ -70,22 +70,22 @@ Example: SINASC (Live Births)
 from susflow.systems import sinasc
 
 # list files for a state
-sinasc.listar(uf="SP")
+sinasc.list_files(uf="SP")
 
 # download and return a pandas.DataFrame
-df = sinasc.ler(uf="SP", ano=2020)
+df = sinasc.read(uf="SP", year=2020)
 ```
 
 Example: PNI (Vaccinations)
 
 ```python
 from susflow.systems import pni
-df = pni.ler(uf="RJ", ano=2015)
+df = pni.read(uf="RJ", year=2015)
 ```
 
 Caching behavior
 -
-By default downloads are stored under `~/.susflow/cache/` mirroring FTP paths. If a requested file is present locally the library skips the download and reads directly from cache. To force re-download set `forcar=True` on download/reader helpers.
+By default downloads are stored under `~/.susflow/cache/` mirroring FTP paths. If a requested file is present locally the library skips the download and reads directly from cache. To force re-download set `force=True` on download/reader helpers.
 
 Performance guidance
 -

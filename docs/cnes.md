@@ -8,8 +8,8 @@
 
  | Type | Function | Returns | Description |
  |------|----------|---------|-------------|
- | By state | `ler(uf, ano, mes)` | `DataFrame` | Registration data for a subtype and state |
- | By state | `baixar(uf, ano, mes)` | `Path` | Raw `.dbc` file |
+ | By state | `read(uf, year, month)` | `DataFrame` | Registration data for a subtype and state |
+ | By state | `download(uf, year, month)` | `Path` | Raw `.dbc` file |
 
  ---
 
@@ -25,25 +25,25 @@
  from susflow.systems import cnes
 
  # show all available subtypes
- print(cnes.subtipos())
+ print(cnes.subtypes())
 
  # Establishments — default subtype
- df = cnes.ler(uf="SP", ano=2025, mes=1)
- df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="ST")
+ df = cnes.read(uf="SP", year=2025, month=1)
+ df = cnes.read(uf="SP", year=2025, month=1, type_="ST")
 
  # other subtypes
- df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   # professionals
- df = cnes.ler(uf="RJ", ano=2024, mes=6, tipo="LT")   # beds
- df = cnes.ler(uf="MG", ano=2023, mes=3, tipo="EQ")   # equipment
+ df = cnes.read(uf="SP", year=2025, month=1, type_="PF")   # professionals
+ df = cnes.read(uf="RJ", year=2024, month=6, type_="LT")   # beds
+ df = cnes.read(uf="MG", year=2023, month=3, type_="EQ")   # equipment
 
  # download only
- path = cnes.baixar(uf="SP", ano=2025, mes=1)
- path = cnes.baixar(uf="SP", ano=2025, mes=1, tipo="PF")
+ path = cnes.download(uf="SP", year=2025, month=1)
+ path = cnes.download(uf="SP", year=2025, month=1, type_="PF")
 
  # list available files
- cnes.listar()                       # all ST files
- cnes.listar(uf="SP")                # ST files for SP
- cnes.listar(uf="SP", tipo="PF")     # professionals for SP
+ cnes.list_files()                          # all ST files
+ cnes.list_files(uf="SP")                   # ST files for SP
+ cnes.list_files(uf="SP", type_="PF")       # professionals for SP
  ```
 
  ### Active subtypes
@@ -132,19 +132,19 @@
 
  ```
  1. Explore available data
-    print(cnes.subtipos())              ← all subtypes and descriptions
-    cnes.listar(uf="SP")                ← ST files available for SP
-    cnes.listar(uf="SP", tipo="PF")     ← professionals for SP
+    print(cnes.subtypes())                 ← all subtypes and descriptions
+    cnes.list_files(uf="SP")               ← ST files available for SP
+    cnes.list_files(uf="SP", type_="PF")   ← professionals for SP
 
  2. Download data
-    df = cnes.ler(uf="SP", ano=2025, mes=1)              ← establishments
-    df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="PF")   ← professionals
-    df = cnes.ler(uf="SP", ano=2025, mes=1, tipo="LT")   ← beds
+    df = cnes.read(uf="SP", year=2025, month=1)               ← establishments
+    df = cnes.read(uf="SP", year=2025, month=1, type_="PF")   ← professionals
+    df = cnes.read(uf="SP", year=2025, month=1, type_="LT")   ← beds
 
  3. Combine months into a time series
     import pandas as pd
-    dfs = [cnes.ler(uf="SP", ano=2024, mes=m) for m in range(1, 13)]
-    df_ano = pd.concat(dfs, ignore_index=True)
+    dfs = [cnes.read(uf="SP", year=2024, month=m) for m in range(1, 13)]
+    df_year = pd.concat(dfs, ignore_index=True)
  ```
 
  ---
@@ -157,4 +157,4 @@
  - Each subtype has its own temporal coverage. Attempting to download `EE` for 2022 will raise an error with the correct coverage (2007–2019).
  - `ST` and `PF` are the most used subtypes: `ST` for analyses of establishment distribution, `PF` for workforce analyses.
  - The `CNES` field is the key to join all subtypes — use it to enrich `ST` with `LT`, `EQ`, `PF`, etc.
- - To map municipality codes to names, use `CADMUN.DBF` available in SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - To map municipality codes to names, use `CADMUN.DBF` available in SIM (`sim.download_tables("CADMUN.DBF")`).
