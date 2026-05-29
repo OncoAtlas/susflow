@@ -5,10 +5,10 @@ SINASC — Live Births Information System.
 
 Data subtypes:
 
-    uf       → DN{UF}{YYYY}.dbc  in NOV/DNRES/   e.g. DNSP2022.dbc
+    uf         → DN{UF}{YYYY}.dbc  in NOV/DNRES/   e.g. DNSP2022.dbc
                          by state, annual, 1996–2022
 
-    national → DNBR{YYYY}.dbc   in NOV/DNRES/   e.g. DNBR2015.dbc
+    national   → DNBR{YYYY}.dbc   in NOV/DNRES/   e.g. DNBR2015.dbc
                          national aggregate, incomplete series (2014–2017 confirmed)
 
     exceptions → DNEX{YYYY}.dbc   in NOV/DNRES/   e.g. DNEX2021.dbc
@@ -16,7 +16,7 @@ Data subtypes:
 
 Auxiliary files (download only, not read as DataFrame):
 
-    docs     → system technical documentation (FTP path to confirm)
+    docs       → system technical documentation (FTP path to confirm)
 """
 
 from pathlib import Path
@@ -27,161 +27,161 @@ from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import SINASC as _CFG
 from ..config import UFS
-from ..reader import ler as _ler
+from ..reader import read as _read
 
 _CFG_UF = _CFG["uf"]
-_CFG_NAC = _CFG["nacional"]
-_CFG_EXC = _CFG["excecoes"]
-_CFG_DOC = _CFG["docs"]
+_CFG_NATIONAL = _CFG["national"]
+_CFG_EXCEPTIONS = _CFG["exceptions"]
+_CFG_DOCS = _CFG["docs"]
 
-_ANO_MIN_UF, _ANO_MAX_UF = _CFG_UF["year_range"]
-_ANO_MIN_NAC, _ANO_MAX_NAC = _CFG_NAC["year_range"]
+_YEAR_MIN_UF, _YEAR_MAX_UF = _CFG_UF["year_range"]
+_YEAR_MIN_NATIONAL, _YEAR_MAX_NATIONAL = _CFG_NATIONAL["year_range"]
 
 
-def _validar_uf(uf: str, ano: int) -> None:
+def _validate_uf(uf: str, year: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
 
-    if not (_ANO_MIN_UF <= ano <= _ANO_MAX_UF):
+    if not (_YEAR_MIN_UF <= year <= _YEAR_MAX_UF):
         raise ValueError(
-            f"Year out of range: {ano} (available: {_ANO_MIN_UF}–{_ANO_MAX_UF})"
+            f"Year out of range: {year} (available: {_YEAR_MIN_UF}–{_YEAR_MAX_UF})"
         )
 
 
-def _validar_nacional(ano: int) -> None:
-    if not (_ANO_MIN_NAC <= ano <= _ANO_MAX_NAC):
+def _validate_national(year: int) -> None:
+    if not (_YEAR_MIN_NATIONAL <= year <= _YEAR_MAX_NATIONAL):
         raise ValueError(
-            f"Year out of range for the national aggregate: {ano} "
-            f"(confirmed: {_ANO_MIN_NAC}–{_ANO_MAX_NAC})"
+            f"Year out of range for the national aggregate: {year} "
+            f"(confirmed: {_YEAR_MIN_NATIONAL}–{_YEAR_MAX_NATIONAL})"
         )
 
 
-def _baixar_arquivo(
-    ftp_dir: str, nome: str, destino: Path | None, forcar: bool
+def _download_file(
+    ftp_dir: str, name: str, destination: Path | None, force: bool
 ) -> Path:
-    caminho = f"{ftp_dir}/{nome}"
-    local = _cache.caminho_local(caminho, destino)
-    if local.exists() and not forcar:
+    path = f"{ftp_dir}/{name}"
+    local = _cache.local_path(path, destination)
+    if local.exists() and not force:
         return local
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
 # ---------------------------------------------------------------------------
-# Por UF
+# By state (UF)
 # ---------------------------------------------------------------------------
 
 
-def listar(uf: str | None = None) -> list[str]:
+def list_files(uf: str | None = None) -> list[str]:
     """List files by state (UF) available on the FTP. Filters by UF if provided."""
-    arquivos = _ftp.listar(_CFG_UF["ftp_dir"])
-    arquivos = [
-        a
-        for a in arquivos
-        if a.upper().startswith("DN") and not a.upper().startswith(("DNBR", "DNEX"))
+    files = _ftp.list_files(_CFG_UF["ftp_dir"])
+    files = [
+        f
+        for f in files
+        if f.upper().startswith("DN") and not f.upper().startswith(("DNBR", "DNEX"))
     ]
     if uf:
-        prefixo = f"DN{uf.upper()}"
-        arquivos = [a for a in arquivos if a.upper().startswith(prefixo)]
-    return arquivos
+        prefix = f"DN{uf.upper()}"
+        files = [f for f in files if f.upper().startswith(prefix)]
+    return files
 
 
-def baixar(
-    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+def download(
+    uf: str, year: int, destination: Path | None = None, force: bool = False
 ) -> Path:
     """Download `DN{UF}{YYYY}.dbc` to local cache."""
-    _validar_uf(uf, ano)
-    return _baixar_arquivo(
-        _CFG_UF["ftp_dir"], f"DN{uf.upper()}{ano}.dbc", destino, forcar
+    _validate_uf(uf, year)
+    return _download_file(
+        _CFG_UF["ftp_dir"], f"DN{uf.upper()}{year}.dbc", destination, force
     )
 
 
-def ler(
-    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+def read(
+    uf: str, year: int, destination: Path | None = None, force: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _read(download(uf, year, destination=destination, force=force))
 
 
 # ---------------------------------------------------------------------------
-# Agregado nacional (DNBR — série incompleta: 2014–2017)
+# National aggregate (DNBR — incomplete series: 2014–2017)
 # ---------------------------------------------------------------------------
 
 
-def listar_nacional() -> list[str]:
+def list_national() -> list[str]:
     """List national aggregate files available on the FTP."""
-    arquivos = _ftp.listar(_CFG_NAC["ftp_dir"])
-    return [a for a in arquivos if a.upper().startswith("DNBR")]
+    files = _ftp.list_files(_CFG_NATIONAL["ftp_dir"])
+    return [f for f in files if f.upper().startswith("DNBR")]
 
 
-def baixar_nacional(
-    ano: int, destino: Path | None = None, forcar: bool = False
+def download_national(
+    year: int, destination: Path | None = None, force: bool = False
 ) -> Path:
     """Download `DNBR{YYYY}.dbc` to local cache."""
-    _validar_nacional(ano)
-    return _baixar_arquivo(_CFG_NAC["ftp_dir"], f"DNBR{ano}.dbc", destino, forcar)
+    _validate_national(year)
+    return _download_file(_CFG_NATIONAL["ftp_dir"], f"DNBR{year}.dbc", destination, force)
 
 
-def ler_nacional(
-    ano: int, destino: Path | None = None, forcar: bool = False
+def read_national(
+    year: int, destination: Path | None = None, force: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the national aggregate as a DataFrame."""
-    return _ler(baixar_nacional(ano, destino=destino, forcar=forcar))
+    return _read(download_national(year, destination=destination, force=force))
 
 
 # ---------------------------------------------------------------------------
-# Arquivos de exceção/suplementares (DNEX)
+# Exception / supplementary files (DNEX)
 # ---------------------------------------------------------------------------
 
 
-def listar_excecoes() -> list[str]:
+def list_exceptions() -> list[str]:
     """List exception files available on the FTP."""
-    arquivos = _ftp.listar(_CFG_EXC["ftp_dir"])
-    return [a for a in arquivos if a.upper().startswith("DNEX")]
+    files = _ftp.list_files(_CFG_EXCEPTIONS["ftp_dir"])
+    return [f for f in files if f.upper().startswith("DNEX")]
 
 
-def baixar_excecao(ano: int, destino: Path | None = None, forcar: bool = False) -> Path:
+def download_exception(year: int, destination: Path | None = None, force: bool = False) -> Path:
     """Download `DNEX{YYYY}.dbc` to local cache."""
-    return _baixar_arquivo(_CFG_EXC["ftp_dir"], f"DNEX{ano}.dbc", destino, forcar)
+    return _download_file(_CFG_EXCEPTIONS["ftp_dir"], f"DNEX{year}.dbc", destination, force)
 
 
-def ler_excecao(
-    ano: int, destino: Path | None = None, forcar: bool = False
+def read_exception(
+    year: int, destination: Path | None = None, force: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the exception file as a DataFrame."""
-    return _ler(baixar_excecao(ano, destino=destino, forcar=forcar))
+    return _read(download_exception(year, destination=destination, force=force))
 
 
 # ---------------------------------------------------------------------------
-# Documentação técnica — apenas download
+# Technical documentation — download only
 # ---------------------------------------------------------------------------
 
 
-def listar_docs() -> dict[str, str]:
+def list_docs() -> dict[str, str]:
     """Return technical documents available for download: {name: description}."""
-    return dict(_CFG_DOC["arquivos"])
+    return dict(_CFG_DOCS["files"])
 
 
-def baixar_docs(
-    arquivo: str | None = None,
-    destino: Path | None = None,
-    forcar: bool = False,
+def download_docs(
+    file: str | None = None,
+    destination: Path | None = None,
+    force: bool = False,
 ) -> "Path | list[Path]":
     """Download SINASC technical documents.
 
     Note: the FTP path for this directory has not been fully confirmed.
     If download fails, use `mapear_ftp.py` to locate the correct directory.
 
-    - If `arquivo` is provided, download only that file.
+    - If `file` is provided, download only that file.
     - If omitted, download all available files.
     """
-    disponiveis = _CFG_DOC["arquivos"]
-    ftp_dir = _CFG_DOC["ftp_dir"]
+    available = _CFG_DOCS["files"]
+    ftp_dir = _CFG_DOCS["ftp_dir"]
 
-    if arquivo:
-        if arquivo not in disponiveis:
+    if file:
+        if file not in available:
             raise ValueError(
-                f"Document not available: '{arquivo}'. Available: {list(disponiveis)}"
+                f"Document not available: '{file}'. Available: {list(available)}"
             )
-        return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
+        return _download_file(ftp_dir, file, destination, force)
 
-    return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]
+    return [_download_file(ftp_dir, name, destination, force) for name in available]
