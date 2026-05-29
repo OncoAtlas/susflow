@@ -8,7 +8,6 @@ RUN_INTEGRATION = os.getenv("RUN_INTEGRATION", "false").lower() == "true"
 
 
 @pytest.mark.skipif(not RUN_INTEGRATION, reason="Integration tests disabled by default")
-def test_listar_real_ftp():
-    # This test will run only when RUN_INTEGRATION=true in the environment
-    files = _ftp.listar("/")
+def test_list_files_real_ftp():
+    files = _ftp.list_files("/")
     assert isinstance(files, list)
