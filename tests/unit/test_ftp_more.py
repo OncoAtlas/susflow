@@ -33,7 +33,7 @@ class FakeFTPGood:
         self.closed = True
 
 
-def test__tentar_retries_then_fails(monkeypatch):
+def test__retry_retries_then_fails(monkeypatch):
     calls = {"n": 0}
 
     def bad():
@@ -43,16 +43,16 @@ def test__tentar_retries_then_fails(monkeypatch):
     monkeypatch.setattr(_ftp, "time", type("T", (), {"sleep": lambda *_: None}))
 
     with pytest.raises(_ftp.FTPError):
-        _ftp._tentar(bad)
-    assert calls["n"] == _ftp._TENTATIVAS
+        _ftp._retry(bad)
+    assert calls["n"] == _ftp._RETRIES
 
 
-def test_baixar_success(monkeypatch, tmp_path: Path):
+def test_download_success(monkeypatch, tmp_path: Path):
     fake = FakeFTPGood()
 
-    monkeypatch.setattr(_ftp, "_conectar", lambda: fake)
+    monkeypatch.setattr(_ftp, "_connect", lambda: fake)
 
-    destino = tmp_path / "out.dbc"
-    res = _ftp.baixar("/some/file.dbc", destino)
+    destination = tmp_path / "out.dbc"
+    res = _ftp.download("/some/file.dbc", destination)
     assert res.exists()
     assert res.read_bytes() == b"hello"
