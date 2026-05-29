@@ -7,20 +7,20 @@ Default folder: ~/.susflow/cache/, mirroring the FTP structure.
 
 from pathlib import Path
 
-_CACHE_PADRAO = Path.home() / ".susflow" / "cache"
+_DEFAULT_CACHE = Path.home() / ".susflow" / "cache"
 
 
-def caminho_local(caminho_ftp: str, raiz: Path | None = None) -> Path:
+def local_path(ftp_path: str, root: Path | None = None) -> Path:
     """
     Return the local path corresponding to an FTP path.
     Example: /dissemin/publicos/SINASC/NOV/DNRES/DNSP2022.dbc
      →  ~/.susflow/cache/dissemin/publicos/SINASC/NOV/DNRES/DNSP2022.dbc
     """
-    raiz = Path(raiz) if raiz else _CACHE_PADRAO
-    # remove the leading slash to avoid creating an absolute path when joining
-    relativo = caminho_ftp.lstrip("/")
-    return raiz / relativo
+    root = Path(root) if root else _DEFAULT_CACHE
+    # strip leading slash to avoid creating an absolute path when joining
+    relative = ftp_path.lstrip("/")
+    return root / relative
 
 
-def existe(caminho_ftp: str, raiz: Path | None = None) -> bool:
-    return caminho_local(caminho_ftp, raiz).exists()
+def exists(ftp_path: str, root: Path | None = None) -> bool:
+    return local_path(ftp_path, root).exists()
