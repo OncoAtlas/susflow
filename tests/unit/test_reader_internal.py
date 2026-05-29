@@ -4,11 +4,10 @@ import pandas as pd
 import pytest
 
 from susflow import reader
-from susflow.reader import LeituraError
+from susflow.reader import ReadError
 
 
-def test__ler_dbc_uses_dbc2dbf_and_calls_ler_dbf(tmp_path: Path, monkeypatch):
-    # create a fake .dbc file path
+def test__read_dbc_uses_dbc2dbf_and_calls_read_dbf(tmp_path: Path, monkeypatch):
     dbc_file = tmp_path / "sample.dbc"
     dbc_file.write_text("dummy")
 
@@ -21,16 +20,15 @@ def test__ler_dbc_uses_dbc2dbf_and_calls_ler_dbf(tmp_path: Path, monkeypatch):
     expected = pd.DataFrame({"A": [1]})
 
     monkeypatch.setattr(reader, "dbc2dbf", fake_dbc2dbf)
-    monkeypatch.setattr(reader, "_ler_dbf", lambda p: expected)
+    monkeypatch.setattr(reader, "_read_dbf", lambda p: expected)
 
-    df = reader._ler_dbc(dbc_file)
+    df = reader._read_dbc(dbc_file)
     assert df.equals(expected)
     assert called["src"].endswith("sample.dbc")
     assert called["dst"].endswith(".dbf")
 
 
-def test__ler_dbf_returns_dataframe_and_uppercases_columns(monkeypatch, tmp_path: Path):
-    # prepare a fake DBF iterable
+def test__read_dbf_returns_dataframe_and_uppercases_columns(monkeypatch, tmp_path: Path):
     class FakeDBF:
         def __init__(self, path, encoding=None, load=False):
             self._rows = [{"col": "x", "num": 1}]
@@ -43,15 +41,15 @@ def test__ler_dbf_returns_dataframe_and_uppercases_columns(monkeypatch, tmp_path
     p = tmp_path / "dummy.dbf"
     p.write_text("x")
 
-    df = reader._ler_dbf(p)
+    df = reader._read_dbf(p)
     assert list(df.columns) == ["COL", "NUM"]
     assert df.iloc[0]["COL"] == "x"
 
 
-def test__ler_dbf_raises_leituraerror_on_failure(monkeypatch, tmp_path: Path):
+def test__read_dbf_raises_readerror_on_failure(monkeypatch, tmp_path: Path):
     def bad_dbf(path, encoding=None, load=False):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(reader, "DBF", bad_dbf)
-    with pytest.raises(LeituraError):
-        reader._ler_dbf(tmp_path / "nope.dbf")
+    with pytest.raises(ReadError):
+        reader._read_dbf(tmp_path / "nope.dbf")
