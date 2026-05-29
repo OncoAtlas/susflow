@@ -13,8 +13,8 @@ Active prefixes:
     AD   — APAC various reports                     2008–2026
     AM   — APAC medications                         2008–2026
     AMP  — APAC standardized medications            2020–2026
-    AQ   — APAC chemotherapy                         2008–2026
-    AR   — APAC radiotherapy                         2008–2026
+    AQ   — APAC chemotherapy                        2008–2026
+    AR   — APAC radiotherapy                        2008–2026
     ACF  — APAC creation of arteriovenous fistula   2014–2026
     ATD  — APAC dialysis treatment                  2014–2026
     PS   — RAAS Psychosocial                        2013–2026
@@ -34,95 +34,95 @@ from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import SIASUS as _CFG
 from ..config import UFS
-from ..reader import ler as _ler
+from ..reader import read as _read
 
 _DIR = _CFG["ftp_dir"]
-_PREFIXOS = _CFG["prefixes"]  # {prefixo: (descricao, ano_min, ano_max)}
-_ANO_MIN, _ANO_MAX = _CFG["year_range"]
+_PREFIXES = _CFG["prefixes"]  # {prefix: (description, year_min, year_max)}
+_YEAR_MIN, _YEAR_MAX = _CFG["year_range"]
 
 
-def _validar_prefixo(prefixo: str) -> str:
-    prefixo = prefixo.upper()
-    if prefixo not in _PREFIXOS:
+def _validate_prefix(prefix: str) -> str:
+    prefix = prefix.upper()
+    if prefix not in _PREFIXES:
         raise ValueError(
-            f"Invalid prefix: '{prefixo}'. " f"Available: {sorted(_PREFIXOS)}"
+            f"Invalid prefix: '{prefix}'. Available: {sorted(_PREFIXES)}"
         )
-    return prefixo
+    return prefix
 
 
-def _validar(prefixo: str, uf: str, ano: int, mes: int) -> None:
+def _validate(prefix: str, uf: str, year: int, month: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
 
-    if not (1 <= mes <= 12):
-        raise ValueError(f"Invalid month: {mes}. Use 1–12.")
-    _, ano_min, ano_max = _PREFIXOS[prefixo]
+    if not (1 <= month <= 12):
+        raise ValueError(f"Invalid month: {month}. Use 1–12.")
+    _, year_min, year_max = _PREFIXES[prefix]
 
-    if not (ano_min <= ano <= ano_max):
+    if not (year_min <= year <= year_max):
         raise ValueError(
-            f"Year {ano} out of range for prefix '{prefixo}' "
-            f"(available: {ano_min}–{ano_max})"
+            f"Year {year} out of range for prefix '{prefix}' "
+            f"(available: {year_min}–{year_max})"
         )
 
 
-def _nome(prefixo: str, uf: str, ano: int, mes: int) -> str:
-    return f"{prefixo}{uf}{str(ano)[-2:]}{mes:02d}.dbc"
+def _file_name(prefix: str, uf: str, year: int, month: int) -> str:
+    return f"{prefix}{uf}{str(year)[-2:]}{month:02d}.dbc"
 
 
-def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
-    caminho = f"{_DIR}/{nome}"
-    local = _cache.caminho_local(caminho, destino)
+def _download_file(name: str, destination: Path | None, force: bool) -> Path:
+    path = f"{_DIR}/{name}"
+    local = _cache.local_path(path, destination)
 
-    if local.exists() and not forcar:
+    if local.exists() and not force:
         return local
 
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
-def prefixos() -> dict[str, str]:
+def prefixes() -> dict[str, str]:
     """Return available prefixes: {prefix: description}."""
-    return {k: v[0] for k, v in _PREFIXOS.items()}
+    return {k: v[0] for k, v in _PREFIXES.items()}
 
 
-def listar(uf: str | None = None, prefixo: str = "PA") -> list[str]:
+def list_files(uf: str | None = None, prefix: str = "PA") -> list[str]:
     """List files available on the FTP.
 
     Filters by prefix (default: `PA`) and optionally by state (UF).
     """
-    prefixo = _validar_prefixo(prefixo)
-    arquivos = _ftp.listar(_DIR)
-    arquivos = [a for a in arquivos if a.upper().startswith(prefixo)]
+    prefix = _validate_prefix(prefix)
+    files = _ftp.list_files(_DIR)
+    files = [f for f in files if f.upper().startswith(prefix)]
 
     if uf:
-        filtro = f"{prefixo}{uf.upper()}"
-        arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
-    return arquivos
+        filter_ = f"{prefix}{uf.upper()}"
+        files = [f for f in files if f.upper().startswith(filter_)]
+    return files
 
 
-def baixar(
+def download(
     uf: str,
-    ano: int,
-    mes: int,
-    prefixo: str = "PA",
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    month: int,
+    prefix: str = "PA",
+    destination: Path | None = None,
+    force: bool = False,
 ) -> Path:
     """Download `{PREFIX}{UF}{YY}{MM}.dbc` to local cache.
 
     Default prefix: `PA` (Outpatient production).
     """
-    prefixo = _validar_prefixo(prefixo)
-    _validar(prefixo, uf, ano, mes)
-    return _baixar_arquivo(_nome(prefixo, uf.upper(), ano, mes), destino, forcar)
+    prefix = _validate_prefix(prefix)
+    _validate(prefix, uf, year, month)
+    return _download_file(_file_name(prefix, uf.upper(), year, month), destination, force)
 
 
-def ler(
+def read(
     uf: str,
-    ano: int,
-    mes: int,
-    prefixo: str = "PA",
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    month: int,
+    prefix: str = "PA",
+    destination: Path | None = None,
+    force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, mes, prefixo=prefixo, destino=destino, forcar=forcar))
+    return _read(download(uf, year, month, prefix=prefix, destination=destination, force=force))
