@@ -20,8 +20,7 @@ Auxiliary files (download only, not read as DataFrame):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -96,10 +95,10 @@ def baixar(
 
 
 def ler(
-    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
-) -> pd.DataFrame:
+    uf: str, ano: int, destino: Path | None = None, forcar: bool = False, engine: str = "pandas"
+) -> Any:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, destino=destino, forcar=forcar), engine=engine)
 
 
 # ---------------------------------------------------------------------------
@@ -122,10 +121,10 @@ def baixar_nacional(
 
 
 def ler_nacional(
-    ano: int, destino: Path | None = None, forcar: bool = False
-) -> pd.DataFrame:
+    ano: int, destino: Path | None = None, forcar: bool = False, engine: str = "pandas"
+) -> Any:
     """Download (if needed) and return the national aggregate as a DataFrame."""
-    return _ler(baixar_nacional(ano, destino=destino, forcar=forcar))
+    return _ler(baixar_nacional(ano, destino=destino, forcar=forcar), engine=engine)
 
 
 # ---------------------------------------------------------------------------
@@ -145,10 +144,10 @@ def baixar_excecao(ano: int, destino: Path | None = None, forcar: bool = False) 
 
 
 def ler_excecao(
-    ano: int, destino: Path | None = None, forcar: bool = False
-) -> pd.DataFrame:
+    ano: int, destino: Path | None = None, forcar: bool = False, engine: str = "pandas"
+) -> Any:
     """Download (if needed) and return the exception file as a DataFrame."""
-    return _ler(baixar_excecao(ano, destino=destino, forcar=forcar))
+    return _ler(baixar_excecao(ano, destino=destino, forcar=forcar), engine=engine)
 
 
 # ---------------------------------------------------------------------------

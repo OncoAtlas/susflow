@@ -20,8 +20,7 @@ Coverage:    2008–2026
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -120,9 +119,10 @@ def ler(
     prefixo: str = "RD",
     destino: Path | None = None,
     forcar: bool = False,
-) -> pd.DataFrame:
+    engine: str = "pandas",
+) -> Any:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _ler(baixar(uf, ano, mes, prefixo=prefixo, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, mes, prefixo=prefixo, destino=destino, forcar=forcar), engine=engine)
 
 
 # ---------------------------------------------------------------------------
@@ -164,8 +164,10 @@ def ler_nacional(
     prefixo: str = "CH",
     destino: Path | None = None,
     forcar: bool = False,
-) -> pd.DataFrame:
+    engine: str = "pandas",
+) -> Any:
     """Download (if needed) and return national data as a DataFrame."""
     return _ler(
-        baixar_nacional(ano, mes, prefixo=prefixo, destino=destino, forcar=forcar)
+        baixar_nacional(ano, mes, prefixo=prefixo, destino=destino, forcar=forcar),
+        engine=engine,
     )
