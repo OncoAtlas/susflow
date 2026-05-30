@@ -37,9 +37,7 @@ def _validar(uf: str, ano: int) -> None:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
 
     if not (_ANO_MIN <= ano <= _ANO_MAX):
-        raise ValueError(
-            f"Year {ano} out of range for PNI " f"(available: {_ANO_MIN}–{_ANO_MAX})"
-        )
+        raise ValueError(f"Year {ano} out of range for PNI " f"(available: {_ANO_MIN}–{_ANO_MAX})")
 
 
 def _nome(uf: str, ano: int) -> str:
@@ -92,6 +90,7 @@ def ler(
     ano: int,
     destino: Path | None = None,
     forcar: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar)

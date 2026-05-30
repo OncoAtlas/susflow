@@ -123,6 +123,11 @@ def ler(
     prefixo: str = "PA",
     destino: Path | None = None,
     forcar: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, mes, prefixo=prefixo, destino=destino, forcar=forcar))
+    return _ler(
+        baixar(uf, ano, mes, prefixo=prefixo, destino=destino, forcar=forcar),
+        parquet=parquet,
+        forcar=forcar,
+    )

@@ -55,3 +55,68 @@ def test__ler_dbf_raises_leituraerror_on_failure(monkeypatch, tmp_path: Path):
     monkeypatch.setattr(reader, "DBF", bad_dbf)
     with pytest.raises(LeituraError):
         reader._ler_dbf(tmp_path / "nope.dbf")
+
+
+# ---------------------------------------------------------------------------
+# Parquet cache
+# ---------------------------------------------------------------------------
+
+_SAMPLE = pd.DataFrame({"A": [1, 2], "B": ["x", "y"]})
+
+
+def _make_dbf(tmp_path: Path) -> Path:
+    p = tmp_path / "sample.dbf"
+    p.write_text("dummy")
+    return p
+
+
+def test_ler_parquet_writes_sidecar_on_first_call(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    monkeypatch.setattr(reader, "_ler_fonte", lambda _: _SAMPLE)
+
+    result = reader.ler(src, parquet=True)
+    parquet_path = src.with_suffix(".parquet")
+
+    assert result.equals(_SAMPLE)
+    assert parquet_path.exists()
+
+
+def test_ler_parquet_reads_sidecar_on_second_call(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    call_count = {"n": 0}
+
+    def counting_fonte(_):
+        call_count["n"] += 1
+        return _SAMPLE
+
+    monkeypatch.setattr(reader, "_ler_fonte", counting_fonte)
+
+    reader.ler(src, parquet=True)
+    reader.ler(src, parquet=True)
+
+    assert call_count["n"] == 1
+
+
+def test_ler_parquet_forcar_rebuilds_sidecar(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    call_count = {"n": 0}
+
+    def counting_fonte(_):
+        call_count["n"] += 1
+        return _SAMPLE
+
+    monkeypatch.setattr(reader, "_ler_fonte", counting_fonte)
+
+    reader.ler(src, parquet=True)
+    reader.ler(src, parquet=True, forcar=True)
+
+    assert call_count["n"] == 2
+
+
+def test_ler_without_parquet_does_not_create_sidecar(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    monkeypatch.setattr(reader, "_ler_fonte", lambda _: _SAMPLE)
+
+    reader.ler(src)
+
+    assert not src.with_suffix(".parquet").exists()

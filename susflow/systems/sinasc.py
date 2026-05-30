@@ -96,10 +96,10 @@ def baixar(
 
 
 def ler(
-    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+    uf: str, ano: int, destino: Path | None = None, forcar: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar)
 
 
 # ---------------------------------------------------------------------------
@@ -122,10 +122,12 @@ def baixar_nacional(
 
 
 def ler_nacional(
-    ano: int, destino: Path | None = None, forcar: bool = False
+    ano: int, destino: Path | None = None, forcar: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the national aggregate as a DataFrame."""
-    return _ler(baixar_nacional(ano, destino=destino, forcar=forcar))
+    return _ler(
+        baixar_nacional(ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -145,10 +147,12 @@ def baixar_excecao(ano: int, destino: Path | None = None, forcar: bool = False) 
 
 
 def ler_excecao(
-    ano: int, destino: Path | None = None, forcar: bool = False
+    ano: int, destino: Path | None = None, forcar: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the exception file as a DataFrame."""
-    return _ler(baixar_excecao(ano, destino=destino, forcar=forcar))
+    return _ler(
+        baixar_excecao(ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar
+    )
 
 
 # ---------------------------------------------------------------------------

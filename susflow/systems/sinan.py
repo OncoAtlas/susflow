@@ -105,12 +105,15 @@ def ler(
     destino: Path | None = None,
     forcar: bool = False,
     preliminar: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """
     Download (if needed) and return the data as a DataFrame.
     """
     return _ler(
-        baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar)
+        baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar),
+        parquet=parquet,
+        forcar=forcar,
     )
 
 
