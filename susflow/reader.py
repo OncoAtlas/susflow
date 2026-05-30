@@ -17,24 +17,38 @@ class LeituraError(Exception):
     """Failed to convert file to DataFrame."""
 
 
-def ler(arquivo: Path) -> pd.DataFrame:
+def ler(arquivo: Path, parquet: bool = False, forcar: bool = False) -> pd.DataFrame:
     """
     Read a local file and return a DataFrame.
     Supports .dbc, .dbf and .zip (containing .dbc or .dbf).
     Columns always uppercased, strings decoded using latin-1.
+
+    If parquet=True, a .parquet sidecar is written next to the source file on
+    first read and returned directly on subsequent calls, skipping the slow
+    dbc2dbf conversion. Pass forcar=True to rebuild the sidecar.
+    Requires pyarrow or fastparquet: pip install pyarrow
     """
     arquivo = Path(arquivo)
-    sufixo = arquivo.suffix.lower()
 
+    if parquet:
+        parquet_path = arquivo.with_suffix(".parquet")
+        if parquet_path.exists() and not forcar:
+            return pd.read_parquet(parquet_path)
+        df = _ler_fonte(arquivo)
+        df.to_parquet(parquet_path, index=False)
+        return df
+
+    return _ler_fonte(arquivo)
+
+
+def _ler_fonte(arquivo: Path) -> pd.DataFrame:
+    sufixo = arquivo.suffix.lower()
     if sufixo == ".dbc":
         return _ler_dbc(arquivo)
-
     if sufixo == ".dbf":
         return _ler_dbf(arquivo)
-
     if sufixo == ".zip":
         return _ler_zip(arquivo)
-
     raise LeituraError(f"Unsupported format: {sufixo}")
 
 

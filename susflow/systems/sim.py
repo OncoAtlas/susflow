@@ -86,10 +86,10 @@ def baixar(
 
 
 def ler(
-    uf: str, ano: int, destino: Path | None = None, forcar: bool = False
+    uf: str, ano: int, destino: Path | None = None, forcar: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar)
 
 
 # ---------------------------------------------------------------------------
@@ -116,10 +116,12 @@ def baixar_especial(
 
 
 def ler_especial(
-    tipo: str, ano: int, destino: Path | None = None, forcar: bool = False
+    tipo: str, ano: int, destino: Path | None = None, forcar: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return special data as a DataFrame."""
-    return _ler(baixar_especial(tipo, ano, destino=destino, forcar=forcar))
+    return _ler(
+        baixar_especial(tipo, ano, destino=destino, forcar=forcar), parquet=parquet, forcar=forcar
+    )
 
 
 # ---------------------------------------------------------------------------
