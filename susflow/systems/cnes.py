@@ -29,8 +29,7 @@ Retired subtypes (still available on FTP):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -122,6 +121,7 @@ def ler(
     tipo: str = "ST",
     destino: Path | None = None,
     forcar: bool = False,
-) -> pd.DataFrame:
+    engine: str = "pandas",
+) -> Any:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, mes, tipo=tipo, destino=destino, forcar=forcar))
+    return _ler(baixar(uf, ano, mes, tipo=tipo, destino=destino, forcar=forcar), engine=engine)

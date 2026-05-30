@@ -14,8 +14,7 @@ Auxiliary files (download only, not read as DataFrame):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -105,12 +104,14 @@ def ler(
     destino: Path | None = None,
     forcar: bool = False,
     preliminar: bool = False,
-) -> pd.DataFrame:
+    engine: str = "pandas",
+) -> Any:
     """
     Download (if needed) and return the data as a DataFrame.
     """
     return _ler(
-        baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar)
+        baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar),
+        engine=engine,
     )
 
 
