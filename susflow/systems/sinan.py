@@ -6,7 +6,7 @@ SINAN — Notifiable Diseases Information System.
 Disease data:
 
     final        → {DISEASE}BR{YY}.dbc  in DADOS/FINAIS/   e.g. DENGBR23.dbc
-    preliminary  → {DISEASE}BR{YY}.dbc  in DADOS/PRELIM/   (use flag `preliminar=True`)
+    preliminary  → {DISEASE}BR{YY}.dbc  in DADOS/PRELIM/   (use flag `preliminary=True`)
 
 Auxiliary files (download only, not read as DataFrame):
 
@@ -20,97 +20,99 @@ import pandas as pd
 from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import SINAN as _CFG
-from ..reader import ler as _ler
+from ..reader import read as _read
 
 _DIR_FINAL = _CFG["ftp_dir"]
 _DIR_PRELIM = _CFG["ftp_dir_prelim"]
-_CFG_DOC = _CFG["docs"]
-_DOENCAS = {k.upper(): v for k, v in _CFG["diseases"].items()}
-_ANO_MIN = 2000  # menor ano observado nos arquivos do FTP
-_ANO_MAX = 2024
+_CFG_DOCS = _CFG["docs"]
+_DISEASES = {k.upper(): v for k, v in _CFG["diseases"].items()}
+_YEAR_MIN = 2000
+_YEAR_MAX = 2024
 
 
-def _validar(doenca: str, ano: int) -> str:
-    doenca = doenca.upper()
-    if doenca not in _DOENCAS:
-        disponiveis = ", ".join(sorted(_DOENCAS))
-        raise ValueError(f"Invalid disease code: '{doenca}'.\nAvailable: {disponiveis}")
+def _validate(disease: str, year: int) -> str:
+    disease = disease.upper()
+    if disease not in _DISEASES:
+        available = ", ".join(sorted(_DISEASES))
+        raise ValueError(f"Invalid disease code: '{disease}'.\nAvailable: {available}")
 
-    if not (_ANO_MIN <= ano <= _ANO_MAX):
-        raise ValueError(f"Year out of range: {ano} (available: {_ANO_MIN}–{_ANO_MAX})")
+    if not (_YEAR_MIN <= year <= _YEAR_MAX):
+        raise ValueError(
+            f"Year out of range: {year} (available: {_YEAR_MIN}–{_YEAR_MAX})"
+        )
 
-    return doenca
-
-
-def _nome_arquivo(doenca: str, ano: int) -> str:
-    return f"{doenca}BR{str(ano)[-2:]}.dbc"
+    return disease
 
 
-def _baixar_arquivo(
-    ftp_dir: str, nome: str, destino: Path | None, forcar: bool
+def _file_name(disease: str, year: int) -> str:
+    return f"{disease}BR{str(year)[-2:]}.dbc"
+
+
+def _download_file(
+    ftp_dir: str, name: str, destination: Path | None, force: bool
 ) -> Path:
-    caminho = f"{ftp_dir}/{nome}"
-    local = _cache.caminho_local(caminho, destino)
-    if local.exists() and not forcar:
+    path = f"{ftp_dir}/{name}"
+    local = _cache.local_path(path, destination)
+    if local.exists() and not force:
         return local
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
-def doencas() -> dict[str, str]:
+def diseases() -> dict[str, str]:
     """Return the dictionary {code: description} of all available diseases."""
-    return dict(_DOENCAS)
+    return dict(_DISEASES)
 
 
-def listar(doenca: str | None = None, preliminar: bool = False) -> list[str]:
+def list_files(disease: str | None = None, preliminary: bool = False) -> list[str]:
     """
     List files available on the FTP.
-    If `doenca` is provided, filter by disease code.
-    Use `preliminar=True` to list preliminary data.
+    If `disease` is provided, filter by disease code.
+    Use `preliminary=True` to list preliminary data.
     """
-    diretorio = _DIR_PRELIM if preliminar else _DIR_FINAL
-    arquivos = _ftp.listar(diretorio)
+    directory = _DIR_PRELIM if preliminary else _DIR_FINAL
+    files = _ftp.list_files(directory)
 
-    if doenca:
-        prefixo = doenca.upper()
-        arquivos = [a for a in arquivos if a.upper().startswith(prefixo)]
+    if disease:
+        prefix = disease.upper()
+        files = [f for f in files if f.upper().startswith(prefix)]
 
-    return arquivos
+    return files
 
 
-def baixar(
-    doenca: str,
-    ano: int,
-    destino: Path | None = None,
-    forcar: bool = False,
-    preliminar: bool = False,
+def download(
+    disease: str,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    preliminary: bool = False,
 ) -> Path:
     """
     Download `{DISEASE}BR{YY}.dbc` to local cache.
-    Use `preliminar=True` to download preliminary data.
+    Use `preliminary=True` to download preliminary data.
     """
-    doenca = _validar(doenca, ano)
-    dirftp = _DIR_PRELIM if preliminar else _DIR_FINAL
-    caminho = f"{dirftp}/{_nome_arquivo(doenca, ano)}"
-    local = _cache.caminho_local(caminho, destino)
+    disease = _validate(disease, year)
+    ftp_dir = _DIR_PRELIM if preliminary else _DIR_FINAL
+    path = f"{ftp_dir}/{_file_name(disease, year)}"
+    local = _cache.local_path(path, destination)
 
-    if local.exists() and not forcar:
+    if local.exists() and not force:
         return local
 
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
-def ler(
-    doenca: str,
-    ano: int,
-    destino: Path | None = None,
-    forcar: bool = False,
-    preliminar: bool = False,
+def read(
+    disease: str,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    preliminary: bool = False,
 ) -> pd.DataFrame:
-    """
-    Download (if needed) and return the data as a DataFrame.
-    """
-    return _ler(
-        baixar(doenca, ano, destino=destino, forcar=forcar, preliminar=preliminar)
+    """Download (if needed) and return the data as a DataFrame."""
+    return _read(
+        download(
+            disease, year, destination=destination, force=force, preliminary=preliminary
+        )
     )
 
 
@@ -119,32 +121,32 @@ def ler(
 # ---------------------------------------------------------------------------
 
 
-def listar_docs() -> dict[str, str]:
+def list_docs() -> dict[str, str]:
     """Return available technical documents for download: {name: description}."""
-    return dict(_CFG_DOC["arquivos"])
+    return dict(_CFG_DOCS["files"])
 
 
-def baixar_docs(
-    arquivo: str | None = None,
-    destino: Path | None = None,
-    forcar: bool = False,
+def download_docs(
+    file: str | None = None,
+    destination: Path | None = None,
+    force: bool = False,
 ) -> "Path | list[Path]":
     """Download SINAN technical documents (layouts, variable dictionary, technical notes).
 
     Note: the FTP path for this directory has not been fully confirmed.
     If download fails, use `mapear_ftp.py` to locate the correct directory.
 
-    - If `arquivo` is provided, download only that file.
+    - If `file` is provided, download only that file.
     - If omitted, download all available files.
     """
-    disponiveis = _CFG_DOC["arquivos"]
-    ftp_dir = _CFG_DOC["ftp_dir"]
+    available = _CFG_DOCS["files"]
+    ftp_dir = _CFG_DOCS["ftp_dir"]
 
-    if arquivo:
-        if arquivo not in disponiveis:
+    if file:
+        if file not in available:
             raise ValueError(
-                f"Document not available: '{arquivo}'.\nAvailable: {list(disponiveis)}"
+                f"Document not available: '{file}'.\nAvailable: {list(available)}"
             )
-        return _baixar_arquivo(ftp_dir, arquivo, destino, forcar)
+        return _download_file(ftp_dir, file, destination, force)
 
-    return [_baixar_arquivo(ftp_dir, nome, destino, forcar) for nome in disponiveis]
+    return [_download_file(ftp_dir, name, destination, force) for name in available]

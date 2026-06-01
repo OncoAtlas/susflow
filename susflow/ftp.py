@@ -10,20 +10,20 @@ from pathlib import Path
 
 from .config import FTP_HOST
 
-_TIMEOUT = 30  # segundos
-_TENTATIVAS = 3
-_BACKOFF = 2  # segundos entre tentativas
+_TIMEOUT = 30  # seconds
+_RETRIES = 3
+_BACKOFF = 2  # seconds between attempts
 
 
 class FTPError(Exception):
     """Communication error with the DATASUS FTP."""
 
 
-class ArquivoNaoEncontradoError(FTPError):
+class FileNotFoundOnFTPError(FTPError):
     """File does not exist on the FTP."""
 
 
-def _conectar() -> FTP:
+def _connect() -> FTP:
     """Open a fresh FTP connection. Reconnecting per operation avoids '200 Type set to A' bug."""
     ftp = FTP()
     ftp.connect(FTP_HOST, 21, timeout=_TIMEOUT)
@@ -32,84 +32,81 @@ def _conectar() -> FTP:
     return ftp
 
 
-def _tentar(fn, *args, **kwargs):
+def _retry(fn, *args, **kwargs):
     """Run `fn` with retries and backoff."""
-    ultimo_erro = None
-    for tentativa in range(_TENTATIVAS):
+    last_error = None
+    for attempt in range(_RETRIES):
         try:
             return fn(*args, **kwargs)
 
         except all_errors as e:
-            ultimo_erro = e
-            if tentativa < _TENTATIVAS - 1:
+            last_error = e
+            if attempt < _RETRIES - 1:
                 time.sleep(_BACKOFF)
 
-    raise FTPError(
-        f"Failed after {_TENTATIVAS} attempts: {ultimo_erro}"
-    ) from ultimo_erro
+    raise FTPError(f"Failed after {_RETRIES} attempts: {last_error}") from last_error
 
 
-def listar(caminho: str) -> list[str]:
+def list_files(path: str) -> list[str]:
     """
     List file names in an FTP directory.
     Returns files only (no subdirectories).
     """
 
-    def _listar():
-        ftp = _conectar()
+    def _list():
+        ftp = _connect()
 
         try:
-            itens: list[str] = []
-            ftp.retrlines("LIST", itens.append)  # LIST in cwd after cwd()
-            ftp.cwd(caminho)
-            itens.clear()
-            ftp.retrlines("LIST", itens.append)
+            entries: list[str] = []
+            ftp.retrlines("LIST", entries.append)
+            ftp.cwd(path)
+            entries.clear()
+            ftp.retrlines("LIST", entries.append)
 
-            arquivos = []
-            for linha in itens:
-                if "<DIR>" in linha:
+            files = []
+            for line in entries:
+                if "<DIR>" in line:
                     continue
+                name = line.split()[-1]
+                files.append(name)
 
-                nome = linha.split()[-1]
-                arquivos.append(nome)
-
-            return arquivos
+            return files
 
         finally:
             ftp.quit()
 
-    return _tentar(_listar)
+    return _retry(_list)
 
 
-def baixar(caminho_ftp: str, destino: Path) -> Path:
+def download(ftp_path: str, destination: Path) -> Path:
     """
-    Download a file from the FTP to local path `destino`.
+    Download a file from the FTP to local path `destination`.
     Creates necessary directories. Returns the saved file path.
-    Raises ArquivoNaoEncontradoError if the file does not exist on the FTP.
+    Raises FileNotFoundOnFTPError if the file does not exist on the FTP.
     """
-    destino = Path(destino)
-    destino.parent.mkdir(parents=True, exist_ok=True)
+    destination = Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
 
-    def _baixar():
-        ftp = _conectar()
+    def _download():
+        ftp = _connect()
 
         try:
-            with open(destino, "wb") as f:
-                ftp.retrbinary(f"RETR {caminho_ftp}", f.write)
+            with open(destination, "wb") as f:
+                ftp.retrbinary(f"RETR {ftp_path}", f.write)
 
         except all_errors as e:
-            if destino.exists():
-                destino.unlink()
+            if destination.exists():
+                destination.unlink()
 
             if "550" in str(e):
-                raise ArquivoNaoEncontradoError(
-                    f"File not found on FTP: {caminho_ftp}"
+                raise FileNotFoundOnFTPError(
+                    f"File not found on FTP: {ftp_path}"
                 ) from e
             raise
 
         finally:
             ftp.quit()
 
-        return destino
+        return destination
 
-    return _tentar(_baixar)
+    return _retry(_download)

@@ -8,8 +8,8 @@
 
  | Tipo | Função | Retorno | Descrição |
  |------|--------|---------|-----------|
- | Por UF | `ler(uf, ano, mes)` | `DataFrame` | Microdados ambulatoriais de uma UF |
- | Por UF | `baixar(uf, ano, mes)` | `Path` | Arquivo `.dbc` bruto |
+ | Por UF | `read(uf, year, month)` | `DataFrame` | Microdados ambulatoriais de uma UF |
+ | Por UF | `download(uf, year, month)` | `Path` | Arquivo `.dbc` bruto |
 
  ---
 
@@ -22,24 +22,24 @@
  from susflow.systems import siasus
 
  # ver todos os prefixos disponíveis
- print(siasus.prefixos())
+ print(siasus.prefixes())
 
  # Produção Ambulatorial — prefixo padrão
- df = siasus.ler(uf="SP", ano=2023, mes=1)
- df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="PA")
+ df = siasus.read(uf="SP", year=2023, month=1)
+ df = siasus.read(uf="SP", year=2023, month=1, prefix="PA")
 
  # outros prefixos
- df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ")   # quimioterapia
- df = siasus.ler(uf="RJ", ano=2023, mes=6, prefixo="ATD")  # diálise
+ df = siasus.read(uf="SP", year=2023, month=1, prefix="AQ")   # quimioterapia
+ df = siasus.read(uf="RJ", year=2023, month=6, prefix="ATD")  # diálise
 
  # só baixar
- path = siasus.baixar(uf="SP", ano=2023, mes=1)
- path = siasus.baixar(uf="MG", ano=2023, mes=3, prefixo="AM")
+ path = siasus.download(uf="SP", year=2023, month=1)
+ path = siasus.download(uf="MG", year=2023, month=3, prefix="AM")
 
  # listar arquivos disponíveis
- siasus.listar()                         # todos os PA
- siasus.listar(uf="SP")                  # PA de SP
- siasus.listar(uf="SP", prefixo="AQ")    # quimioterapia de SP
+ siasus.list_files()                         # todos os PA
+ siasus.list_files(uf="SP")                  # PA de SP
+ siasus.list_files(uf="SP", prefix="AQ")    # quimioterapia de SP
  ```
 
  ### Prefixos ativos
@@ -132,17 +132,17 @@
 
  ```
  1. Explorar o que existe
-    print(siasus.prefixos())             ← todos os prefixos e descrições
-    siasus.listar(uf="SP")               ← arquivos PA de SP disponíveis
-    siasus.listar(uf="SP", prefixo="AQ") ← quimioterapia de SP
+    print(siasus.prefixes())             ← todos os prefixos e descrições
+    siasus.list_files(uf="SP")               ← arquivos PA de SP disponíveis
+    siasus.list_files(uf="SP", prefix="AQ") ← quimioterapia de SP
 
  2. Baixar os dados
-    df = siasus.ler(uf="SP", ano=2023, mes=1)              ← produção ambulatorial
-    df = siasus.ler(uf="SP", ano=2023, mes=1, prefixo="AQ") ← quimioterapia
+    df = siasus.read(uf="SP", year=2023, month=1)              ← produção ambulatorial
+    df = siasus.read(uf="SP", year=2023, month=1, prefix="AQ") ← quimioterapia
 
  3. Combinar meses em série histórica
     import pandas as pd
-    dfs = [siasus.ler(uf="SP", ano=2023, mes=m) for m in range(1, 13)]
+    dfs = [siasus.read(uf="SP", year=2023, month=m) for m in range(1, 13)]
     df_ano = pd.concat(dfs, ignore_index=True)
  ```
 
@@ -155,5 +155,5 @@
  - Cada prefixo tem sua própria cobertura temporal. A validação de ano é feita por prefixo — tentar baixar `AN` para 2020 levanta erro com a cobertura correta.
  - `PA` é o arquivo mais volumoso — estados grandes (SP, RJ, MG) podem ter centenas de MB por mês.
  - Procedimentos são identificados pelo código SIGTAP (`PA_PROC_ID`). Consulte a tabela SIGTAP para descrições.
- - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.baixar_tabelas("CADMUN.DBF")`).
+ - Para cruzar municípios com nomes, use `CADMUN.DBF` disponível no SIM (`sim.download_tables("CADMUN.DBF")`).
  - Para cruzar estabelecimentos com dados cadastrais, use o CNES.

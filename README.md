@@ -15,21 +15,27 @@ Modern Python library for downloading, parsing and engineering DATASUS public he
 
 This repository focuses on practical reproducibility and safe access to legacy public data systems.
 
-Contents
--
-- Documentation for each system: `docs/` (layouts, variable dictionaries, notes)
+Portuguese (Brazil) documentation and module index: [Português do Brasil](./docs/pt-br/README.md)
+
+## Contents
+
+- Module documentation in `docs/en/` (layouts, variable dictionaries, notes)
 - Library code: `susflow/`
 - Utilities: `tools/` (FTP mapping and inspection)
 
 Quick links
-- [CNES](./docs/cnes.md) — health establishments
-- [PNI](./docs/pni.md) — immunizations
-- [SIM](./docs/sim.md) — mortality
-- [SINAN](./docs/sinan.md) — notifiable diseases
-- [SINASC](./docs/sinasc.md) — live births
 
-Installation
--
+- [CNES](./docs/en/cnes.md) — health establishments
+- [PNI](./docs/en/pni.md) — immunizations
+- [SIM](./docs/en/sim.md) — mortality
+- [SINAN](./docs/en/sinan.md) — notifiable diseases
+- [SINASC](./docs/en/sinasc.md) — live births
+- [SIASUS](./docs/en/siasus.md) — ambulatory information system (SUS)
+- [SIHSUS](./docs/en/sihsus.md) — hospital information system (SUS)
+- [FTP file patterns summary](./docs/en/summary.md)
+
+## Installation
+
 Install in editable mode during development:
 
 ```bash
@@ -58,9 +64,9 @@ Core runtime dependencies are declared in `pyproject.toml`. Typical extras for p
 - `pyarrow` or `fastparquet` (Parquet cache)
 - `pandas` (DataFrame API)
 
-Basic usage
--
-Each DATASUS system is available under `susflow.systems`. APIs are lightweight: `listar`, `baixar` and `ler` helpers manage discovery, download and conversion.
+## Basic usage
+
+Each DATASUS system is available under `susflow.systems`. APIs are lightweight: `list_files`, `download` and `read` helpers manage discovery, download and conversion.
 
 Example: SINASC (Live Births)
 
@@ -68,31 +74,31 @@ Example: SINASC (Live Births)
 from susflow.systems import sinasc
 
 # list files for a state
-sinasc.listar(uf="SP")
+sinasc.list_files(uf="SP")
 
 # download and return a pandas.DataFrame
-df = sinasc.ler(uf="SP", ano=2020)
+df = sinasc.read(uf="SP", year=2020)
 ```
 
 Example: PNI (Vaccinations)
 
 ```python
 from susflow.systems import pni
-df = pni.ler(uf="RJ", ano=2015)
+df = pni.read(uf="RJ", year=2015)
 ```
 
-Caching behavior
--
-By default downloads are stored under `~/.susflow/cache/` mirroring FTP paths. If a requested file is present locally the library skips the download and reads directly from cache. To force re-download set `forcar=True` on download/reader helpers.
+## Caching behavior
 
-Performance guidance
--
+By default downloads are stored under `~/.susflow/cache/` mirroring FTP paths. If a requested file is present locally the library skips the download and reads directly from cache. To force re-download set `force=True` on download/reader helpers.
+
+## Performance guidance
+
 - Downcast numeric types and convert repeated strings to `category` to reduce memory.
 - Convert commonly used datasets to Parquet once and reuse local Parquet caches.
 - For very large datasets prefer processing in chunks or using DuckDB/Polars to avoid excessive RAM.
 
-Developer tools and linters
--
+## Developer tools and linters
+
 We recommend the following dev tools for contributors:
 
 ```bash
@@ -104,23 +110,24 @@ isort --check-only .
 pytest -q
 ```
 
-Testing strategy
--
+## Testing strategy
+
 - Unit tests should mock FTP and file IO; see `tests/unit/` for examples.
 - Integration tests that access live FTP data should be opt-in and run manually (network-dependent).
 
-Utilities
--
+## Utilities
+
 `tools/mapear_ftp.py` helps locate and audit DATASUS FTP directory structures when paths change. It can save structured maps to `tools/mapas/` for offline analysis.
 
-Contributing
--
-See `CONTRIBUTING.md` for guidelines: coding style, tests, and PR workflow.
+## Contributing
 
-License
--
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines: coding style, tests, and PR workflow.
+See [docs/contributing/coverage.md](./docs/contributing/coverage.md) for coverage instructions.
+
+## License
+
 This project is released under the MIT License — see `LICENSE`.
 
-Contact
--
+## Contact
+
 Open issues and pull requests are welcome. For larger changes please open an issue to discuss scope before implementing.
