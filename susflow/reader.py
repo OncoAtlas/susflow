@@ -13,85 +13,85 @@ from dbfread import DBF
 from pyreaddbc import dbc2dbf
 
 
-class LeituraError(Exception):
+class ReadError(Exception):
     """Failed to convert file to DataFrame."""
 
 
-def ler(arquivo: Path) -> pd.DataFrame:
+def read(file: Path) -> pd.DataFrame:
     """
     Read a local file and return a DataFrame.
     Supports .dbc, .dbf and .zip (containing .dbc or .dbf).
     Columns always uppercased, strings decoded using latin-1.
     """
-    arquivo = Path(arquivo)
-    sufixo = arquivo.suffix.lower()
+    file = Path(file)
+    suffix = file.suffix.lower()
 
-    if sufixo == ".dbc":
-        return _ler_dbc(arquivo)
+    if suffix == ".dbc":
+        return _read_dbc(file)
 
-    if sufixo == ".dbf":
-        return _ler_dbf(arquivo)
+    if suffix == ".dbf":
+        return _read_dbf(file)
 
-    if sufixo == ".zip":
-        return _ler_zip(arquivo)
+    if suffix == ".zip":
+        return _read_zip(file)
 
-    raise LeituraError(f"Unsupported format: {sufixo}")
+    raise ReadError(f"Unsupported format: {suffix}")
 
 
-def _ler_dbc(arquivo: Path) -> pd.DataFrame:
+def _read_dbc(file: Path) -> pd.DataFrame:
     try:
         with tempfile.NamedTemporaryFile(suffix=".dbf", delete=False) as tmp:
             tmp_path = Path(tmp.name)
 
         try:
-            dbc2dbf(str(arquivo), str(tmp_path))
-            return _ler_dbf(tmp_path)
+            dbc2dbf(str(file), str(tmp_path))
+            return _read_dbf(tmp_path)
 
         finally:
             if tmp_path.exists():
                 tmp_path.unlink()
 
-    except LeituraError:
+    except ReadError:
         raise
 
     except Exception as e:
-        raise LeituraError(f"Failed to read .dbc: {arquivo}") from e
+        raise ReadError(f"Failed to read .dbc: {file}") from e
 
 
-def _ler_dbf(arquivo: Path) -> pd.DataFrame:
+def _read_dbf(file: Path) -> pd.DataFrame:
     try:
-        tabela = DBF(str(arquivo), encoding="latin-1", load=True)
-        df = pd.DataFrame(iter(tabela))
+        table = DBF(str(file), encoding="latin-1", load=True)
+        df = pd.DataFrame(iter(table))
         df.columns = df.columns.str.upper()
         return df
 
     except Exception as e:
-        raise LeituraError(f"Failed to read .dbf: {arquivo}") from e
+        raise ReadError(f"Failed to read .dbf: {file}") from e
 
 
-def _ler_zip(arquivo: Path) -> pd.DataFrame:
+def _read_zip(file: Path) -> pd.DataFrame:
     try:
         with tempfile.TemporaryDirectory() as tmp:
 
-            with zipfile.ZipFile(arquivo) as zf:
-                nomes = [n for n in zf.namelist() if not n.endswith("/")]
+            with zipfile.ZipFile(file) as zf:
+                names = [n for n in zf.namelist() if not n.endswith("/")]
 
-                if not nomes:
-                    raise LeituraError(f"Empty ZIP: {arquivo}")
+                if not names:
+                    raise ReadError(f"Empty ZIP: {file}")
 
                 zf.extractall(tmp)
 
             # read the first recognizable file inside the zip
-            for nome in nomes:
-                extraido = Path(tmp) / nome
-                sufixo = extraido.suffix.lower()
-                if sufixo in (".dbc", ".dbf"):
-                    return ler(extraido)
+            for name in names:
+                extracted = Path(tmp) / name
+                suffix = extracted.suffix.lower()
+                if suffix in (".dbc", ".dbf"):
+                    return read(extracted)
 
-        raise LeituraError(f"No .dbc or .dbf found inside {arquivo}")
+        raise ReadError(f"No .dbc or .dbf found inside {file}")
 
-    except LeituraError:
+    except ReadError:
         raise
 
     except Exception as e:
-        raise LeituraError(f"Failed to read .zip: {arquivo}") from e
+        raise ReadError(f"Failed to read .zip: {file}") from e

@@ -3,49 +3,47 @@ import pytest
 from susflow.systems import sinan
 
 
-def test_validar_invalid_disease():
+def test_validate_invalid_disease():
     with pytest.raises(ValueError):
-        sinan._validar("UNKNOWN", 2020)
+        sinan._validate("UNKNOWN", 2020)
 
 
-def test_validar_year_out_of_range():
+def test_validate_year_out_of_range():
     with pytest.raises(ValueError):
-        sinan._validar("DENG", 1990)
+        sinan._validate("DENG", 1990)
 
 
-def test_nome_arquivo():
-    assert sinan._nome_arquivo("DENG", 2023) == "DENGBR23.dbc"
+def test_file_name():
+    assert sinan._file_name("DENG", 2023) == "DENGBR23.dbc"
 
 
-def test_listar_filters(monkeypatch):
+def test_list_files_filters(monkeypatch):
     sample = ["DENGBR23.dbc", "CHIKBR23.dbc", "README.txt"]
-    monkeypatch.setattr(sinan._ftp, "listar", lambda d: sample)
+    monkeypatch.setattr(sinan._ftp, "list_files", lambda d: sample)
 
-    all_files = sinan.listar()
+    all_files = sinan.list_files()
     assert all_files == sample
 
-    deng_files = sinan.listar("DENG")
+    deng_files = sinan.list_files("DENG")
     assert deng_files == ["DENGBR23.dbc"]
 
 
-def test_baixar_uses_cache_if_exists(monkeypatch, tmp_path):
+def test_download_uses_cache_if_exists(monkeypatch, tmp_path):
     local = tmp_path / "DENGBR23.dbc"
     local.write_text("x")
 
-    # Simulate cache returning a local path that exists
-    monkeypatch.setattr(sinan._cache, "caminho_local", lambda caminho, destino: local)
+    monkeypatch.setattr(sinan._cache, "local_path", lambda path, destination: local)
 
-    # _ftp.baixar should not be called; monkeypatch to raise if called
     monkeypatch.setattr(
         sinan._ftp,
-        "baixar",
+        "download",
         lambda *a, **k: (_ for _ in ()).throw(RuntimeError("ftp called")),
     )
 
-    result = sinan.baixar("DENG", 2023)
+    result = sinan.download("DENG", 2023)
     assert result == local
 
 
-def test_baixar_invalid_doenca(monkeypatch):
+def test_download_invalid_disease(monkeypatch):
     with pytest.raises(ValueError):
-        sinan.baixar("XXXX", 2023)
+        sinan.download("XXXX", 2023)

@@ -8,8 +8,8 @@
 
  | Tipo   | Função            | Retorno     | Descrição                                      |
  | ------ | ----------------- | ----------- | ---------------------------------------------- |
- | Por UF | `ler(uf, ano)`    | `DataFrame` | Dados de imunização registrados na UF, por ano |
- | Por UF | `baixar(uf, ano)` | `Path`      | Arquivo `.DBF` bruto da UF                     |
+ | Por UF | `read(uf, year)`    | `DataFrame` | Dados de imunização registrados na UF, por ano |
+ | Por UF | `download(uf, year)` | `Path`      | Arquivo `.DBF` bruto da UF                     |
 
  ---
 
@@ -25,13 +25,13 @@
  from susflow.systems import pni
 
  # Baixa (se necessário) e carrega os dados em um DataFrame
- df = pni.ler(uf="SP", ano=2015)
+ df = pni.read(uf="SP", year=2015)
 
  # Apenas realiza o download do arquivo bruto
- path = pni.baixar(uf="RJ", ano=2010)
+ path = pni.download(uf="RJ", year=2010)
 
  # Lista os arquivos filtrando por uma UF específica
- arquivos = pni.listar(uf="PB")
+ arquivos = pni.list_files(uf="PB")
 
  ```
 
@@ -55,10 +55,10 @@
 
  ```
  1. Explorar o que existe no FTP
-    pni.listar(uf="PB")                           ← lista todos os anos da Paraíba
+    pni.list_files(uf="PB")                           ← lista todos os anos da Paraíba
 
  2. Baixar e processar os dados
-    df = pni.ler(uf="SP", ano=2015)               ← dados de imunização de SP em 2015
+    df = pni.read(uf="SP", year=2015)               ← dados de imunização de SP em 2015
 
  3. Persistir localmente de forma otimizada
     # Recomendado converter para Parquet após a leitura para melhorar a performance

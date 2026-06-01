@@ -13,7 +13,7 @@ Files are located directly in `DADOS/` (no nested folder):
 Notes:
     - Pure .DBF format (no blast); read with `dbfread` via `reader.py`.
     - Year suffix uses 2 digits (94–19); years 2000–2009 appear as
-        00–09, so normalization is done with `(ano % 100)`.
+        00–09, so normalization is done with `(year % 100)`.
     - UF encoded as 2 uppercase letters (e.g. SP, RJ, AM).
     - Coverage ends in 2019; there are no preliminary files.
 """
@@ -26,72 +26,72 @@ from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import PNI as _CFG
 from ..config import UFS
-from ..reader import ler as _ler
+from ..reader import read as _read
 
 _BASE = _CFG["ftp_dir"]
-_ANO_MIN, _ANO_MAX = _CFG["year_range"]
+_YEAR_MIN, _YEAR_MAX = _CFG["year_range"]
 
 
-def _validar(uf: str, ano: int) -> None:
+def _validate(uf: str, year: int) -> None:
     if uf.upper() not in UFS:
         raise ValueError(f"Invalid UF: '{uf}'. Accepted values: {UFS}")
 
-    if not (_ANO_MIN <= ano <= _ANO_MAX):
+    if not (_YEAR_MIN <= year <= _YEAR_MAX):
         raise ValueError(
-            f"Year {ano} out of range for PNI " f"(available: {_ANO_MIN}–{_ANO_MAX})"
+            f"Year {year} out of range for PNI (available: {_YEAR_MIN}–{_YEAR_MAX})"
         )
 
 
-def _nome(uf: str, ano: int) -> str:
-    return f"DPNI{uf.upper()}{ano % 100:02d}.DBF"
+def _file_name(uf: str, year: int) -> str:
+    return f"DPNI{uf.upper()}{year % 100:02d}.DBF"
 
 
-def _baixar_arquivo(nome: str, destino: Path | None, forcar: bool) -> Path:
-    caminho = f"{_BASE}/{nome}"
-    local = _cache.caminho_local(caminho, destino)
+def _download_file(name: str, destination: Path | None, force: bool) -> Path:
+    path = f"{_BASE}/{name}"
+    local = _cache.local_path(path, destination)
 
-    if local.exists() and not forcar:
+    if local.exists() and not force:
         return local
 
-    return _ftp.baixar(caminho, local)
+    return _ftp.download(path, local)
 
 
-def listar(uf: str | None = None) -> list[str]:
+def list_files(uf: str | None = None) -> list[str]:
     """List files available on the FTP for PNI.
 
     Filters by state (UF) if provided.
     """
-    arquivos = _ftp.listar(_BASE)
+    files = _ftp.list_files(_BASE)
     if uf:
-        filtro = f"DPNI{uf.upper()}"
-        arquivos = [a for a in arquivos if a.upper().startswith(filtro)]
-    return arquivos
+        filter_ = f"DPNI{uf.upper()}"
+        files = [f for f in files if f.upper().startswith(filter_)]
+    return files
 
 
-def baixar(
+def download(
     uf: str,
-    ano: int,
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
 ) -> Path:
     """Download `DPNI{UF}{YY}.DBF` to local cache and return the path.
 
     Parameters
     ----------
-    uf      : state code (e.g. 'SP')
-    ano     : year with 4 digits (e.g. 2010)
-    destino : destination folder; uses default cache if None
-    forcar  : if True, download even if file exists in cache
+    uf          : state code (e.g. 'SP')
+    year        : 4-digit year (e.g. 2010)
+    destination : destination folder; uses default cache if None
+    force       : if True, download even if file exists in cache
     """
-    _validar(uf, ano)
-    return _baixar_arquivo(_nome(uf, ano), destino, forcar)
+    _validate(uf, year)
+    return _download_file(_file_name(uf, year), destination, force)
 
 
-def ler(
+def read(
     uf: str,
-    ano: int,
-    destino: Path | None = None,
-    forcar: bool = False,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _ler(baixar(uf, ano, destino=destino, forcar=forcar))
+    return _read(download(uf, year, destination=destination, force=force))
