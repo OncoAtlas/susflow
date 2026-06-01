@@ -44,9 +44,7 @@ _YEAR_MIN, _YEAR_MAX = _CFG["year_range"]
 def _validate_prefix(prefix: str) -> str:
     prefix = prefix.upper()
     if prefix not in _PREFIXES:
-        raise ValueError(
-            f"Invalid prefix: '{prefix}'. Available: {sorted(_PREFIXES)}"
-        )
+        raise ValueError(f"Invalid prefix: '{prefix}'. Available: {sorted(_PREFIXES)}")
     return prefix
 
 
@@ -113,7 +111,9 @@ def download(
     """
     prefix = _validate_prefix(prefix)
     _validate(prefix, uf, year, month)
-    return _download_file(_file_name(prefix, uf.upper(), year, month), destination, force)
+    return _download_file(
+        _file_name(prefix, uf.upper(), year, month), destination, force
+    )
 
 
 def read(
@@ -125,4 +125,6 @@ def read(
     force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _read(download(uf, year, month, prefix=prefix, destination=destination, force=force))
+    return _read(
+        download(uf, year, month, prefix=prefix, destination=destination, force=force)
+    )

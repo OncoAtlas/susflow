@@ -37,7 +37,9 @@ def _validate(disease: str, year: int) -> str:
         raise ValueError(f"Invalid disease code: '{disease}'.\nAvailable: {available}")
 
     if not (_YEAR_MIN <= year <= _YEAR_MAX):
-        raise ValueError(f"Year out of range: {year} (available: {_YEAR_MIN}–{_YEAR_MAX})")
+        raise ValueError(
+            f"Year out of range: {year} (available: {_YEAR_MIN}–{_YEAR_MAX})"
+        )
 
     return disease
 
@@ -108,7 +110,9 @@ def read(
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
     return _read(
-        download(disease, year, destination=destination, force=force, preliminary=preliminary)
+        download(
+            disease, year, destination=destination, force=force, preliminary=preliminary
+        )
     )
 
 

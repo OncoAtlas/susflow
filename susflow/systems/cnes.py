@@ -45,9 +45,7 @@ _SUBTYPES = _CFG["subtypes"]  # {type: (description, year_min, year_max)}
 def _validate_subtype(type_: str) -> str:
     type_ = type_.upper()
     if type_ not in _SUBTYPES:
-        raise ValueError(
-            f"Invalid subtype: '{type_}'. Available: {sorted(_SUBTYPES)}"
-        )
+        raise ValueError(f"Invalid subtype: '{type_}'. Available: {sorted(_SUBTYPES)}")
     return type_
 
 
@@ -72,7 +70,9 @@ def _file_name(type_: str, uf: str, year: int, month: int) -> str:
     return f"{type_}{uf}{str(year)[-2:]}{month:02d}.dbc"
 
 
-def _download_file(type_: str, name: str, destination: Path | None, force: bool) -> Path:
+def _download_file(
+    type_: str, name: str, destination: Path | None, force: bool
+) -> Path:
     path = f"{_ftp_dir(type_)}/{name}"
     local = _cache.local_path(path, destination)
     if local.exists() and not force:
@@ -112,7 +112,9 @@ def download(
     """
     type_ = _validate_subtype(type_)
     _validate(type_, uf, year, month)
-    return _download_file(type_, _file_name(type_, uf.upper(), year, month), destination, force)
+    return _download_file(
+        type_, _file_name(type_, uf.upper(), year, month), destination, force
+    )
 
 
 def read(
@@ -124,4 +126,6 @@ def read(
     force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _read(download(uf, year, month, type_=type_, destination=destination, force=force))
+    return _read(
+        download(uf, year, month, type_=type_, destination=destination, force=force)
+    )

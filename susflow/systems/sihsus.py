@@ -30,7 +30,7 @@ from ..config import UFS
 from ..reader import read as _read
 
 _DIR = _CFG["ftp_dir"]
-_PREFIXES = set(_CFG["prefixes"].keys())           # RD, SP, RJ, ER
+_PREFIXES = set(_CFG["prefixes"].keys())  # RD, SP, RJ, ER
 _NATIONAL_PREFIXES = set(_CFG["national_prefixes"].keys())  # CH, CM
 _YEAR_MIN, _YEAR_MAX = _CFG["year_range"]
 
@@ -43,7 +43,9 @@ def _validate_uf(uf: str, year: int, month: int) -> None:
 
 def _validate_period(year: int, month: int) -> None:
     if not (_YEAR_MIN <= year <= _YEAR_MAX):
-        raise ValueError(f"Year out of range: {year} (available: {_YEAR_MIN}–{_YEAR_MAX})")
+        raise ValueError(
+            f"Year out of range: {year} (available: {_YEAR_MIN}–{_YEAR_MAX})"
+        )
     if not (1 <= month <= 12):
         raise ValueError(f"Invalid month: {month}. Use 1–12.")
 
@@ -110,7 +112,9 @@ def download(
     """
     prefix = _validate_prefix(prefix)
     _validate_uf(uf, year, month)
-    return _download_file(_file_name(prefix, uf.upper(), year, month), destination, force)
+    return _download_file(
+        _file_name(prefix, uf.upper(), year, month), destination, force
+    )
 
 
 def read(
@@ -122,7 +126,9 @@ def read(
     force: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _read(download(uf, year, month, prefix=prefix, destination=destination, force=force))
+    return _read(
+        download(uf, year, month, prefix=prefix, destination=destination, force=force)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -167,5 +173,7 @@ def read_national(
 ) -> pd.DataFrame:
     """Download (if needed) and return national data as a DataFrame."""
     return _read(
-        download_national(year, month, prefix=prefix, destination=destination, force=force)
+        download_national(
+            year, month, prefix=prefix, destination=destination, force=force
+        )
     )

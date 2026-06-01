@@ -48,9 +48,7 @@ def test_download_docs_invalid():
 
 def test_download_docs_all(monkeypatch, tmp_path):
     dummy = tmp_path / "doc.zip"
-    monkeypatch.setattr(
-        sim, "_download_file", lambda ftp_dir, name, dest, force: dummy
-    )
+    monkeypatch.setattr(sim, "_download_file", lambda ftp_dir, name, dest, force: dummy)
 
     result = sim.download_docs()
     assert isinstance(result, list)
