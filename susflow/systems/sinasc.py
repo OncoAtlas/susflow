@@ -118,7 +118,9 @@ def download_national(
 ) -> Path:
     """Download `DNBR{YYYY}.dbc` to local cache."""
     _validate_national(year)
-    return _download_file(_CFG_NATIONAL["ftp_dir"], f"DNBR{year}.dbc", destination, force)
+    return _download_file(
+        _CFG_NATIONAL["ftp_dir"], f"DNBR{year}.dbc", destination, force
+    )
 
 
 def read_national(
@@ -139,9 +141,13 @@ def list_exceptions() -> list[str]:
     return [f for f in files if f.upper().startswith("DNEX")]
 
 
-def download_exception(year: int, destination: Path | None = None, force: bool = False) -> Path:
+def download_exception(
+    year: int, destination: Path | None = None, force: bool = False
+) -> Path:
     """Download `DNEX{YYYY}.dbc` to local cache."""
-    return _download_file(_CFG_EXCEPTIONS["ftp_dir"], f"DNEX{year}.dbc", destination, force)
+    return _download_file(
+        _CFG_EXCEPTIONS["ftp_dir"], f"DNEX{year}.dbc", destination, force
+    )
 
 
 def read_exception(

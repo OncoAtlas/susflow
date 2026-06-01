@@ -28,7 +28,9 @@ def test__read_dbc_uses_dbc2dbf_and_calls_read_dbf(tmp_path: Path, monkeypatch):
     assert called["dst"].endswith(".dbf")
 
 
-def test__read_dbf_returns_dataframe_and_uppercases_columns(monkeypatch, tmp_path: Path):
+def test__read_dbf_returns_dataframe_and_uppercases_columns(
+    monkeypatch, tmp_path: Path
+):
     class FakeDBF:
         def __init__(self, path, encoding=None, load=False):
             self._rows = [{"col": "x", "num": 1}]

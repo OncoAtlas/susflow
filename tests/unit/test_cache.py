@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from susflow.cache import local_path, exists
+from susflow.cache import exists, local_path
 
 
 def test_local_path_with_custom_root(tmp_path: Path):
