@@ -96,10 +96,10 @@ def download(
 
 
 def read(
-    uf: str, year: int, destination: Path | None = None, force: bool = False
+    uf: str, year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _read(download(uf, year, destination=destination, force=force))
+    return _read(download(uf, year, destination=destination, force=force), parquet=parquet, force=force)
 
 
 # ---------------------------------------------------------------------------
@@ -124,10 +124,10 @@ def download_national(
 
 
 def read_national(
-    year: int, destination: Path | None = None, force: bool = False
+    year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the national aggregate as a DataFrame."""
-    return _read(download_national(year, destination=destination, force=force))
+    return _read(download_national(year, destination=destination, force=force), parquet=parquet, force=force)
 
 
 # ---------------------------------------------------------------------------
@@ -151,10 +151,10 @@ def download_exception(
 
 
 def read_exception(
-    year: int, destination: Path | None = None, force: bool = False
+    year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
 ) -> pd.DataFrame:
     """Download (if needed) and return the exception file as a DataFrame."""
-    return _read(download_exception(year, destination=destination, force=force))
+    return _read(download_exception(year, destination=destination, force=force), parquet=parquet, force=force)
 
 
 # ---------------------------------------------------------------------------
