@@ -19,6 +19,10 @@ dependencies = [
     "dbfread",
 ]
 
+[project.optional-dependencies]
+polars = ["polars"]
+pyarrow = ["pyarrow"]
+
 [project.urls]
 "Homepage" = "https://github.com/OncoAtlas/susflow"
 "PyPI" = "https://pypi.org/project/susflow"

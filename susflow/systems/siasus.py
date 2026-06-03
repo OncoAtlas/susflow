@@ -27,8 +27,7 @@ Retired prefixes (still available on FTP):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -123,8 +122,10 @@ def read(
     prefix: str = "PA",
     destination: Path | None = None,
     force: bool = False,
-) -> pd.DataFrame:
+    engine: str = "pandas",
+) -> Any:
     """Download (if needed) and return the data as a DataFrame."""
     return _read(
-        download(uf, year, month, prefix=prefix, destination=destination, force=force)
+        download(uf, year, month, prefix=prefix, destination=destination, force=force),
+        engine=engine,
     )
