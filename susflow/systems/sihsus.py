@@ -124,10 +124,13 @@ def read(
     prefix: str = "RD",
     destination: Path | None = None,
     force: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
     return _read(
-        download(uf, year, month, prefix=prefix, destination=destination, force=force)
+        download(uf, year, month, prefix=prefix, destination=destination, force=force),
+        parquet=parquet,
+        force=force,
     )
 
 
@@ -170,10 +173,13 @@ def read_national(
     prefix: str = "CH",
     destination: Path | None = None,
     force: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return national data as a DataFrame."""
     return _read(
         download_national(
             year, month, prefix=prefix, destination=destination, force=force
-        )
+        ),
+        parquet=parquet,
+        force=force,
     )

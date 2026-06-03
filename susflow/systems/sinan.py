@@ -107,12 +107,15 @@ def read(
     destination: Path | None = None,
     force: bool = False,
     preliminary: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
     return _read(
         download(
             disease, year, destination=destination, force=force, preliminary=preliminary
-        )
+        ),
+        parquet=parquet,
+        force=force,
     )
 
 

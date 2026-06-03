@@ -92,6 +92,7 @@ def read(
     year: int,
     destination: Path | None = None,
     force: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
-    return _read(download(uf, year, destination=destination, force=force))
+    return _read(download(uf, year, destination=destination, force=force), parquet=parquet, force=force)

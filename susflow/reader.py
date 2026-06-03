@@ -17,24 +17,38 @@ class ReadError(Exception):
     """Failed to convert file to DataFrame."""
 
 
-def read(file: Path) -> pd.DataFrame:
+def read(file: Path, parquet: bool = False, force: bool = False) -> pd.DataFrame:
     """
     Read a local file and return a DataFrame.
     Supports .dbc, .dbf and .zip (containing .dbc or .dbf).
     Columns always uppercased, strings decoded using latin-1.
+
+    If parquet=True, a .parquet sidecar is written next to the source file on
+    first read and returned directly on subsequent calls, skipping the slow
+    dbc2dbf conversion. Pass force=True to rebuild the sidecar.
+    Requires pyarrow or fastparquet: pip install susflow[parquet]
     """
     file = Path(file)
-    suffix = file.suffix.lower()
 
+    if parquet:
+        parquet_path = file.with_suffix(".parquet")
+        if parquet_path.exists() and not force:
+            return pd.read_parquet(parquet_path)
+        df = _read_source(file)
+        df.to_parquet(parquet_path, index=False)
+        return df
+
+    return _read_source(file)
+
+
+def _read_source(file: Path) -> pd.DataFrame:
+    suffix = file.suffix.lower()
     if suffix == ".dbc":
         return _read_dbc(file)
-
     if suffix == ".dbf":
         return _read_dbf(file)
-
     if suffix == ".zip":
         return _read_zip(file)
-
     raise ReadError(f"Unsupported format: {suffix}")
 
 
@@ -86,7 +100,7 @@ def _read_zip(file: Path) -> pd.DataFrame:
                 extracted = Path(tmp) / name
                 suffix = extracted.suffix.lower()
                 if suffix in (".dbc", ".dbf"):
-                    return read(extracted)
+                    return _read_source(extracted)
 
         raise ReadError(f"No .dbc or .dbf found inside {file}")
 

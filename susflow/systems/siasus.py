@@ -123,8 +123,11 @@ def read(
     prefix: str = "PA",
     destination: Path | None = None,
     force: bool = False,
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""
     return _read(
-        download(uf, year, month, prefix=prefix, destination=destination, force=force)
+        download(uf, year, month, prefix=prefix, destination=destination, force=force),
+        parquet=parquet,
+        force=force,
     )

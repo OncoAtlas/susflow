@@ -55,3 +55,68 @@ def test__read_dbf_raises_readerror_on_failure(monkeypatch, tmp_path: Path):
     monkeypatch.setattr(reader, "DBF", bad_dbf)
     with pytest.raises(ReadError):
         reader._read_dbf(tmp_path / "nope.dbf")
+
+
+# ---------------------------------------------------------------------------
+# Parquet cache
+# ---------------------------------------------------------------------------
+
+_SAMPLE = pd.DataFrame({"A": [1, 2], "B": ["x", "y"]})
+
+
+def _make_dbf(tmp_path: Path) -> Path:
+    p = tmp_path / "sample.dbf"
+    p.write_text("dummy")
+    return p
+
+
+def test_read_parquet_writes_sidecar_on_first_call(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    monkeypatch.setattr(reader, "_read_source", lambda _: _SAMPLE)
+
+    result = reader.read(src, parquet=True)
+    parquet_path = src.with_suffix(".parquet")
+
+    assert result.equals(_SAMPLE)
+    assert parquet_path.exists()
+
+
+def test_read_parquet_reads_sidecar_on_second_call(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    call_count = {"n": 0}
+
+    def counting_source(_):
+        call_count["n"] += 1
+        return _SAMPLE
+
+    monkeypatch.setattr(reader, "_read_source", counting_source)
+
+    reader.read(src, parquet=True)
+    reader.read(src, parquet=True)
+
+    assert call_count["n"] == 1
+
+
+def test_read_parquet_force_rebuilds_sidecar(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    call_count = {"n": 0}
+
+    def counting_source(_):
+        call_count["n"] += 1
+        return _SAMPLE
+
+    monkeypatch.setattr(reader, "_read_source", counting_source)
+
+    reader.read(src, parquet=True)
+    reader.read(src, parquet=True, force=True)
+
+    assert call_count["n"] == 2
+
+
+def test_read_without_parquet_does_not_create_sidecar(monkeypatch, tmp_path: Path):
+    src = _make_dbf(tmp_path)
+    monkeypatch.setattr(reader, "_read_source", lambda _: _SAMPLE)
+
+    reader.read(src)
+
+    assert not src.with_suffix(".parquet").exists()

@@ -19,6 +19,9 @@ dependencies = [
     "dbfread",
 ]
 
+[project.optional-dependencies]
+parquet = ["pyarrow"]
+
 [project.urls]
 "Homepage" = "https://github.com/OncoAtlas/susflow"
 "PyPI" = "https://pypi.org/project/susflow"
