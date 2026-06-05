@@ -8,7 +8,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .systems import cnes, pni, siasus, sihsus, sim, sinan, sinasc
+from .systems import cnes, ibge_pop, pni, siasus, sihsus, sim, sinan, sinasc
 
 
 def _dest_force(p):
@@ -158,6 +158,20 @@ def main(argv=None):
     p.set_defaults(func=_pni_download)
 
     # ------------------------------------------------------------------
+    # IBGE — Population Estimates (POP)
+    # ------------------------------------------------------------------
+    ibge_p = subs.add_parser("ibge", help="IBGE Population Estimates")
+    ibge_a = ibge_p.add_subparsers(dest="action", required=True)
+
+    p = ibge_a.add_parser("list", help="list available files on FTP")
+    p.set_defaults(func=_ibge_list)
+
+    p = ibge_a.add_parser("download", help="download POPBR{YY}.zip")
+    p.add_argument("year", type=int, help="4-digit year (e.g. 2000)")
+    _dest_force(p)
+    p.set_defaults(func=_ibge_download)
+
+    # ------------------------------------------------------------------
     args = parser.parse_args(argv)
     try:
         args.func(args)
@@ -279,4 +293,15 @@ def _pni_list(args):
 def _pni_download(args):
     print(
         pni.download(args.uf, args.year, destination=args.destination, force=args.force)
+    )
+
+
+def _ibge_list(args):
+    for f in ibge_pop.list_files():
+        print(f)
+
+
+def _ibge_download(args):
+    print(
+        ibge_pop.download(args.year, destination=args.destination, force=args.force)
     )
