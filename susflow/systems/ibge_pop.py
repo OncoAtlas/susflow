@@ -66,8 +66,11 @@ def download(year: int, destination: Path | None = None, force: bool = False) ->
 
 
 def read(
-    year: int, destination: Path | None = None, force: bool = False,
-    engine: str = "pandas", parquet: bool = False
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
 ) -> Any:
     """Download (if needed) and return the population estimates as a DataFrame (or engine table)."""
     return _read(

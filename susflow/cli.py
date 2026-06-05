@@ -302,6 +302,4 @@ def _ibge_list(args):
 
 
 def _ibge_download(args):
-    print(
-        ibge_pop.download(args.year, destination=args.destination, force=args.force)
-    )
+    print(ibge_pop.download(args.year, destination=args.destination, force=args.force))
