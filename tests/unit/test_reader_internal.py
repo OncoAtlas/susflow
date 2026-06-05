@@ -71,6 +71,7 @@ def _make_dbf(tmp_path: Path) -> Path:
 
 
 def test_read_parquet_writes_sidecar_on_first_call(monkeypatch, tmp_path: Path):
+    pytest.importorskip("pyarrow")
     src = _make_dbf(tmp_path)
     monkeypatch.setattr(reader, "_read_source", lambda _: _SAMPLE)
 
@@ -82,6 +83,7 @@ def test_read_parquet_writes_sidecar_on_first_call(monkeypatch, tmp_path: Path):
 
 
 def test_read_parquet_reads_sidecar_on_second_call(monkeypatch, tmp_path: Path):
+    pytest.importorskip("pyarrow")
     src = _make_dbf(tmp_path)
     call_count = {"n": 0}
 
@@ -98,6 +100,7 @@ def test_read_parquet_reads_sidecar_on_second_call(monkeypatch, tmp_path: Path):
 
 
 def test_read_parquet_force_rebuilds_sidecar(monkeypatch, tmp_path: Path):
+    pytest.importorskip("pyarrow")
     src = _make_dbf(tmp_path)
     call_count = {"n": 0}
 
