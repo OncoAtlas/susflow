@@ -17,8 +17,7 @@ Auxiliary files (download only, not read as DataFrame):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -86,10 +85,10 @@ def download(
 
 
 def read(
-    uf: str, year: int, destination: Path | None = None, force: bool = False
-) -> pd.DataFrame:
+    uf: str, year: int, destination: Path | None = None, force: bool = False, engine: str = "pandas"
+) -> Any:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _read(download(uf, year, destination=destination, force=force))
+    return _read(download(uf, year, destination=destination, force=force), engine=engine)
 
 
 # ---------------------------------------------------------------------------
@@ -116,10 +115,10 @@ def download_special(
 
 
 def read_special(
-    type_: str, year: int, destination: Path | None = None, force: bool = False
-) -> pd.DataFrame:
+    type_: str, year: int, destination: Path | None = None, force: bool = False, engine: str = "pandas"
+) -> Any:
     """Download (if needed) and return special data as a DataFrame."""
-    return _read(download_special(type_, year, destination=destination, force=force))
+    return _read(download_special(type_, year, destination=destination, force=force), engine=engine)
 
 
 # ---------------------------------------------------------------------------

@@ -23,7 +23,7 @@ Documentação em inglês: [README principal](../../README.md)
 
 ## Instalação
 
-Instalação em modo editável durante o desenvolvimento:
+Instalação em modo editável durante o desenvolvimento (inclui ferramentas de dev/lint/test via o extra `dev`):
 
 ```bash
 git clone https://github.com/OncoAtlas/susflow.git
@@ -31,7 +31,7 @@ cd susflow
 python -m venv .venv
 . ./.venv/bin/activate
 pip install -U pip
-pip install -e .
+pip install -e ".[dev]"
 ```
 
 Instalação via PyPI (recomendado para a maioria dos usuários):
@@ -88,12 +88,11 @@ Por padrão, os downloads são salvos em `~/.susflow/cache/` espelhando a árvor
 
 ## Ferramentas de desenvolvimento
 
-Recomendamos as seguintes ferramentas para contribuições:
+Após `pip install -e ".[dev]"` (veja Instalação acima), as ferramentas já estão disponíveis. Execute as verificações localmente:
 
 ```bash
 . ./.venv/bin/activate
-pip install -U ruff black isort pytest pytest-mock coverage
-ruff .
+ruff check .
 black --check .
 isort --check-only .
 pytest -q
@@ -110,8 +109,8 @@ pytest -q
 
 ## Contribuindo
 
-Veja [CONTRIBUTING.md](../contributing/CONTRIBUTING.md) para diretrizes de código, testes e fluxo de PR.
-Veja [coverage.md](../contributing/coverage.md) para instruções de cobertura de testes.
+Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para diretrizes de código, testes e fluxo de PR.
+Veja [coverage.md](./coverage.md) para instruções de cobertura de testes.
 
 ## Licença
 

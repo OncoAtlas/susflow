@@ -7,35 +7,64 @@ Read layer: convert local files (.dbc, .dbf, .zip) to DataFrame.
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from dbfread import DBF
 from pyreaddbc import dbc2dbf
+
+_ENGINES = frozenset({"pandas", "polars", "pyarrow"})
 
 
 class ReadError(Exception):
     """Failed to convert file to DataFrame."""
 
 
-def read(file: Path) -> pd.DataFrame:
+def read(file: Path, engine: str = "pandas") -> Any:
     """
     Read a local file and return a DataFrame.
     Supports .dbc, .dbf and .zip (containing .dbc or .dbf).
     Columns always uppercased, strings decoded using latin-1.
-    """
-    file = Path(file)
-    suffix = file.suffix.lower()
 
+    engine : output type — "pandas" (default), "polars", or "pyarrow".
+             Requires polars:  pip install susflow[polars]
+             Requires pyarrow: pip install susflow[pyarrow]
+    """
+    if engine not in _ENGINES:
+        raise ValueError(f"Unknown engine: '{engine}'. Valid options: {sorted(_ENGINES)}")
+    return _convert(_read_source(Path(file)), engine)
+
+
+def _read_source(file: Path) -> pd.DataFrame:
+    suffix = file.suffix.lower()
     if suffix == ".dbc":
         return _read_dbc(file)
-
     if suffix == ".dbf":
         return _read_dbf(file)
-
     if suffix == ".zip":
         return _read_zip(file)
-
     raise ReadError(f"Unsupported format: {suffix}")
+
+
+def _convert(df: pd.DataFrame, engine: str) -> Any:
+    if engine == "pandas":
+        return df
+    if engine == "polars":
+        try:
+            import polars as pl
+        except ImportError:
+            raise ImportError(
+                "engine='polars' requires polars. Install with: pip install susflow[polars]"
+            ) from None
+        return pl.from_pandas(df)
+    if engine == "pyarrow":
+        try:
+            import pyarrow as pa
+        except ImportError:
+            raise ImportError(
+                "engine='pyarrow' requires pyarrow. Install with: pip install susflow[pyarrow]"
+            ) from None
+        return pa.Table.from_pandas(df)
 
 
 def _read_dbc(file: Path) -> pd.DataFrame:
@@ -86,7 +115,7 @@ def _read_zip(file: Path) -> pd.DataFrame:
                 extracted = Path(tmp) / name
                 suffix = extracted.suffix.lower()
                 if suffix in (".dbc", ".dbf"):
-                    return read(extracted)
+                    return _read_source(extracted)
 
         raise ReadError(f"No .dbc or .dbf found inside {file}")
 
