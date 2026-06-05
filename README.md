@@ -32,6 +32,7 @@ Quick links
 - [SINASC](./docs/en/sinasc.md) — live births
 - [SIASUS](./docs/en/siasus.md) — ambulatory information system (SUS)
 - [SIHSUS](./docs/en/sihsus.md) — hospital information system (SUS)
+- IBGE — population estimates (see `susflow.systems.ibge_pop`)
 - [FTP file patterns summary](./docs/en/summary.md)
 
 ## Installation
@@ -59,14 +60,21 @@ To install a specific released version:
 pip install susflow==0.1.1
 ```
 
-Core runtime dependencies are declared in `pyproject.toml`. Typical extras for performance:
+Core runtime dependencies are declared in `pyproject.toml`. Optional extras:
 
-- `pyarrow` or `fastparquet` (Parquet cache)
-- `pandas` (DataFrame API)
+- `susflow[dev]` — development tools (ruff, black, isort, pytest, coverage, etc.)
+- `susflow[polars]` — Polars output support via `engine="polars"`
+- `susflow[pyarrow]` — PyArrow output + Parquet sidecar cache support
+- `susflow[parquet]` — Parquet sidecar cache (pyarrow)
+- `susflow[polars,pyarrow]` — for full `engine=` and cache flexibility
 
 ## Basic usage
 
-Each DATASUS system is available under `susflow.systems`. APIs are lightweight: `list_files`, `download` and `read` helpers manage discovery, download and conversion.
+Each DATASUS system is available under `susflow.systems` (including the newer `ibge_pop`). APIs are lightweight: `list_files`, `download` and `read` helpers manage discovery, download and conversion.
+
+The `read()` functions now support additional options:
+- `engine="pandas" | "polars" | "pyarrow"` — return native objects instead of pandas DataFrame.
+- `parquet=True` — enable local `.parquet` sidecar cache for faster repeated reads.
 
 Example: SINASC (Live Births)
 
@@ -86,6 +94,39 @@ Example: PNI (Vaccinations)
 from susflow.systems import pni
 df = pni.read(uf="RJ", year=2015)
 ```
+
+Example: Using new `engine` and `parquet` options + batch downloads
+
+```python
+from susflow import download_batch
+from susflow.systems import sinasc
+
+# Read with Polars (requires susflow[polars])
+df = sinasc.read(uf="SP", year=2020, engine="polars")
+
+# Enable Parquet sidecar cache (requires susflow[pyarrow] or [parquet])
+df = sinasc.read(uf="SP", year=2020, parquet=True)
+
+# Concurrent downloads
+paths = download_batch([
+    ("sinasc", {"uf": "SP", "year": 2020}),
+    ("sinasc", {"uf": "RJ", "year": 2021}),
+])
+```
+
+## Command-line interface
+
+SUSFlow also provides a `susflow` CLI (installed via the package or `pip install susflow`):
+
+```bash
+susflow --help
+susflow sinasc list --uf SP
+susflow cnes download SP 2023 --type ST
+```
+
+The CLI supports `list` and `download` for the main systems. For full control (including `engine=` and `parquet` cache), use the Python API.
+
+New in recent releases: `ibge_pop` module for population estimates.
 
 ## Caching behavior
 

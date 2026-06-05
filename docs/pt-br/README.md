@@ -19,6 +19,7 @@ Documentação em inglês: [README principal](../../README.md)
 - [SINASC](./sinasc-pt-BR.md) — nascidos vivos
 - [SIASUS](./siasus-pt-BR.md) — sistema de informações ambulatoriais (SUS)
 - [SIHSUS](./sihsus-pt-BR.md) — sistema de informações hospitalares (SUS)
+- IBGE — estimativas populacionais (veja `susflow.systems.ibge_pop`)
 - [Sumário de padrões de FTP](./sumario.md)
 
 ## Instalação
@@ -46,10 +47,10 @@ Para instalar uma versão específica:
 pip install susflow==0.1.1
 ```
 
-Dependências de runtime são declaradas em `pyproject.toml`. Dependências comuns para desempenho:
+Dependências de runtime são declaradas em `pyproject.toml`. Extras opcionais:
 
-- `pyarrow` ou `fastparquet` (cache Parquet)
-- `pandas` (API de DataFrame)
+- `susflow[dev]` — ferramentas de desenvolvimento
+- `susflow[polars]`, `susflow[pyarrow]`, `susflow[parquet]` — suporte a `engine=` e cache Parquet sidecar
 
 ## Uso básico
 
@@ -75,6 +76,15 @@ from susflow.systems import pni
 
 df = pni.read(uf="RJ", year=2015)
 ```
+
+## Interface de linha de comando (CLI)
+
+```bash
+susflow --help
+susflow sinasc list --uf SP
+```
+
+A CLI suporta `list` e `download`. Para opções avançadas (`engine=`, `parquet`, batch), use a API Python.
 
 ## Comportamento de cache
 
