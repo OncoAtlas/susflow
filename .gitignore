@@ -1,42 +1,39 @@
-# Python
+
+*$py.class
+build/
+# Cache local da biblioteca
+CONTEXT.md
+.coverage
+dist/
+docs/pt-br/estrategia_resgate_prs.md
+docs/pt-br/orientacoes.md
+*.egg-info/
+.env
+estrategia_resgate_github_cli.md
+# Generated huge FTP map files from mapear_ftp.py (can be tens of MB)
+htmlcov/
+.idea/
+# IDEs
+# Mapas FTP gerados
+NEXT.md
+orientacoes.md
+*.parquet
+# Private prompt / orientation files (used only locally for AI prompts, never committed)
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-dist/
-build/
-
-# Cache local da biblioteca
-.susflow/
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Testes
 .pytest_cache/
-.coverage
-htmlcov/
-
-# Mapas FTP gerados
+# Python
+.Python
+*.so
+.susflow/
+*.swo
+*.swp
+# Testes
+tools/mapas/
 tools/mapas/mapa_ftp_*.txt
-NEXT.md
-
-CONTEXT.md
-
-.venv
-.env
-venv/
-*.parquet
+tools/mapa*.txt
+tools/mapa_*.txt
 *.txt
-
-tools/mapas/mapa_ftp_*.txt
-# Private prompt / orientation files (used only locally for AI prompts, never committed)
-orientacoes.md
-estrategia_resgate_github_cli.md
-docs/pt-br/orientacoes.md
-docs/pt-br/estrategia_resgate_prs.md
+.venv
+venv/
+.vscode/
