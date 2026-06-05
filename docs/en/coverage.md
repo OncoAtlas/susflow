@@ -4,14 +4,13 @@ This file explains how to run the test suite with coverage and generate reports 
 
 Commands
 
-1. Create and activate a virtual environment, install the package and test dependencies:
+1. Create and activate a virtual environment, install the package and test dependencies (the `dev` extra brings in coverage, pytest, etc.):
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e . || pip install .
-pip install coverage pytest pytest-mock
+pip install -e ".[dev]"
 ```
 
 2. Run tests under coverage and show a terminal summary:

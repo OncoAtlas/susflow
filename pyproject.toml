@@ -19,6 +19,19 @@ dependencies = [
     "dbfread",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "black",
+    "isort",
+    "pytest",
+    "pytest-mock",
+    "coverage",
+    # release / packaging helpers
+    "build",
+    "twine",
+]
+
 [project.scripts]
 susflow = "susflow.cli:main"
 
