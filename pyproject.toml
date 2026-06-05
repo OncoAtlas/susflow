@@ -20,8 +20,22 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+    "ruff",
+    "black",
+    "isort",
+    "pytest",
+    "pytest-mock",
+    "coverage",
+    # release / packaging helpers
+    "build",
+    "twine",
+]
 polars = ["polars"]
 pyarrow = ["pyarrow"]
+
+[project.scripts]
+susflow = "susflow.cli:main"
 
 [project.urls]
 "Homepage" = "https://github.com/OncoAtlas/susflow"
