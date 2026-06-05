@@ -19,8 +19,6 @@ Notes:
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
-
 from .. import cache as _cache
 from .. import ftp as _ftp
 from ..config import IBGE_POP as _CFG
