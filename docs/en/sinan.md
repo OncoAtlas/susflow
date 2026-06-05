@@ -16,6 +16,10 @@ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SINAN/DADOS/`
 
 ---
 
+> **Common parameters supported by all `read*()` functions (including preliminary):**
+> - `engine="pandas" | "polars" | "pyarrow"` (default: `"pandas"`) — return native objects instead of pandas DataFrame. Requires the matching extra.
+> - `parquet=True` — enable fast local `.parquet` sidecar cache. Requires `susflow[parquet]` or `susflow[pyarrow]`. Use `force=True` to rebuild.
+
 ## Disease data — `DADOS/FINAIS/` and `DADOS/PRELIM/`
 
 **File pattern:** `{DOENÇA}BR{YY}.dbc`  

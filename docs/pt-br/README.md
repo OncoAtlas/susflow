@@ -19,7 +19,7 @@ Documentação em inglês: [README principal](../../README.md)
 - [SINASC](./sinasc-pt-BR.md) — nascidos vivos
 - [SIASUS](./siasus-pt-BR.md) — sistema de informações ambulatoriais (SUS)
 - [SIHSUS](./sihsus-pt-BR.md) — sistema de informações hospitalares (SUS)
-- IBGE — estimativas populacionais (veja `susflow.systems.ibge_pop`)
+- [IBGE](./ibge-pt-BR.md) — estimativas populacionais
 - [Sumário de padrões de FTP](./sumario.md)
 
 ## Instalação

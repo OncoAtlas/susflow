@@ -136,7 +136,24 @@
  - **CBO (ocupações):** `TABOCUP.DBF`
  - **Países:** `TABPAIS.DBF`
 
- ## 7. Dicas para consulta e uso
+ ## IBGE – Estimativas Populacionais (IBGE)
+
+**Caminho base:** `/dissemin/publicos/IBGE/POP/`
+
+| Padrão           | Descrição                                      | Exemplo          |
+| ---------------- | ---------------------------------------------- | ---------------- |
+| `POPBR<AA>.zip`  | Estimativas populacionais – Brasil (nacional, ano com 2 dígitos) | `POPBR00.zip`, `POPBR12.zip` |
+
+**Cobertura:** 1980–2012 (anual, apenas nacional)
+
+**Observações:**
+- Arquivos ZIP contendo um .DBC/.DBF com contagens populacionais (por faixas etárias, sexo etc.).
+- Use `ibge_pop.read(ano)` ou `download(ano)` (via `susflow.systems.ibge_pop` ou CLI `susflow ibge`).
+- Sem quebra por estado (UF) — agregado nacional apenas.
+
+---
+
+## 7. Dicas para consulta e uso
 
  - **Prefixo é a chave**: identifique o sistema pelo prefixo do nome (ex: `DO` = SIM, `DN` = SINASC, `RD`/`ER` = SIH, `AB` = SIA).
  - **Ano**: a maioria usa dois dígitos até 1999, depois quatro dígitos ou dois+dois (ano+mês).

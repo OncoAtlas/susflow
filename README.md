@@ -32,7 +32,7 @@ Quick links
 - [SINASC](./docs/en/sinasc.md) — live births
 - [SIASUS](./docs/en/siasus.md) — ambulatory information system (SUS)
 - [SIHSUS](./docs/en/sihsus.md) — hospital information system (SUS)
-- IBGE — population estimates (see `susflow.systems.ibge_pop`)
+- [IBGE](./docs/en/ibge.md) — population estimates
 - [FTP file patterns summary](./docs/en/summary.md)
 
 ## Installation

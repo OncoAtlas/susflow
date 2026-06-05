@@ -136,7 +136,24 @@
  - **CBO (occupations):** `TABOCUP.DBF`
  - **Countries:** `TABPAIS.DBF`
 
- ## 7. Query and usage tips
+ ## IBGE – Population Estimates (IBGE)
+
+**Base path:** `/dissemin/publicos/IBGE/POP/`
+
+| Pattern          | Description                          | Example          |
+| ---------------- | ------------------------------------ | ---------------- |
+| `POPBR<AA>.zip`  | Population estimates – Brazil (national, 2-digit year) | `POPBR00.zip`, `POPBR12.zip` |
+
+**Coverage:** 1980–2012 (annual, national only)
+
+**Notes:**
+- Files are ZIP archives containing a .DBC/.DBF with population counts (by age/sex groups).
+- Use `ibge_pop.read(year)` or `download(year)` (via `susflow.systems.ibge_pop` or CLI `susflow ibge`).
+- No state (UF) breakdown — national aggregate only.
+
+---
+
+## 7. Query and usage tips
 
  - **Prefix is the key**: identify the system by the file prefix (e.g. `DO` = SIM, `DN` = SINASC, `RD`/`ER` = SIH, `AB` = SIA).
  - **Year**: most use two digits until 1999, then four digits or two+two (year+month).

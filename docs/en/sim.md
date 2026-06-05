@@ -18,7 +18,11 @@
 
  ---
 
- ## Data by state — `DORES/`
+> **Common parameters supported by all `read*()` functions (including special variants):**
+> - `engine="pandas" | "polars" | "pyarrow"` (default: `"pandas"`) — return native objects. Requires matching extra.
+> - `parquet=True` — enable local Parquet sidecar cache for speed. Requires `susflow[parquet]`/`[pyarrow]`. Use `force=True` to rebuild.
+
+## Data by state — `DORES/`
 
  **File pattern:** `DO{UF}{YYYY}.dbc`  
  **Coverage:** 1996–2024, all 27 states  

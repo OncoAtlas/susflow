@@ -16,6 +16,12 @@
  | Exceções | `download_exception(year)` | `Path` | Arquivo `.dbc` de exceção |
  | Documentação | `download_docs(file?)` | `Path / list[Path]` | Layouts, estrutura e legislação |
 
+> **Parâmetros comuns suportados por todas as funções `read*()`:**
+> - `engine="pandas" | "polars" | "pyarrow"`
+> - `parquet=True` — cache sidecar Parquet local
+
+
+
  ---
 
  ## Dados por UF — `DNRES/`

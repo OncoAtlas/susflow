@@ -8,7 +8,7 @@ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SINASC/NOV/`
 
 | Type          | Function                   | Returns             | Description                                       |
 | ------------- | -------------------------- | ------------------- | ------------------------------------------------- |
-| By state (UF) | `read(uf, year)`           | `DataFrame`         | Live births recorded in a state, by year          |
+| By state (UF) | `read(uf, year, engine=..., parquet=...)` | `DataFrame` (or engine table) | Live births recorded in a state, by year          |
 | By state (UF) | `download(uf, year)`       | `Path`              | Raw `.dbc` file for the state                     |
 | National      | `read_national(year)`      | `DataFrame`         | National aggregate (incomplete series: 2014–2017) |
 | National      | `download_national(year)`  | `Path`              | `.dbc` file of the national aggregate             |
@@ -17,6 +17,10 @@ FTP base: `ftp.datasus.gov.br/dissemin/publicos/SINASC/NOV/`
 | Documentation | `download_docs(file?)`     | `Path / list[Path]` | Layouts, structure and legislation                |
 
 ---
+
+> **Common parameters supported by all `read*()` functions (including national/exception variants):**
+> - `engine="pandas" | "polars" | "pyarrow"` (default: `"pandas"`) — return native objects instead of pandas DataFrame. Requires the matching extra (`susflow[polars]` or `susflow[pyarrow]`).
+> - `parquet=True` — enable fast local `.parquet` sidecar cache next to the source file (subsequent calls skip the slow DBC→DBF conversion). Requires `susflow[parquet]` or `susflow[pyarrow]`. Pass `force=True` to force rebuild.
 
 ## Data by state — `DNRES/`
 

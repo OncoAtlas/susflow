@@ -13,7 +13,11 @@
 
  ---
 
- ## Data by state and year — `DADOS/`
+> **Common parameters supported by `read()`:**
+> - `engine="pandas" | "polars" | "pyarrow"` (default: "pandas")
+> - `parquet=True` — Parquet sidecar cache
+
+## Data by state and year — `DADOS/`
 
  **File pattern:** `DPNI{UF}{YY}.DBF` (year suffix uses 2 digits)
 
