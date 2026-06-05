@@ -35,3 +35,8 @@ venv/
 *.txt
 
 tools/mapas/mapa_ftp_*.txt
+# Private prompt / orientation files (used only locally for AI prompts, never committed)
+orientacoes.md
+estrategia_resgate_github_cli.md
+docs/pt-br/orientacoes.md
+docs/pt-br/estrategia_resgate_prs.md
