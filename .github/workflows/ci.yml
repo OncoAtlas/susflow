@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
       - name: Checkout
@@ -39,8 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e . || pip install .
-          pip install --upgrade ruff black isort pytest pytest-mock coverage
+          pip install -e ".[dev]"
 
       - name: Run ruff
         run: |
@@ -55,7 +54,12 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          coverage run -m pytest -q
+          if [ "${{ github.event.inputs.run_integration || 'false' }}" = "true" ]; then
+            echo "Running with integration tests enabled (live FTP)"
+            RUN_INTEGRATION=true coverage run -m pytest -q
+          else
+            coverage run -m pytest -q
+          fi
           coverage xml -o coverage.xml
           coverage report -m --fail-under=55
 
@@ -80,7 +84,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install formatters and linters
         run: |
