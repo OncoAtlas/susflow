@@ -56,7 +56,7 @@ def test_read_returns_dataframe(tmp_path, monkeypatch):
     expected = pd.DataFrame({"POPULATION": [1000]})
 
     monkeypatch.setattr(ibge_pop, "download", lambda *a, **k: fake_path)
-    monkeypatch.setattr(ibge_pop, "_read", lambda p: expected)
+    monkeypatch.setattr(ibge_pop, "_read", lambda p, **kwargs: expected)
 
     result = ibge_pop.read(1995)
     assert result.equals(expected)
