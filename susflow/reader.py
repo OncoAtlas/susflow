@@ -7,38 +7,54 @@ Read layer: convert local files (.dbc, .dbf, .zip) to DataFrame.
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from dbfread import DBF
 from pyreaddbc import dbc2dbf
+
+_ENGINES = frozenset({"pandas", "polars", "pyarrow"})
 
 
 class ReadError(Exception):
     """Failed to convert file to DataFrame."""
 
 
-def read(file: Path, parquet: bool = False, force: bool = False) -> pd.DataFrame:
+def read(
+    file: Path, engine: str = "pandas", parquet: bool = False, force: bool = False
+) -> Any:
     """
-    Read a local file and return a DataFrame.
+    Read a local file and return a DataFrame (or engine-specific table).
     Supports .dbc, .dbf and .zip (containing .dbc or .dbf).
     Columns always uppercased, strings decoded using latin-1.
 
-    If parquet=True, a .parquet sidecar is written next to the source file on
-    first read and returned directly on subsequent calls, skipping the slow
-    dbc2dbf conversion. Pass force=True to rebuild the sidecar.
-    Requires pyarrow or fastparquet: pip install susflow[parquet]
+    Args:
+        engine: output type — "pandas" (default), "polars", or "pyarrow".
+                Requires polars:  pip install susflow[polars]
+                Requires pyarrow: pip install susflow[pyarrow]
+        parquet: If True, a .parquet sidecar is written next to the source file on
+                 first read and returned directly on subsequent calls (skipping
+                 slow dbc2dbf). Pass force=True to rebuild the sidecar.
+                 Requires pyarrow or fastparquet: pip install susflow[parquet]
+                 (the sidecar is stored as pandas and converted to engine on load if needed).
     """
+    if engine not in _ENGINES:
+        raise ValueError(
+            f"Unknown engine: '{engine}'. Valid options: {sorted(_ENGINES)}"
+        )
+
     file = Path(file)
 
     if parquet:
         parquet_path = file.with_suffix(".parquet")
         if parquet_path.exists() and not force:
-            return pd.read_parquet(parquet_path)
+            df = pd.read_parquet(parquet_path)
+            return _convert(df, engine)
         df = _read_source(file)
         df.to_parquet(parquet_path, index=False)
-        return df
+        return _convert(df, engine)
 
-    return _read_source(file)
+    return _convert(_read_source(file), engine)
 
 
 def _read_source(file: Path) -> pd.DataFrame:
@@ -50,6 +66,27 @@ def _read_source(file: Path) -> pd.DataFrame:
     if suffix == ".zip":
         return _read_zip(file)
     raise ReadError(f"Unsupported format: {suffix}")
+
+
+def _convert(df: pd.DataFrame, engine: str) -> Any:
+    if engine == "pandas":
+        return df
+    if engine == "polars":
+        try:
+            import polars as pl
+        except ImportError:
+            raise ImportError(
+                "engine='polars' requires polars. Install with: pip install susflow[polars]"
+            ) from None
+        return pl.from_pandas(df)
+    if engine == "pyarrow":
+        try:
+            import pyarrow as pa
+        except ImportError:
+            raise ImportError(
+                "engine='pyarrow' requires pyarrow. Install with: pip install susflow[pyarrow]"
+            ) from None
+        return pa.Table.from_pandas(df)
 
 
 def _read_dbc(file: Path) -> pd.DataFrame:

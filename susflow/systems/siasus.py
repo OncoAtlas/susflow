@@ -123,6 +123,7 @@ def read(
     prefix: str = "PA",
     destination: Path | None = None,
     force: bool = False,
+    engine: str = "pandas",
     parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return the data as a DataFrame."""

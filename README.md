@@ -36,7 +36,7 @@ Quick links
 
 ## Installation
 
-Install in editable mode during development:
+Install in editable mode during development (includes dev/lint/test tools via the `dev` extra):
 
 ```bash
 git clone https://github.com/OncoAtlas/susflow.git
@@ -44,7 +44,7 @@ cd susflow
 python -m venv .venv
 . ./.venv/bin/activate
 pip install -U pip
-pip install -e .
+pip install -e ".[dev]"
 ```
 
 Install from PyPI (recommended for most users):
@@ -99,12 +99,11 @@ By default downloads are stored under `~/.susflow/cache/` mirroring FTP paths. I
 
 ## Developer tools and linters
 
-We recommend the following dev tools for contributors:
+After `pip install -e ".[dev]"` (see Installation above), the tools are available. Run the checks locally:
 
 ```bash
 . ./.venv/bin/activate
-pip install -U ruff black isort pytest pytest-mock coverage
-ruff .
+ruff check .
 black --check .
 isort --check-only .
 pytest -q
@@ -122,7 +121,7 @@ pytest -q
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines: coding style, tests, and PR workflow.
-See [docs/contributing/coverage.md](./docs/contributing/coverage.md) for coverage instructions.
+See [docs/en/coverage.md](./docs/en/coverage.md) for coverage instructions.
 
 ## License
 

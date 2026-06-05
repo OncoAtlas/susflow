@@ -124,6 +124,7 @@ def read(
     prefix: str = "RD",
     destination: Path | None = None,
     force: bool = False,
+    engine: str = "pandas",
     parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
@@ -173,6 +174,7 @@ def read_national(
     prefix: str = "CH",
     destination: Path | None = None,
     force: bool = False,
+    engine: str = "pandas",
     parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return national data as a DataFrame."""

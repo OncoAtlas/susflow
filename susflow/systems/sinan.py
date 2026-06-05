@@ -14,8 +14,7 @@ Auxiliary files (download only, not read as DataFrame):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -107,13 +106,15 @@ def read(
     destination: Path | None = None,
     force: bool = False,
     preliminary: bool = False,
+    engine: str = "pandas",
     parquet: bool = False,
-) -> pd.DataFrame:
-    """Download (if needed) and return the data as a DataFrame."""
+) -> Any:
+    """Download (if needed) and return the data as a DataFrame (or engine-specific table)."""
     return _read(
         download(
             disease, year, destination=destination, force=force, preliminary=preliminary
         ),
+        engine=engine,
         parquet=parquet,
         force=force,
     )

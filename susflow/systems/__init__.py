@@ -1,3 +1,3 @@
-from . import cnes, pni, siasus, sihsus, sim, sinan, sinasc
+from . import cnes, ibge_pop, pni, siasus, sihsus, sim, sinan, sinasc
 
-__all__ = ["sim", "sinasc", "sinan", "sihsus", "siasus", "cnes", "pni"]
+__all__ = ["sim", "sinasc", "sinan", "sihsus", "siasus", "cnes", "pni", "ibge_pop"]

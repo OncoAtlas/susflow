@@ -29,8 +29,7 @@ Retired subtypes (still available on FTP):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -124,11 +123,13 @@ def read(
     type_: str = "ST",
     destination: Path | None = None,
     force: bool = False,
+    engine: str = "pandas",
     parquet: bool = False,
-) -> pd.DataFrame:
-    """Download (if needed) and return the data as a DataFrame."""
+) -> Any:
+    """Download (if needed) and return the data as a DataFrame (or engine table)."""
     return _read(
         download(uf, year, month, type_=type_, destination=destination, force=force),
+        engine=engine,
         parquet=parquet,
         force=force,
     )

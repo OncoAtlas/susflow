@@ -86,10 +86,19 @@ def download(
 
 
 def read(
-    uf: str, year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
+    uf: str,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _read(download(uf, year, destination=destination, force=force), parquet=parquet, force=force)
+    return _read(
+        download(uf, year, destination=destination, force=force),
+        parquet=parquet,
+        force=force,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -116,10 +125,19 @@ def download_special(
 
 
 def read_special(
-    type_: str, year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
+    type_: str,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
 ) -> pd.DataFrame:
     """Download (if needed) and return special data as a DataFrame."""
-    return _read(download_special(type_, year, destination=destination, force=force), parquet=parquet, force=force)
+    return _read(
+        download_special(type_, year, destination=destination, force=force),
+        parquet=parquet,
+        force=force,
+    )
 
 
 # ---------------------------------------------------------------------------

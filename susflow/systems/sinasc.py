@@ -20,8 +20,7 @@ Auxiliary files (download only, not read as DataFrame):
 """
 
 from pathlib import Path
-
-import pandas as pd
+from typing import Any
 
 from .. import cache as _cache
 from .. import ftp as _ftp
@@ -96,10 +95,20 @@ def download(
 
 
 def read(
-    uf: str, year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
-) -> pd.DataFrame:
-    """Download (if needed) and return data by state (UF) as a DataFrame."""
-    return _read(download(uf, year, destination=destination, force=force), parquet=parquet, force=force)
+    uf: str,
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
+) -> Any:
+    """Download (if needed) and return data by state (UF) as a DataFrame (or engine table)."""
+    return _read(
+        download(uf, year, destination=destination, force=force),
+        engine=engine,
+        parquet=parquet,
+        force=force,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -124,10 +133,19 @@ def download_national(
 
 
 def read_national(
-    year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
-) -> pd.DataFrame:
-    """Download (if needed) and return the national aggregate as a DataFrame."""
-    return _read(download_national(year, destination=destination, force=force), parquet=parquet, force=force)
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
+) -> Any:
+    """Download (if needed) and return the national aggregate as a DataFrame (or engine table)."""
+    return _read(
+        download_national(year, destination=destination, force=force),
+        engine=engine,
+        parquet=parquet,
+        force=force,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -151,10 +169,19 @@ def download_exception(
 
 
 def read_exception(
-    year: int, destination: Path | None = None, force: bool = False, parquet: bool = False
-) -> pd.DataFrame:
-    """Download (if needed) and return the exception file as a DataFrame."""
-    return _read(download_exception(year, destination=destination, force=force), parquet=parquet, force=force)
+    year: int,
+    destination: Path | None = None,
+    force: bool = False,
+    engine: str = "pandas",
+    parquet: bool = False,
+) -> Any:
+    """Download (if needed) and return the exception file as a DataFrame (or engine table)."""
+    return _read(
+        download_exception(year, destination=destination, force=force),
+        engine=engine,
+        parquet=parquet,
+        force=force,
+    )
 
 
 # ---------------------------------------------------------------------------
