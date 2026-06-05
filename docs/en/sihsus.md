@@ -3,17 +3,21 @@
 FTP base: `ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/`
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## Available data types
 
 | Type     | Function                         | Returns     | Description                           |
 | -------- | -------------------------------- | ----------- | ------------------------------------- |
-| By state | `read(uf, year, month)`          | `DataFrame` | Hospitalization microdata for a state |
+| By state | `read(uf, year, month, engine=..., parquet=...)` | `DataFrame` (or engine) | Hospitalization microdata for a state |
 | By state | `download(uf, year, month)`      | `Path`      | Raw `.dbc` file per state             |
 | National | `read_national(year, month)`     | `DataFrame` | Aggregated national data (CH or CM)   |
 | National | `download_national(year, month)` | `Path`      | National `.dbc` file                  |
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## Data by state
 
@@ -55,6 +59,8 @@ sihsus.list_files(uf="SP", prefix="SP")   # professional services for SP
 | `ER`   | `ERSP2301.dbc` | AIH with data entry errors                              |
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## National data (CH and CM)
 
@@ -85,6 +91,8 @@ sihsus.list_national(prefix="CM")   # CM
 | `CM`   | `CMBR2301.dbc` | Hospital movement communication             |
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## Main DataFrame variables (Reduced AIH — RD)
 
@@ -117,6 +125,8 @@ sihsus.list_national(prefix="CM")   # CM
 > For the full variable dictionary, consult DATASUS official documentation.
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## Recommended workflow
 
@@ -136,6 +146,8 @@ sihsus.list_national(prefix="CM")   # CM
 ```
 
 ---
+> **Common `read()` parameters:** `engine=...`, `parquet=True` (see README for engine and parquet support).
+
 
 ## Notes
 

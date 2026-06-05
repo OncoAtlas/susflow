@@ -3,6 +3,8 @@
 Base FTP: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
 
 ---
+> **Parâmetros comuns de `read()`:** `engine=...`, `parquet=True` (veja README).
+
 
 ## Tipos de dados disponíveis
 
@@ -12,6 +14,8 @@ Base FTP: `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/`
 | Por UF | `download(uf, year, month)` | `Path` | Arquivo `.dbc` bruto |
 
 ---
+> **Parâmetros comuns de `read()`:** `engine=...`, `parquet=True` (veja README).
+
 
 ## Subtipos disponíveis
 
@@ -70,6 +74,8 @@ cnes.list_files(uf="SP", type_="PF")     # profissionais de SP
 | `EE` | `EESP0703.dbc` | Equipamentos e produções | 2007–2019 | Encerrado em dez/2019 |
 
 ---
+> **Parâmetros comuns de `read()`:** `engine=...`, `parquet=True` (veja README).
+
 
 ## Principais variáveis por subtipo
 
@@ -127,6 +133,8 @@ cnes.list_files(uf="SP", type_="PF")     # profissionais de SP
 | `COMPETEN` | str | Competência (AAAAMM) |
 
 ---
+> **Parâmetros comuns de `read()`:** `engine=...`, `parquet=True` (veja README).
+
 
 ## Fluxo recomendado
 
@@ -148,6 +156,8 @@ cnes.list_files(uf="SP", type_="PF")     # profissionais de SP
 ```
 
 ---
+> **Parâmetros comuns de `read()`:** `engine=...`, `parquet=True` (veja README).
+
 
 ## Notas
 
