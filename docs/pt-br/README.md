@@ -44,7 +44,7 @@ pip install susflow
 Para instalar uma versão específica:
 
 ```bash
-pip install susflow==0.1.1
+pip install susflow==0.2.0
 ```
 
 Dependências de runtime são declaradas em `pyproject.toml`. Extras opcionais:

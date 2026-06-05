@@ -57,7 +57,7 @@ pip install susflow
 To install a specific released version:
 
 ```bash
-pip install susflow==0.1.1
+pip install susflow==0.2.0
 ```
 
 Core runtime dependencies are declared in `pyproject.toml`. Optional extras:

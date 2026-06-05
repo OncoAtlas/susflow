@@ -8,7 +8,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "susflow"
-version = "0.1.1"
+version = "0.2.0"
 description = "Acesso programático aos dados do DATASUS"
 readme = "README.md"
 license = { text = "MIT" }
