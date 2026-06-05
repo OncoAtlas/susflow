@@ -18,7 +18,7 @@ git checkout -b feat/sua-funcionalidade
 python -m venv .venv
 . ./.venv/bin/activate
 pip install -U pip
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
 ## Estilo & linters
@@ -30,7 +30,7 @@ pip install -e .[dev]
 Execute todas as verificações localmente antes de abrir um PR:
 
 ```bash
-ruff .
+ruff check .
 isort --check-only .
 black --check .
 ```
