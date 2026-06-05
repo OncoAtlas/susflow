@@ -12,10 +12,16 @@ from .systems import cnes, pni, siasus, sihsus, sim, sinan, sinasc
 
 
 def _dest_force(p):
-    p.add_argument("--destination", metavar="DIR", type=Path, default=None,
-                   help="destination folder (default: cache)")
-    p.add_argument("--force", action="store_true",
-                   help="re-download even if already cached")
+    p.add_argument(
+        "--destination",
+        metavar="DIR",
+        type=Path,
+        default=None,
+        help="destination folder (default: cache)",
+    )
+    p.add_argument(
+        "--force", action="store_true", help="re-download even if already cached"
+    )
 
 
 def main(argv=None):
@@ -164,13 +170,16 @@ def main(argv=None):
 # Handlers
 # ---------------------------------------------------------------------------
 
+
 def _sim_list(args):
     for f in sim.list_files(args.uf):
         print(f)
 
 
 def _sim_download(args):
-    print(sim.download(args.uf, args.year, destination=args.destination, force=args.force))
+    print(
+        sim.download(args.uf, args.year, destination=args.destination, force=args.force)
+    )
 
 
 def _sinasc_list(args):
@@ -179,7 +188,11 @@ def _sinasc_list(args):
 
 
 def _sinasc_download(args):
-    print(sinasc.download(args.uf, args.year, destination=args.destination, force=args.force))
+    print(
+        sinasc.download(
+            args.uf, args.year, destination=args.destination, force=args.force
+        )
+    )
 
 
 def _sinan_list(args):
@@ -193,10 +206,15 @@ def _sinan_diseases(args):
 
 
 def _sinan_download(args):
-    print(sinan.download(
-        args.disease, args.year,
-        destination=args.destination, force=args.force, preliminary=args.preliminary,
-    ))
+    print(
+        sinan.download(
+            args.disease,
+            args.year,
+            destination=args.destination,
+            force=args.force,
+            preliminary=args.preliminary,
+        )
+    )
 
 
 def _siasus_list(args):
@@ -205,10 +223,16 @@ def _siasus_list(args):
 
 
 def _siasus_download(args):
-    print(siasus.download(
-        args.uf, args.year, args.month,
-        prefix=args.prefix, destination=args.destination, force=args.force,
-    ))
+    print(
+        siasus.download(
+            args.uf,
+            args.year,
+            args.month,
+            prefix=args.prefix,
+            destination=args.destination,
+            force=args.force,
+        )
+    )
 
 
 def _sihsus_list(args):
@@ -217,10 +241,16 @@ def _sihsus_list(args):
 
 
 def _sihsus_download(args):
-    print(sihsus.download(
-        args.uf, args.year, args.month,
-        prefix=args.prefix, destination=args.destination, force=args.force,
-    ))
+    print(
+        sihsus.download(
+            args.uf,
+            args.year,
+            args.month,
+            prefix=args.prefix,
+            destination=args.destination,
+            force=args.force,
+        )
+    )
 
 
 def _cnes_list(args):
@@ -229,10 +259,16 @@ def _cnes_list(args):
 
 
 def _cnes_download(args):
-    print(cnes.download(
-        args.uf, args.year, args.month,
-        type_=args.type_, destination=args.destination, force=args.force,
-    ))
+    print(
+        cnes.download(
+            args.uf,
+            args.year,
+            args.month,
+            type_=args.type_,
+            destination=args.destination,
+            force=args.force,
+        )
+    )
 
 
 def _pni_list(args):
@@ -241,4 +277,6 @@ def _pni_list(args):
 
 
 def _pni_download(args):
-    print(pni.download(args.uf, args.year, destination=args.destination, force=args.force))
+    print(
+        pni.download(args.uf, args.year, destination=args.destination, force=args.force)
+    )
