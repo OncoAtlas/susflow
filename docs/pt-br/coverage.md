@@ -4,14 +4,13 @@ Este arquivo explica como executar a suíte de testes com cobertura e gerar rela
 
 ## Comandos
 
-1. Crie e ative um ambiente virtual, instale o pacote e as dependências de teste:
+1. Crie e ative um ambiente virtual, instale o pacote e as dependências de teste (o extra `dev` inclui coverage, pytest etc.):
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e . || pip install .
-pip install coverage pytest pytest-mock
+pip install -e ".[dev]"
 ```
 
 2. Execute os testes com cobertura e mostre o resumo no terminal:

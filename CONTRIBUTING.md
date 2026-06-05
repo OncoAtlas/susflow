@@ -19,7 +19,7 @@ git checkout -b feat/your-feature
 python -m venv .venv
 . ./.venv/bin/activate
 pip install -U pip
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
 Style & linters
@@ -31,7 +31,7 @@ Style & linters
 Run all checks locally before opening a PR:
 
 ```bash
-ruff .
+ruff check .
 isort --check-only .
 black --check .
 ```
