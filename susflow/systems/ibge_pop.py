@@ -17,6 +17,7 @@ Notes:
 """
 
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -67,7 +68,13 @@ def download(year: int, destination: Path | None = None, force: bool = False) ->
 
 
 def read(
-    year: int, destination: Path | None = None, force: bool = False
-) -> pd.DataFrame:
-    """Download (if needed) and return the population estimates as a DataFrame."""
-    return _read(download(year, destination=destination, force=force))
+    year: int, destination: Path | None = None, force: bool = False,
+    engine: str = "pandas", parquet: bool = False
+) -> Any:
+    """Download (if needed) and return the population estimates as a DataFrame (or engine table)."""
+    return _read(
+        download(year, destination=destination, force=force),
+        engine=engine,
+        parquet=parquet,
+        force=force,
+    )
